@@ -877,7 +877,7 @@ class gpsfFeedGenerator
 
         if ($product['products_model'] !== '') {
             $unique_identifiers++;
-            $this->xmlWriter->writeElement('g:mpn', $this->sanitizeXml($product['products_model']);
+            $this->xmlWriter->writeElement('g:mpn', $this->sanitizeXml($product['products_model']));
         }
 
         if (strpos($this->identifiersList, '{gtin}') === true) {
