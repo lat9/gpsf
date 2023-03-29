@@ -71,8 +71,14 @@ class gpsfBase
     // Gives an extension the means to insert additional feed-related attributes, e.g. 'color or 'adult' into
     // the product's feed for the product identified as $products_id.
     //
-    // The input $products array contains the database information retrieved for the product, possibly including
+    // The input $product array contains the database information retrieved for the product, possibly including
     // extension-specific values as identified in the 'getAdditionalQueryFields' method's return.
+    //
+    // The input $categories_list array contains the name(s) of the product's parent category-chain; element 0
+    // contains the product's topmost category's name.
+    //
+    // The input $cPath array conains the category id value(s) of the product's parent category-chain; element 0
+    // contains the product's topmost category ID.
     //
     // The input $custom_fields array identifies any custom fields already gathered.
     //
@@ -83,7 +89,7 @@ class gpsfBase
     // example, the 'adult' attribute should be set to (string)'true'/'false' values, not (bool)true/false.
     // Any URL-type attributes returned should be urlencoded.
     //
-    public function getProductsAttributes(string $products_id, array $product, array $custom_fields):array
+    public function getProductsAttributes(string $products_id, array $product, array $categories_list, array $cPath, array $custom_fields):array
     {
         $extension_custom_fields = [];
 

@@ -581,7 +581,7 @@ class gpsfFeedGenerator
             if ($next_image === $products_image) {
                 continue;
             }
-            $this->xmlWriter->writeElement('g:additional_image_link', $this->getProductsImageUrl(str_replace(DIR_WS_IMAGES, '', $next_image)));
+            $this->xmlWriter->writeElement('g:additional_image_link', urlencode($this->getProductsImageUrl(str_replace(DIR_WS_IMAGES, '', $next_image))));
             $images_found++;
             if ($images_found === 9) {
                 break;
@@ -619,11 +619,10 @@ class gpsfFeedGenerator
             $image_ih = handle_image($products_image_large, '', LARGE_IMAGE_MAX_WIDTH, LARGE_IMAGE_MAX_HEIGHT, '');
             $retval = HTTP_SERVER . DIR_WS_CATALOG . $image_ih[0];
         } else {
-            $retval = HTTP_SERVER . DIR_WS_CATALOG . rawurlencode($products_image_large);
+            $retval = HTTP_SERVER . DIR_WS_CATALOG . $products_image_large;
         }
-        $image_url = str_replace('%2F', '/', $retval);
 
-        return $image_url;
+        return $retval;
     }
 
     protected function formatPriceElement($price)
@@ -810,8 +809,9 @@ class gpsfFeedGenerator
 
     protected function getExtensionsAttributes(string $products_id, array $product, array $custom_fields):array
     {
+        list($categories_list, $cPath) = $this->getCategoryInfo($product['master_categories_id']);
         foreach ($this->extensions as $extension_class) {
-            $extension_custom_fields = $extension_class->getProductsAttributes($products_id, $product, $custom_fields);
+            $extension_custom_fields = $extension_class->getProductsAttributes($products_id, $product, $categories_list, $cPath, $custom_fields);
             $new_custom_fields = [];
             foreach ($extension_custom_fields as $key => $value) {
                 $key = strtolower($key);
@@ -856,14 +856,9 @@ class gpsfFeedGenerator
             $this->xmlWriter->endElement();
         }
 
-        $this->xmlWriter->writeElement('g:image_link', $this->getProductsImageUrl($product['products_image']));
+        $this->xmlWriter->writeElement('g:image_link', urlencode($this->getProductsImageUrl($product['products_image'])));
         if (GPSF_INCLUDE_ADDITIONAL_IMAGES === 'true') {
-            $additional_images = $this->addProductsAdditionalImages($product['products_image']);
-            if (!empty($additional_images)) {
-                foreach ($additional_images as $additional_image) {
-                    $this->xmlWriter->writeElement('g:additional_image_link', $additional_image);
-                }
-            }
+            $this->addProductsAdditionalImages($product['products_image']);
         }
 
         // only include if less then 30 days as 30 is the max and leaving blank will default to the max
@@ -871,7 +866,7 @@ class gpsfFeedGenerator
             $this->xmlWriter->writeElement('g:expiration_date', $this->getProductsExpirationDate($product['base_date']));
         }
 
-         $cPath_href = (GPSF_USE_CPATH === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
+        $cPath_href = (GPSF_USE_CPATH === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
         $link = zen_href_link($product['type_handler'] . '.info', $cPath_href . 'products_id=' . $product['products_id'], 'NONSSL', false);
         $this->xmlWriter->writeElement('link', urlencode($link));
 

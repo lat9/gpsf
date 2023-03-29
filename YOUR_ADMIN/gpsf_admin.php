@@ -214,8 +214,10 @@ if ($feed_files === []) {
 ?>
                     </tbody>
                 </table>
-                <div id="feed-output" class="text-center">
+                <div class="text-center">
                     <h2 id="feed-processing"><?php echo GPSF_PROCESSING_FEED_TEXT; ?></h2>
+                    <div id="feed-output">
+                    </div>
                 </div>
             </div>
         </div>
@@ -226,8 +228,9 @@ if ($feed_files === []) {
 
         jQuery('#feed').on('submit', function() {
             jQuery('#feed-processing').show();
+            jQuery('#feed-output').html('');
             jQuery('#feed-generate').prop('disabled', true);
-            jQuery('html, body').css('cursor', 'wait!important');
+            jQuery('*').css('cursor', 'wait');
             jQuery.get('<?php echo $gpsf_main_controller . '.php'; ?>', jQuery(this).serialize(), function(data) {
                 jQuery.get('<?php echo zen_href_link(FILENAME_GPSF_ADMIN); ?>', function(data2) {
                     var availableDownloads = jQuery(data2).find('#feed-files').html();
@@ -235,7 +238,7 @@ if ($feed_files === []) {
                 });
                 jQuery('#feed-processing').hide();
                 jQuery('#feed-output').html(data);
-                jQuery('html, body').css('cursor', 'default!important');
+                jQuery('*').css('cursor', 'default');
                 jQuery('#feed-generate').prop('disabled', false);
             });
             return false;
