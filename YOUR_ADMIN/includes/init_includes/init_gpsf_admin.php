@@ -61,7 +61,7 @@ if (!defined('GPSF_VERSION')) {
 
             ('Compress Feed File', 'GPSF_COMPRESS', 'false', 'Compress Google Merchant Center file', $cgi, 9, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
-            ('Uploaded date', 'GPSF_UPLOADED_DATE', '0001-01-01 00:00:00', 'Date and time of the last upload', $cgi, 10, now(), NULL, NULL),
+            ('Last Upload Date', 'GPSF_UPLOADED_DATE', '0001-01-01 00:00:00', 'Date and time of the last upload', $cgi, 10, now(), NULL, NULL),
 
             ('Output Directory', 'GPSF_DIRECTORY', 'feed/google/', 'Set the name of your feed\'s output directory', $cgi, 11, now(), NULL, NULL),
 
@@ -89,13 +89,11 @@ if (!defined('GPSF_VERSION')) {
 
             ('Feed Currency', 'GPSF_CURRENCY', 'USD', 'Choose the currency to be used for the feed.', $cgi, 41, now(), NULL, 'gpsf_cfg_pull_down_currencies('),
 
-            ('ID Source (g:id)', 'GPSF_OFFER_ID', 'model', 'Choose the unique identifier to use for each product.  The value will default to the <code>products_id</code> if you choose a value other than <code>id</code> and the associated value is empty for a product. ', $cgi, 42, now(), NULL, 'zen_cfg_select_option([\'id\', \'model\', \'UPC\', \'ISBN\', \'EAN\'],'),
+            ('ID Source (g:id)', 'GPSF_OFFER_ID', 'model', 'Choose the unique identifier to use for each product.  The value will default to the <code>products_id</code> if you choose a value other than <code>id</code> and the associated value is empty for a product. If you choose <b>UPC</b>, <b>ISBN</b> or <b>EAN</b>, ensure that your site has provided this information for the feed!', $cgi, 42, now(), NULL, 'zen_cfg_select_option([\'id\', \'model\', \'UPC\', \'ISBN\', \'EAN\'],'),
 
             ('Shipping Options', 'GPSF_SHIPPING', '', 'The shipping options available for an item', $cgi, 46, now(), NULL, NULL),
 
             ('Default Product Condition', 'GPSF_CONDITION', 'new', 'Choose your products\' default condition.', $cgi, 47, now(), NULL, 'zen_cfg_select_option([\'new\', \'used\', \'refurbished\'],'),
-
-            ('Use Product-Specific Condition?', 'GPSF_PRODUCT_CONDITION', 'false', 'Include a product-specific condition?  Requires that your <code>products</code> table includes a field named <code>products_condition</code>.', $cgi, 48, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
             ('Default Product Type', 'GPSF_DEFAULT_PRODUCT_TYPE', '', 'Enter your product type if using default', $cgi, 49, now(), NULL, NULL),
 
@@ -109,9 +107,7 @@ if (!defined('GPSF_VERSION')) {
 
             ('Use Meta Title', 'GPSF_META_TITLE', 'false', 'Use a product\'s meta title (if not empty) as the product\'s feed title?  If set to <em>false</em>, the <code>products_name</code> is used instead.', $cgi, 57, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
-            ('Enable Map Pricing', 'GPSF_MAP_PRICING', 'false', 'Enable MAP Pricing (requires separate add-on)?', $cgi, 58, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
-
-            ('Use cPath in url', 'GPSF_USE_CPATH', 'false', 'Use cPath in product info url', $cgi, 59, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
+            ('Use cPath in URL', 'GPSF_USE_CPATH', 'false', 'Use a product\s &quot;cPath&quot; in the <code>g:link</code> feed attribute?', $cgi, 59, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
             ('Google Product Category Default', 'GPSF_DEFAULT_PRODUCT_CATEGORY', '', 'Enter a default Google product category from the <a href=\"https://www.google.com/support/merchants/bin/answer.py?answer=160081\" target=\"_blank\" rel=\"noreferrer\">Google Category Taxonomy</a> or leave blank (note: you can override this default setting by creating a Google Product Category attribute as per the documentation):', $cgi, 60, now(), NULL, NULL),
 
@@ -148,8 +144,6 @@ if (!defined('GPSF_VERSION')) {
             ('Include Min quantity on product', 'GPSF_INCLUDE_MIN_QUANITY', 'false', 'Include product min quantity in the feed?', $cgi, 216, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
             ('Include Out of Stock', 'GPSF_INCLUDE_OUT_OF_STOCK', 'true', 'Include out of stock items in the feed?', $cgi, 216, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
-
-            ('Include MAP products', 'GPSF_INCLUDE_MAP', 'true', 'Include items with a MAP price in the feed?', $cgi, 217, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
             ('Include Additional Images', 'GPSF_INCLUDE_ADDITIONAL_IMAGES', 'false', 'Include additional images in the feed (setting to true may affect performance and cause timeouts)?', $cgi, 218, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
