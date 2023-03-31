@@ -144,7 +144,7 @@ if ($feed === 'yes') {
     touch($lockfile);
     ftruncate($fp, 0);
 
-    $stimer_feed = $gpsf->microtime_float();
+    $timer_feed_start = $gpsf->microtime_float();
 
     // -----
     // Kick the feed's generation off ...
@@ -156,9 +156,7 @@ if ($feed === 'yes') {
     fclose($fp);
     unlink($lockfile);
 
-    $gpsf->googleOutputDebug();
-
-    if (GPSF_COMPRESS === 'true') {
+    if (GPSF_COMPRESS === 'true' && function_exists('gzopen')) {
         $gzcontent = file_get_contents($outfile);
         unlink($outfile);
 
@@ -168,15 +166,17 @@ if ($feed === 'yes') {
         gzclose($gz); // Close file handler
     }
 
-    $timer_feed = $gpsf->microtime_float() - $stimer_feed;
-
+    $products_total = $gpsf->getTotalProducts();
+    $products_processed = $gpsf->getTotalProductsProcessed();
+    $products_skipped = $products_total - $products_processed;
     echo
-        '<p>' . TEXT_GPSF_FEED_COMPLETE .
-        ' ' . GPSF_TIME_TAKEN .
-        ' ' . sprintf("%f " . TEXT_GPSF_FEED_SECONDS, number_format($timer_feed, 6)) .
-        '<br>' .
-        ' ' . $gpsf->getTotalProductsProcessed() . ' of ' . $gpsf->getTotalProducts() .
-        ' ' . TEXT_GPSF_FEED_RECORDS . '</p>';
+        '<p>' .
+            sprintf(TEXT_GPSF_FEED_COMPLETE, $gpsf->microtime_float() - $timer_feed_start) .
+            '<br>' .
+            sprintf(TEXT_GPSF_FEED_PROCESSED, $products_total, $products_processed, $products_skipped) .
+        '</p>';
+
+    $gpsf->googleOutputDebug();
 }
 
 // -----

@@ -46,6 +46,18 @@ class gpsfBase
     }
 
     // -----
+    // Gives an extension the opportunity to bypass a product for the feed, with
+    // a message returned.
+    //
+    // The extension returns an empty string ('') if the product is to be included or
+    // a message (which is 'logged' if the GPSF debug is enabled.
+    //
+    public function bypassProductInFeed(string $products_id, array $product):string
+    {
+        return '';
+    }
+
+    // -----
     // Gives an extension a means to override the specified product's
     // g:id value for the feed.
     //

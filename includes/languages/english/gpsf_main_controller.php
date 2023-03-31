@@ -16,11 +16,14 @@
  */
 define('TEXT_GPSF_STARTED', 'Google Product Search Feeder II v%s started ' . date('Y/m/d H:i:s'));
 define('TEXT_GPSF_FILE_LOCATION', 'Feed file - ');
-define('TEXT_GPSF_FEED_COMPLETE', 'Product Feed Complete');
-define('TEXT_GPSF_FEED_TIMER', 'Time:');
-define('TEXT_GPSF_FEED_SECONDS', 'Seconds');
-define('TEXT_GPSF_FEED_RECORDS', ' Records Processed');
-define('GPSF_TIME_TAKEN', 'In');
+
+//- %f is the number of seconds the feed took to process
+define('TEXT_GPSF_FEED_COMPLETE', 'Product Feed Complete in %.6f seconds.');
+
+//- %1$u is the total number of products 'examined' for the feed
+//- %2$u is the number of products processed
+//- %3$u is the number skipped due to error
+define('TEXT_GPSF_FEED_PROCESSED', '%1$u total products. %2$u products processed for the feed. %3$u products skipped due to errors.');
 
 define('ERROR_GPSF_DIRECTORY_NOT_WRITEABLE', 'Your Google Product Search folder is not writeable! Please chmod the /' . GPSF_DIRECTORY . ' folder to 755 or 777 depending on your host.');
 define('ERROR_GPSF_DIRECTORY_DOES_NOT_EXIST', 'Your Google Product Search output directory does not exist! Please create a /' . GPSF_DIRECTORY . ' directory and chmod to 755 or 777 depending on your host.');

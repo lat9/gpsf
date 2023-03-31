@@ -35,7 +35,9 @@ define('GPSF_FILESIZE_HEADER', 'File Size');
 define('GPSF_ACTION', 'Action');
 define('GPSF_NO_FILES_FOUND_TEXT', 'No files found.');
 define('GPSF_MAX_MEMORY_TEXT', 'Max memory (<code>memory_limit</code>):');
+define('GPSF_MAX_EXECUTION_TIME_TEXT', 'Max execution time (in seconds):');
 define('GPSF_MAX_PRODUCTS_IN_FEED', 'Maximum number of products in feed: ');
+define('GPSF_FEED_STARTED_AT', 'Feed started at ');
 
 define('GPSF_BUTTON_GENERATE_FEED', 'Generate Feed');
 define('GPSF_BUTTON_DELETE', 'Delete');

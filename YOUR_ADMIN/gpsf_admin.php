@@ -105,7 +105,11 @@ $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTRO
             <div class="col-md-4">
                 <div>
                     <div class="col-md-8 text-right"><?php echo GPSF_MAX_MEMORY_TEXT; ?></div>
-                    <div class="col-md-4"><?php echo (int)GPSF_MEMORY_LIMIT . 'M'; ?></div>
+                    <div class="col-md-4"><?php echo (GPSF_MEMORY_LIMIT === '') ? ini_get('memory_limit') : ((int)GPSF_MEMORY_LIMIT . 'M'); ?></div>
+                </div>
+                <div>
+                    <div class="col-md-8 text-right"><?php echo GPSF_MAX_EXECUTION_TIME_TEXT; ?></div>
+                    <div class="col-md-4"><?php echo (GPSF_MAX_EXECUTION_TIME === '') ? ini_get('max_execution_time') : GPSF_MAX_EXECUTION_TIME; ?></div>
                 </div>
                 <div>
                     <div class="col-md-8 text-right"><?php echo GPSF_MAX_PRODUCTS_IN_FEED; ?></div>
@@ -216,6 +220,7 @@ if ($feed_files === []) {
                 </table>
                 <div class="text-center">
                     <h2 id="feed-processing"><?php echo GPSF_PROCESSING_FEED_TEXT; ?></h2>
+                    <h3 id="feed-time"><?php echo GPSF_FEED_STARTED_AT; ?> <span id="feed-start-time"></span></h3>
                     <div id="feed-output">
                     </div>
                 </div>
@@ -224,10 +229,13 @@ if ($feed_files === []) {
     </div>
     <script>
     jQuery(document).ready(function() {
-        jQuery('#feed-processing').hide();
+        jQuery('#feed-processing, #feed-time').hide();
 
         jQuery('#feed').on('submit', function() {
-            jQuery('#feed-processing').show();
+            const addZero = (num) => `${num}`.padStart(2, '0');
+            var date = new Date();
+            jQuery('#feed-start-time').text(addZero(date.getHours())+':'+addZero(date.getMinutes())+':'+addZero(date.getSeconds()));
+            jQuery('#feed-processing, #feed-time').show();
             jQuery('#feed-output').html('');
             jQuery('#feed-generate').prop('disabled', true);
             jQuery('*').css('cursor', 'wait');
@@ -236,7 +244,7 @@ if ($feed_files === []) {
                     var availableDownloads = jQuery(data2).find('#feed-files').html();
                     jQuery('#feed-files').html(availableDownloads);
                 });
-                jQuery('#feed-processing').hide();
+                jQuery('#feed-processing, #feed-time').hide();
                 jQuery('#feed-output').html(data);
                 jQuery('*').css('cursor', 'default');
                 jQuery('#feed-generate').prop('disabled', false);

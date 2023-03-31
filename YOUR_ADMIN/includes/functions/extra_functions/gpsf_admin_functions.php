@@ -19,7 +19,11 @@ function gpsf_cfg_pull_down_currencies($currencies_id, $key = '')
     global $db;
 
     $name = (($key !== '') ? "configuration[$key]" : 'configuration_value');
-    $currencies = $db->Execute("SELECT code FROM " . TABLE_CURRENCIES);
+    $currencies = $db->Execute(
+        'SELECT code
+           FROM '. TABLE_CURRENCIES . '
+          ORDER BY code ASC'
+    );
     $currencies_array = [];
     foreach ($currencies as $next_currency) {
         $currencies_array[] = [
@@ -35,7 +39,11 @@ function gpsf_cfg_pull_down_country_iso3_list($countries_id, $key = '')
     global $db;
 
     $name = (($key !== '') ? "configuration[$key]" : 'configuration_value');
-    $countries = $db->Execute("SELECT countries_id, countries_iso_code_3 FROM " . TABLE_COUNTRIES);
+    $countries = $db->Execute(
+        'SELECT countries_id, countries_iso_code_3
+           FROM ' . TABLE_COUNTRIES . '
+          ORDER BY countries_iso_code_3 ASC'
+    );
     $countries_array = [];
     foreach ($countries as $next_country) {
         $countries_array[] = [
@@ -51,7 +59,11 @@ function gpsf_cfg_pull_down_languages_list($languages_id, $key = '')
     global $db;
 
     $name = (($key !== '') ? "configuration[$key]" : 'configuration_value');
-    $languages = $db->Execute("SELECT name, languages_id FROM " . TABLE_LANGUAGES);
+    $languages = $db->Execute(
+        'SELECT name, languages_id
+           FROM ' . TABLE_LANGUAGES . '
+          ORDER BY name'
+    );
     $languages_array = [];
     foreach ($languages as $next_language) {
         $languages_array[] = [

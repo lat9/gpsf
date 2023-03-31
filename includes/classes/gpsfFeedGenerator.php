@@ -177,9 +177,36 @@ class gpsfFeedGenerator
             $products_id = $product['products_id'];
             $products_name = $product['products_name'];
 
+            // -----
+            // Check to see if the extension indicates that the current product should be
+            // bypassed for the feed.
+            //
+            if ($this->extensions !== null) {
+                $extension_bypass_product = false;
+                foreach ($this->extensions as $extension_class) {
+                    $extension_message = $extension_class->bypassProductInFeed($products_id, $product);
+                    if ($extension_message !== '') {
+                        $extension_bypass_product = true;
+                        break;
+                    }
+                }
+                if ($extension_bypass_product === true) {
+                    if ($this->addSkippedProduct($products_id, $products_name . ": Bypassed by extension ($extension_message).") === false) {
+                        break;
+                    }
+                    continue;
+                }
+            }
+
+            // -----
+            // If the feed's configuration indicates that duplicate titles are to be
+            // skipped, skip this product.
+            //
             if ($skip_duplicate_titles === true) {
                 if ($last_title === $products_name) {
-                    $this->productsSkipped[$products_id] = $products_name . ': Duplicate title';
+                    if ($this->addSkippedProduct($products_id, $products_name . ': Duplicate title') === false) {
+                        break;
+                    }
                     continue;
                 }
                 $last_title = $products_name;
@@ -205,7 +232,9 @@ class gpsfFeedGenerator
             // For the feed to be valid, an item's price must be greater than 0.
             //
             if ($price <= 0 && $product['products_priced_by_attribute'] !== '1') {
-                $this->productsSkipped[$products_id] = $products_name . ': price below 0';
+                if ($this->addSkippedProduct($products_id, $products_name . ': price below 0') === false) {
+                    break;
+                }
                 continue;
             }
 
@@ -244,7 +273,9 @@ class gpsfFeedGenerator
             }
             $products_description = $this->sanitizeXml($products_description, $products_id);
             if (empty($products_description)) {
-                $this->productsSkipped[$products_id] = $products_name . ': Product description cannot be empty.';
+                if ($this->addSkippedProduct($products_id, $products_name . ': Product description cannot be empty.') === false) {
+                    break;
+                }
                 continue;
             }
 
@@ -258,7 +289,9 @@ class gpsfFeedGenerator
                 $products_title = $this->sanitizeXml($products_name);
             }
             if (empty($products_title)) {
-                $this->productsSkipped[$products_id] = $products_name . ': title cannot be empty';
+                if ($this->addSkippedProduct($products_id, $products_name . ': title cannot be empty') === false) {
+                    break;
+                }
                 continue;
             }
 
@@ -301,7 +334,17 @@ class gpsfFeedGenerator
             }
 
             if ($id === false) {
-                $this->productsSkipped[$products_id] = $products_name . ': no id found for the product, it\'s required!';
+                if ($this->addSkippedProduct($products_id, $products_name . ': no id found for the product, it\'s required!') === false) {
+                    break;
+                }
+                continue;
+            }
+
+            $products_image = $this->getProductsImageUrl($product['products_image']);
+            if ($products_image === false) {
+                if ($this->addSkippedProduct($products_id, $products_name . ': products image (' . $product['products_image'] . ') not found.') === false) {
+                    break;
+                }
                 continue;
             }
 
@@ -332,7 +375,7 @@ class gpsfFeedGenerator
             }
 
             // add universal elements/attributes to products
-            $this->addUniversalAttributes($product, $products_description);
+            $this->addUniversalAttributes($product, $products_description, $products_image);
 
             // finalize item
             $this->xmlWriter->endElement(); // end item
@@ -360,6 +403,10 @@ class gpsfFeedGenerator
     protected function initializeProductsFeed($limit, $offset)
     {
         global $db, $currencies;
+
+        if (!defined('GPSF_DEBUG_MAX_SKIPPED')) {
+            define('GPSF_DEBUG_MAX_SKIPPED', '1000');
+        }
 
         // -----
         // Determine if the feed's images are located somewhere other than the site's /images
@@ -615,14 +662,21 @@ class gpsfFeedGenerator
             $products_image_large = DIR_WS_IMAGES . 'medium/' . $products_image_medium;
         }
 
-        if (GPSF_IMAGE_HANDLER === 'true' && function_exists('handle_image')) {
-            $image_ih = handle_image($products_image_large, '', LARGE_IMAGE_MAX_WIDTH, LARGE_IMAGE_MAX_HEIGHT, '');
-            $retval = HTTP_SERVER . DIR_WS_CATALOG . $image_ih[0];
-        } else {
-            $retval = HTTP_SERVER . DIR_WS_CATALOG . $products_image_large;
+        // -----
+        // If the image isn't found, return (bool)false; it's required!
+        //
+        if (!file_exists($products_image_large)) {
+            return false;
         }
 
-        return $retval;
+        if (GPSF_IMAGE_HANDLER === 'true' && function_exists('handle_image')) {
+            $image_ih = handle_image($products_image_large, '', LARGE_IMAGE_MAX_WIDTH, LARGE_IMAGE_MAX_HEIGHT, '');
+            $products_image_link = HTTP_SERVER . DIR_WS_CATALOG . $image_ih[0];
+        } else {
+            $products_image_link = HTTP_SERVER . DIR_WS_CATALOG . $products_image_large;
+        }
+
+        return $products_image_link;
     }
 
     protected function formatPriceElement($price)
@@ -826,7 +880,7 @@ class gpsfFeedGenerator
     }
 
     // takes already created $item and adds universal attributes from $products
-    protected function addUniversalAttributes($product, $products_description)
+    protected function addUniversalAttributes($product, $products_description, $products_image)
     {
          $unique_identifiers = 0;
 
@@ -856,7 +910,7 @@ class gpsfFeedGenerator
             $this->xmlWriter->endElement();
         }
 
-        $this->xmlWriter->writeElement('g:image_link', urlencode($this->getProductsImageUrl($product['products_image'])));
+        $this->xmlWriter->writeElement('g:image_link', urlencode($products_image));
         if (GPSF_INCLUDE_ADDITIONAL_IMAGES === 'true') {
             $this->addProductsAdditionalImages($product['products_image']);
         }
@@ -1276,7 +1330,7 @@ class gpsfFeedGenerator
 
     public function microtime_float()
     {
-       list($usec, $sec) = explode(" ", microtime());
+       list($usec, $sec) = explode(' ', microtime());
        return ((float)$usec + (float)$sec);
     }
 
@@ -1292,6 +1346,29 @@ class gpsfFeedGenerator
         }
         // we should only get here if nothing was returned
         return false; 
+    }
+
+    // -----
+    // Adds a product to the list of those skipped, if debug is enabled. If debug *is* enabled,
+    // also checks to see that the maximum number of skipped products has been reached.
+    //
+    // Returns:
+    //
+    // (bool)false if the maximum number of skipped products has been reached.
+    // (bool)true if either the debug is not enabled or the maximum number of skipped products
+    //      has not been reached.
+    //
+    protected function addSkippedProduct($products_id, $message):bool
+    {
+        if (GPSF_DEBUG === 'false') {
+            return true;
+        }
+        $this->productsSkipped[$products_id] = $message;
+        if (GPSF_DEBUG_MAX_SKIPPED !== '' && count($this->productsSkipped) > (int)GPSF_DEBUG_MAX_SKIPPED) {
+            $this->productsSkipped['max-out'] = 'Maximum number of skipped products reached (' . GPSF_DEBUG_MAX_SKIPPED . '); feed terminating.';
+            return false;
+        }
+        return true;
     }
 
     public function googleOutputDebug()
