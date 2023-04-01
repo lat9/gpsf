@@ -108,6 +108,10 @@ $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTRO
                     <div class="col-md-4"><?php echo (GPSF_MEMORY_LIMIT === '') ? ini_get('memory_limit') : ((int)GPSF_MEMORY_LIMIT . 'M'); ?></div>
                 </div>
                 <div>
+                    <div class="col-md-8 text-right">Maximum input time:</div>
+                    <div class="col-md-4"><?php echo (ini_get('max_input_time') === -1) ? 'Same as below' : ini_get('max_input_time'); ?></div>
+                </div>
+                <div>
                     <div class="col-md-8 text-right"><?php echo GPSF_MAX_EXECUTION_TIME_TEXT; ?></div>
                     <div class="col-md-4"><?php echo (GPSF_MAX_EXECUTION_TIME === '') ? ini_get('max_execution_time') : GPSF_MAX_EXECUTION_TIME; ?></div>
                 </div>
@@ -218,33 +222,63 @@ if ($feed_files === []) {
 ?>
                     </tbody>
                 </table>
-                <div class="text-center">
-                    <h2 id="feed-processing"><?php echo GPSF_PROCESSING_FEED_TEXT; ?></h2>
-                    <h3 id="feed-time"><?php echo GPSF_FEED_STARTED_AT; ?> <span id="feed-start-time"></span></h3>
-                    <div id="feed-output">
-                    </div>
+                <div id="feed-container" class="text-center">
+                    <h2><?php echo GPSF_PROCESSING_FEED_TEXT; ?></h2>
+                    <h3>
+                        <?php echo GPSF_FEED_STARTED_AT; ?> <span id="feed-start-time"></span>
+                    </h3>
+                    <h4>
+                        <?php echo GPSF_ELAPSED_TIME; ?> <span id="feed-elapsed-time"></span>
+                    </h4>
                 </div>
+                <div id="feed-output" class="text-center"></div>
             </div>
         </div>
     </div>
     <script>
     jQuery(document).ready(function() {
-        jQuery('#feed-processing, #feed-time').hide();
+        jQuery('#feed-container').hide();
 
         jQuery('#feed').on('submit', function() {
             const addZero = (num) => `${num}`.padStart(2, '0');
+
+            // -----
+            // Define the function that provides the feed's elapsed time and then start it.
+            //
+            function setElapsedTime(totalSeconds)
+            {
+                if (typeof(totalSeconds) === 'undefined') {
+                    totalSeconds = 0;
+                }
+
+                if (totalSeconds !== 0 && jQuery('#feed-elapsed-time').is(':hidden')) {
+                    return;
+                }
+
+                var hours = Math.floor(totalSeconds / 3600);
+                var minutes = Math.floor((totalSeconds - (hours * 3600)) / 60);
+                var seconds = totalSeconds - (hours * 3600) - (minutes * 60);
+
+                jQuery('#feed-elapsed-time').text(addZero(hours)+':'+addZero(minutes)+':'+addZero(seconds));
+                jQuery.jTimeout.reset();
+
+                setTimeout(function() { setElapsedTime(totalSeconds + 1) }, 1000);
+            }
+            setElapsedTime();
+
             var date = new Date();
             jQuery('#feed-start-time').text(addZero(date.getHours())+':'+addZero(date.getMinutes())+':'+addZero(date.getSeconds()));
-            jQuery('#feed-processing, #feed-time').show();
+
             jQuery('#feed-output').html('');
             jQuery('#feed-generate').prop('disabled', true);
             jQuery('*').css('cursor', 'wait');
+            jQuery('#feed-container').show();
             jQuery.get('<?php echo $gpsf_main_controller . '.php'; ?>', jQuery(this).serialize(), function(data) {
                 jQuery.get('<?php echo zen_href_link(FILENAME_GPSF_ADMIN); ?>', function(data2) {
                     var availableDownloads = jQuery(data2).find('#feed-files').html();
                     jQuery('#feed-files').html(availableDownloads);
                 });
-                jQuery('#feed-processing, #feed-time').hide();
+                jQuery('#feed-container').hide();
                 jQuery('#feed-output').html(data);
                 jQuery('*').css('cursor', 'default');
                 jQuery('#feed-generate').prop('disabled', false);
