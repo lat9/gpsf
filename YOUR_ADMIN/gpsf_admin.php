@@ -260,7 +260,6 @@ if ($feed_files === []) {
                 var seconds = totalSeconds - (hours * 3600) - (minutes * 60);
 
                 jQuery('#feed-elapsed-time').text(addZero(hours)+':'+addZero(minutes)+':'+addZero(seconds));
-                jQuery.jTimeout.reset();
 
                 setTimeout(function() { setElapsedTime(totalSeconds + 1) }, 1000);
             }
@@ -273,13 +272,32 @@ if ($feed_files === []) {
             jQuery('#feed-generate').prop('disabled', true);
             jQuery('*').css('cursor', 'wait');
             jQuery('#feed-container').show();
-            jQuery.get('<?php echo $gpsf_main_controller . '.php'; ?>', jQuery(this).serialize(), function(data) {
+
+            jQuery.get('<?php echo $gpsf_main_controller . '.php'; ?>', jQuery(this).serialize())
+            .done(function(data, textStatus, jqXHR) {
+                var lockMessage = '';
                 jQuery.get('<?php echo zen_href_link(FILENAME_GPSF_ADMIN); ?>', function(data2) {
                     var availableDownloads = jQuery(data2).find('#feed-files').html();
                     jQuery('#feed-files').html(availableDownloads);
+                    if (availableDownloads.indexOf('.xml.lock') >= 0) {
+                        lockMessage = '<p class="text-danger">Since an .xml.lock file is present, the feed might have run out of either memory or time.  Check your <code>/logs</code> directory for details.</p>';
+                    }
                 });
                 jQuery('#feed-container').hide();
-                jQuery('#feed-output').html(data);
+                jQuery('#feed-output').html(data + lockMessage);
+                jQuery('*').css('cursor', 'default');
+                jQuery('#feed-generate').prop('disabled', false);
+            })
+            .fail(function(jqXHR) {
+                if (jqXHR.status === 500) {
+                    jQuery('#feed-output').html('<p class="text-danger">Request failed, Internal Server Error (500). Check your <code>/logs</code> directory for details.</p>');
+                } else if (jqXHR.status === 504) {
+                    jQuery('#feed-output').html('<p class="text-danger">Request failed, Gateway Timeout (504). Check your site\'s "Maximum Input Time".  You might need to contact your webhost for assistance.</p>');
+                } else {
+                    jQuery('#feed-output').html('<p class="text-danger">Request failed, ' + jqXHR.statusText + ' (' + jqXHR.status + ').</p>');
+                }
+
+                jQuery('#feed-container').hide();
                 jQuery('*').css('cursor', 'default');
                 jQuery('#feed-generate').prop('disabled', false);
             });
@@ -288,11 +306,10 @@ if ($feed_files === []) {
 
         jQuery('.upload-feed').on('click', function(e) {
             e.preventDefault();
-            jQuery('html, body').css('cursor', 'wait!important');
+            jQuery('*').css('cursor', 'wait');
             jQuery.get(jQuery(this).prop('href'), '', function(data) {
                 jQuery('#feed-output').html(data);
-                jQuery('html, body').css('cursor', 'default!important');
-
+                jQuery('*').css('cursor', 'default');
             });
             return false;
         });

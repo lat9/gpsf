@@ -29,19 +29,25 @@ class gpsfBase
     //
     // Returns a simple array containing:
     //
-    // $additional_fields   Contains a comma-separated string that identifies any additional fields to
-    //                      be gathered from the database.
-    // $additional_tables   Contains a string of additional LEFT JOIN clauses to include additional
-    //                      database tables in the query.
+    // $additional_fields
+    //    Contains a comma-separated string that identifies any additional fields to
+    //    be gathered from the database.
+    // $additional_tables
+    //    Contains a string of additional LEFT JOIN clauses to include additional
+    //    database tables in the query.
+    // $additional_where_clause
+    //    Contains a string of additional 'AND' elements to be added to the feed's database query.
     //
     public function getAdditionalQueryFields(string $additional_fields_base, string $additional_tables_base):array
     {
         $additional_fields = '';
         $additional_tables = '';
+        $additional_where_clause = '';
 
         return [
             $additional_fields,
-            $additional_tables
+            $additional_tables,
+            $additional_where_clause,
         ];
     }
 
@@ -99,7 +105,10 @@ class gpsfBase
     //
     // Note: It is the extension's responsibility to properly format any non-string attribute type.  For
     // example, the 'adult' attribute should be set to (string)'true'/'false' values, not (bool)true/false.
-    // Any URL-type attributes returned should be urlencoded.
+    // Any URL-type attributes returned should be have spaces (' ') converted to %20 and ampersands (&) converted
+    // to %26.
+    //
+    // If an attribute is set to (bool)false, the feed's associated value will not be included.
     //
     public function getProductsAttributes(string $products_id, array $product, array $categories_list, array $cPath, array $custom_fields):array
     {

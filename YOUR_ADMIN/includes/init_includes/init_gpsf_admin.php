@@ -93,7 +93,7 @@ if (!defined('GPSF_VERSION')) {
 
             ('Expiration Date Adjust', 'GPSF_EXPIRATION_DAYS', '302', '<br>Expiration date adjustment in days.  Leave blank for Google to auto-set.<br>', $cgi, 302, now(), NULL, NULL),
 
-            ('ID Source (g:id)', 'GPSF_OFFER_ID', 'model', '<br>Choose the unique identifier to use for each product.  The value will default to the <code>products_id</code> if you choose a value other than <code>id</code> and the associated value is empty for a product. If you choose <b>UPC</b>, <b>ISBN</b> or <b>EAN</b>, ensure that your site has provided this information for the feed!', $cgi, 400, now(), NULL, 'zen_cfg_select_option([\'id\', \'model\', \'UPC\', \'ISBN\', \'EAN\'],'),
+            ('ID Source (g:id)', 'GPSF_OFFER_ID', 'id', '<br>Choose the unique identifier to use for each product.  If you choose <code>model</code>, any product with an empty <code>products_model</code> will be skipped for the generated feed.', $cgi, 400, now(), NULL, 'zen_cfg_select_option([\'id\', \'model\'],'),
 
             ('Include Min quantity on product', 'GPSF_INCLUDE_MIN_QUANITY', 'false', '<br>Include product min quantity in the feed?', $cgi, 402, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 

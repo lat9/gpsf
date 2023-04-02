@@ -35,6 +35,7 @@ if ((int)GPSF_MAX_EXECUTION_TIME > 0) {
     ini_set('max_execution_time', (int)GPSF_MAX_EXECUTION_TIME);
     set_time_limit((int)GPSF_MAX_EXECUTION_TIME);
 }
+ini_set('max_input_time', -1);
 if ((int)GPSF_MEMORY_LIMIT > 0) {
     ini_set('memory_limit', (int)GPSF_MEMORY_LIMIT . 'M');
 }

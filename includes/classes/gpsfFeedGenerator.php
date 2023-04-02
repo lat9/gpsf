@@ -300,31 +300,10 @@ class gpsfFeedGenerator
             $link = zen_href_link($product['type_handler'] . '.info', $cPath_href . 'products_id=' . $products_id, 'NONSSL', false);
 
             $id = false;
-            switch (GPSF_OFFER_ID) {
-                case 'model':
-                    if ($product['products_model'] !== '') {
-                        $id = $this->sanitizeXml($product['products_model']);
-                    }
-                    break;
-                case 'UPC':
-                    if (!empty($product['products_upc'])) {
-                        $id = $product['products_upc'];
-                    }
-                    break;
-                case 'ISBN':
-                    if (!empty($product['products_isbn'])) {
-                        $id = $product['products_isbn'];
-                    }
-                    break;
-                case 'EAN':
-                    if (!empty($product['products_ean'])) {
-                        $id = $product['products_ean'];
-                    }
-                    break;
-                case 'id':
-                default:
-                    $id = $products_id;
-                    break;
+            if (GPSF_OFFER_ID === 'id') {
+                $id = $products_id;
+            } elseif ($product['products_model'] !== '') {
+                $id = $this->sanitizeXml($product['products_model']);
             }
 
             if ($this->extensions !== null) {
@@ -348,8 +327,6 @@ class gpsfFeedGenerator
                 continue;
             }
 
-            $this->identifiersSet = [];
-
             // -----
             // Determine if a product has any 'custom' fields (like size or color)
             // based on its attributes, if present.  Then, if there's a site-specific
@@ -360,17 +337,21 @@ class gpsfFeedGenerator
                 $custom_fields = $this->getExtensionsAttributes($products_id, $product, $custom_fields);
             }
 
-            $this->xmlWriter->startElement('item');
-
             // -----
             // Set a string version of the identifiers as {xx}[,{xx}]... so that the
             // values can be found with a 'quick' strpos instead of an array lookup.
             //
-            $this->identifiersList = '{' . implode('}{', $this->identifiersSet) . '}';
+            $this->identifiersList = '{' . implode('}{', array_keys($custom_fields)) . '}';
+            $this->identifiersSet = $custom_fields;
+
+            $this->xmlWriter->startElement('item');
 
             $this->createBaseProduct($id, $product, $products_title, $tax_rate, $price, $sale_price);
 
             foreach ($custom_fields as $key => $value) {
+                if ($value === false) {
+                    continue;
+                }
                 $this->xmlWriter->writeElement('g:' . $key, $value);
             }
 
@@ -403,10 +384,6 @@ class gpsfFeedGenerator
     protected function initializeProductsFeed($limit, $offset)
     {
         global $db, $currencies;
-
-        if (!defined('GPSF_DEBUG_MAX_SKIPPED')) {
-            define('GPSF_DEBUG_MAX_SKIPPED', '1000');
-        }
 
         // -----
         // Determine if the feed's images are located somewhere other than the site's /images
@@ -455,9 +432,9 @@ class gpsfFeedGenerator
 
         // -----
         // Determine any additional fields and/or tables to be gathered from the database, depending
-        // on configuration setting and fields' presence.
+        // on configuration and extensions' additions.
         //
-        list($additional_fields, $additional_tables) = $this->getAdditionalQueryFields();
+        list($additional_fields, $additional_tables, $additional_where_clause) = $this->getAdditionalQueryFields();
 
         // -----
         // Initialize the products' query to pull the fields required for the to-be-generated feed.
@@ -495,7 +472,8 @@ class gpsfFeedGenerator
                 AND p.product_is_free != 1
                 AND p.products_image IS NOT NULL
                 AND p.products_image != ''
-                AND p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "'";
+                AND p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "'" .
+            $additional_where_clause;
 
         // -----
         // Now, add additional limitations to products gathered, based on the current configuration.
@@ -540,6 +518,7 @@ class gpsfFeedGenerator
     {
         $additional_fields = '';
         $additional_tables = '';
+        $additional_where_clause = '';
 
         if (GPSF_META_TITLE === 'true') {
             $additional_fields .= ', mtpd.metatags_title';
@@ -553,54 +532,25 @@ class gpsfFeedGenerator
         // -----
         // If the site-specific "helper" function is provided, see if there are any
         // additional fields and/or tables that should be included in the products'
-        // gathering query.
+        // gathering query or any additional conditions added to the feed's "where" claues.
         //
         if ($this->extensions !== null) {
             foreach ($this->extensions as $extension_class) {
-                list($extension_fields, $extension_tables) = $extension_class->getAdditionalQueryFields($additional_fields, $additional_tables);
+                list($extension_fields, $extension_tables, $extension_where_clause) = $extension_class->getAdditionalQueryFields($additional_fields, $additional_tables);
                 $extension_fields = trim($extension_fields, ',');
                 if ($extension_fields !== '') {
                     $additional_fields .= ', ' . $extension_fields;
                 }
                 $additional_tables .= ' ' . $extension_tables;
+                $additional_where_clause .= ' ' . $extension_where_clause;
             }
         }
 
         return [
             $additional_fields,
             $additional_tables,
+            $additional_where_clause,
         ];
-    }
-    // -----
-    // For the specified configuration key, check that the table-fields required for the
-    // associated inclusion are, in fact, present in the database and change the
-    // setting's value to 'false' if not.
-    //
-    protected function checkConfigurationEnabled($key, $value, $table_name, $columns_to_check)
-    {
-        global $db;
-
-        $configuration_enabled = false;
-        if ($value === 'true') {
-            $configuration_enabled = true;
-            foreach ($columns_to_check as $column) {
-                $configuration_enabled = $this->sniffer->field_exists($table_name, $column);
-                if ($configuration_enabled === false) {
-                    break;
-                }
-            }
-
-            // if the column doesn't exist, change the associated configuration value
-            if ($configuration_enabled === false) {
-                $update_conf_sql =
-                    "UPDATE " . TABLE_CONFIGURATION . "
-                        SET configuration_value = 'false',
-                            last_updated = now()
-                      WHERE configuration_key = '$key'";
-                $db->Execute($update_conf_sql);
-            }
-        }
-        return $configuration_enabled;
     }
 
     protected function addProductsAdditionalImages($products_image)
@@ -628,7 +578,7 @@ class gpsfFeedGenerator
             if ($next_image === $products_image) {
                 continue;
             }
-            $this->xmlWriter->writeElement('g:additional_image_link', urlencode($this->getProductsImageUrl(str_replace(DIR_WS_IMAGES, '', $next_image))));
+            $this->xmlWriter->writeElement('g:additional_image_link', $this->getProductsImageUrl(str_replace(DIR_WS_IMAGES, '', $next_image)));
             $images_found++;
             if ($images_found === 9) {
                 break;
@@ -643,7 +593,7 @@ class gpsfFeedGenerator
             if ($this->alternateImageUrlIsLocal === true) {
                 $products_image = $this->alternateImageUrl . $products_image;
             } else {
-                return $this->alternateImageUrl . rawurlencode($products_image);
+                return $this->alternateImageUrl . $products_image;
             }
         }
 
@@ -676,7 +626,24 @@ class gpsfFeedGenerator
             $products_image_link = HTTP_SERVER . DIR_WS_CATALOG . $products_image_large;
         }
 
-        return $products_image_link;
+        return $this->sanitizeLink($products_image_link);
+    }
+
+    protected function sanitizeLink($link)
+    {
+        return str_replace(
+            [
+                ' ',
+                '&amp;',
+                '&',
+            ],
+            [
+                '%20',
+                '%26',
+                '%26',
+            ],
+            $link
+        );
     }
 
     protected function formatPriceElement($price)
@@ -839,23 +806,7 @@ class gpsfFeedGenerator
                 continue;
             }
 
-            switch ($options_name) {
-                case 'google_product_category':
-                    $this->identifiersSet[] = 'google_product_category';
-                    break;
-                case 'colour':
-                    $options_name = 'color';
-                    break;
-                case 'upc':
-                case 'isbn':
-                case 'ean':
-                case 'jan':
-                case 'gtin':
-                    $this->identifiersSet[] = $options_name;
-                    break;
-                default:
-                    break;
-            }
+            $options_name = ($options_name === 'colour') ? 'color' : $options_name;
             $attributes[$options_name] = strtolower($this->sanitizeXml($next_att['products_options_values_name']));
         }
         return $attributes;
@@ -869,12 +820,9 @@ class gpsfFeedGenerator
             $new_custom_fields = [];
             foreach ($extension_custom_fields as $key => $value) {
                 $key = strtolower($key);
-                $this->identifiersSet[] = $key;
-                $new_custom_fields[$key] = $this->sanitizeXml($value);
+                $new_custom_fields[$key] = ($value === false) ? false : $this->sanitizeXml($value);
             }
         }
-        
-        $this->identifiersSet = array_unique($this->identifiersSet);
 
         return array_merge($custom_fields, $new_custom_fields);
     }
@@ -910,7 +858,7 @@ class gpsfFeedGenerator
             $this->xmlWriter->endElement();
         }
 
-        $this->xmlWriter->writeElement('g:image_link', urlencode($products_image));
+        $this->xmlWriter->writeElement('g:image_link', $products_image);
         if (GPSF_INCLUDE_ADDITIONAL_IMAGES === 'true') {
             $this->addProductsAdditionalImages($product['products_image']);
         }
@@ -922,14 +870,18 @@ class gpsfFeedGenerator
 
         $cPath_href = (GPSF_USE_CPATH === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
         $link = zen_href_link($product['type_handler'] . '.info', $cPath_href . 'products_id=' . $product['products_id'], 'NONSSL', false);
-        $this->xmlWriter->writeElement('link', urlencode($link));
+        $this->xmlWriter->writeElement('link', $this->sanitizeLink($link));
 
-        if ($product['products_model'] !== '') {
+        if (strpos($this->identifiersList, '{mpn}') === false) {
+            if ($product['products_model'] !== '') {
+                $unique_identifiers++;
+                $this->xmlWriter->writeElement('g:mpn', $this->sanitizeXml($product['products_model']));
+            }
+        } elseif ($this->identifiersSet['mpn'] !== false) {
             $unique_identifiers++;
-            $this->xmlWriter->writeElement('g:mpn', $this->sanitizeXml($product['products_model']));
         }
 
-        if (strpos($this->identifiersList, '{gtin}') === true) {
+        if (strpos($this->identifiersList, '{gtin}') === true && $this->identiersSet['gtin'] !== false) {
             $unique_identifiers++;
         }
 
@@ -963,7 +915,7 @@ class gpsfFeedGenerator
         }
     }
 
-    protected function sanitizeString($str)
+    protected function sanitizeString($str):string
     {
         $str = (string)$str;
         $str = str_replace(
