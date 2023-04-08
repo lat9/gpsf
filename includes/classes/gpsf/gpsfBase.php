@@ -139,4 +139,29 @@ class gpsfBase
             $sale_price
         ];
     }
+
+    // -----
+    // Gives an extension a means to override the determination/generation of a product's image
+    // for the feed.
+    //
+    // If no override is necessary, this method returns (bool)false.  Otherwise it returns either the string
+    // URL associated with the specified image or null if the image is not present and the product
+    // should not be included in the feed.
+    //
+    public function getProductsImageUrl(string $products_image)
+    {
+        return false;
+    }
+
+    // -----
+    // Gives an extension a means to override the determination/generation of a product's additional
+    // image URLs for the feed.
+    //
+    // If no override is necessary, this method returns (bool)false, otherwise it returns an array of
+    // additional-image URLs to be included in the feed.
+    //
+    public function getProductsAdditionalImagesUrls(string $products_image)
+    {
+        return false;
+    }
 }

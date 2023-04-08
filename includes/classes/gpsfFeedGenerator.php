@@ -18,6 +18,8 @@
  */
 class gpsfFeedGenerator
 {
+    const FEED_OUTPUT_FREQUENCY = 2500;
+
     protected
         $productsSkipped = [],
         $categoryInfoCache = [],
@@ -212,8 +214,6 @@ class gpsfFeedGenerator
                 $last_title = $products_name;
             }
 
-            ob_start();
-
             /* BEGIN GLOBAL ELEMENTS USED IN ALL ITEMS */
 
             $price = zen_get_products_base_price($products_id);
@@ -361,11 +361,15 @@ class gpsfFeedGenerator
             // finalize item
             $this->xmlWriter->endElement(); // end item
 
+            // -----
+            // Increment the number of products output to the feed.  Every so often,
+            // flush the XML to the output file so we don't run out of memory.
+            //
             $this->productsProcessed++;
-
-            fwrite($fp, $this->xmlWriter->outputMemory(true));
-            ob_flush();
-            flush();
+            if (($this->productsProcessed % self::FEED_OUTPUT_FREQUENCY) === 0) {
+                fwrite($this->fp, $this->xmlWriter->flush(true));
+                fflush($this->fp);
+             }
         }
 
         // -----
@@ -428,7 +432,8 @@ class gpsfFeedGenerator
 
         $this->xmlWriter->writeElement('link', GPSF_ADDRESS);
         $this->xmlWriter->writeElement('description', $this->sanitizeXml(GPSF_DESCRIPTION));
-        fwrite($this->fp, $this->xmlWriter->outputMemory(true));
+        fwrite($this->fp, $this->xmlWriter->flush(true));
+        fflush($this->fp);
 
         // -----
         // Determine any additional fields and/or tables to be gathered from the database, depending
@@ -457,7 +462,7 @@ class gpsfFeedGenerator
                         ON p2c.products_id = p.products_id" . $additional_tables;
 
         // -----
-        // Create the 'base' WHERE clause for the query.  For a product to be includes, it must:
+        // Create the 'base' WHERE clause for the query.  For a product to be included, it must:
         //
         // - Be enabled
         // - Not be a "Document General" type.
@@ -555,6 +560,24 @@ class gpsfFeedGenerator
 
     protected function addProductsAdditionalImages($products_image)
     {
+       if ($this->extensions !== null) {
+            foreach ($this->extensions as $extension_class) {
+                $extension_additional_image_urls = $extension_class->getProductsAdditionalImagesUrls($products_image);
+                if (!is_array($extension_additional_image_urls)) {
+                    continue;
+                }
+                $images_found = 0;
+                foreach ($extension_additional_image_urls as $next_url) {
+                    $this->xmlWriter->writeElement('g:additional_image_link', $next_url);
+                    $images_found++;
+                    if ($images_found === 9) {
+                        break;
+                    }
+                }
+                return;
+            }
+        }
+
         $image_pathinfo = pathinfo($products_image);
 
         // prepare image name
@@ -589,6 +612,24 @@ class gpsfFeedGenerator
     // creates the url for the products_image
     protected function getProductsImageUrl($products_image)
     {
+        // -----
+        // See if an extension wants to override the determination of a product's image.
+        //
+        // The method returns:
+        //
+        // - (bool)false if no override is provided.
+        // - (string)URL when returning the image's URL.
+        // - null if the product's image, and thus the product, should not be included in the feed.
+        //
+        if ($this->extensions !== null) {
+            foreach ($this->extensions as $extension_class) {
+                $extension_image_url = $extension_class->getProductsImageUrl($products_image);
+                if ($extension_image_url !== false) {
+                    return $extension_image_url ?? false;
+                }
+            }
+        }
+
         if ($this->alternateImageUrl !== false) {
             if ($this->alternateImageUrlIsLocal === true) {
                 $products_image = $this->alternateImageUrl . $products_image;
@@ -1016,8 +1057,10 @@ class gpsfFeedGenerator
         $this->xmlWriter->endElement(); // end rss
         $this->xmlWriter->endDocument(); // end xml
 
-        // Write uncompressed file
-        fwrite($this->fp, $this->xmlWriter->outputMemory(true));
+        // -----
+        // Write the remaining in-memory XML elements to the output file.
+        //
+        fwrite($this->fp, $this->xmlWriter->flush(true));
         fflush($this->fp);
 
         unset($this->xmlWriter);
@@ -1048,7 +1091,7 @@ class gpsfFeedGenerator
         // then continue on to do the built-in calculations.
         //
         if ($this->extensions !== null) {
-            foreach ($extensions as $extension_class) {
+            foreach ($this->extensions as $extension_class) {
                 $rate = $extension_class->getProductsShippingRate($products_id, $products_weight, $products_price, $product_is_always_free_shipping);
                 if ($rate >= 0) {
                     return $rate;
