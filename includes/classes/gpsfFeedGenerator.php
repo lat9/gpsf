@@ -525,8 +525,8 @@ class gpsfFeedGenerator
             $additional_tables .= ' LEFT JOIN ' . TABLE_META_TAGS_PRODUCTS_DESCRIPTION . ' mtpd ON (p.products_id = mtpd.products_id) ';
         }
 
-        if (GPSF_INCLUDE_MIN_QUANITY === 'true') {
-            $additional_fields .= ', p.products_quantity_order_units';
+        if (GPSF_INCLUDE_MIN_QUANTITY === 'true') {
+            $additional_fields .= ', p.products_quantity_order_min';
         }
 
         // -----
@@ -707,7 +707,7 @@ class gpsfFeedGenerator
                     $this->xmlWriter->writeElement('g:country', GPSF_TAX_COUNTRY);
                     $this->xmlWriter->writeElement('g:region', trim($region));
                     if (GPSF_TAX_SHIPPING === 'y') {
-                        $this->xmlWriter->writeElement('g:tax_ship', GPSF_TAX_SHIPPING);
+                        $this->xmlWriter->writeElement('g:tax_ship', 'yes');
                     }
                     $this->xmlWriter->writeElement('g:rate', $tax_rate);
                     $this->xmlWriter->endElement();
@@ -716,7 +716,7 @@ class gpsfFeedGenerator
                 $this->xmlWriter->startElement('g:tax');
                 $this->xmlWriter->writeElement('g:country', GPSF_TAX_COUNTRY);
                 if (GPSF_TAX_SHIPPING === 'y') {
-                    $this->xmlWriter->writeElement('g:tax_ship', GPSF_TAX_SHIPPING);
+                    $this->xmlWriter->writeElement('g:tax_ship', 'yes');
                 }
                 $this->xmlWriter->writeElement('g:rate', $tax_rate);
                 $this->xmlWriter->endElement();
@@ -726,7 +726,7 @@ class gpsfFeedGenerator
         if (STOCK_CHECK !== 'true') {
             $this->xmlWriter->writeElement('g:availability', 'in stock');
         } elseif ($product['products_quantity'] > 0) {
-            if (isset($product['products_quantity_order_units']) && $product['products_quantity_order_units'] > $product['products_quantity']) {
+            if (isset($product['products_quantity_order_min']) && $product['products_quantity_order_min'] > $product['products_quantity']) {
                 $this->xmlWriter->writeElement('g:availability', 'out_of_stock');
             } else {
                 $this->xmlWriter->writeElement('g:availability', 'in stock');
@@ -740,7 +740,11 @@ class gpsfFeedGenerator
             $this->xmlWriter->writeElement('g:availability', 'preorder');
         }
 
-        if (GPSF_SHIPPING_METHOD !== '' && GPSF_SHIPPING_METHOD !== 'none') {
+        if (GPSF_WEIGHT === 'true' && $product['products_weight'] > 0) {
+            $this->xmlWriter->writeElement('g:product_weight', $product['products_weight'] . ' ' . GPSF_UNITS);
+        }
+
+        if (GPSF_SHIPPING_METHOD !== 'none') {
             $shipping_rate = $this->getProductsShippingRate($product['products_id'], $product['products_weight'], $price, $product['product_is_always_free_shipping']);
 
             if ((float)$shipping_rate >= 0) {
@@ -889,19 +893,8 @@ class gpsfFeedGenerator
             $this->xmlWriter->writeElement('g:identifier_exists', 'false');
         }
 
-        if (GPSF_PICKUP !== 'do not display') {
-            $this->xmlWriter->writeElement('g:pickup', GPSF_PICKUP);
-        }
-
-        if (GPSF_PAYMENT_METHODS !== '') { 
-            $payments_accepted = explode(',', GPSF_PAYMENT_METHODS);
-            foreach ($payments_accepted as $payment_accepted) {
-                $this->xmlWriter->writeElement('g:payment_accepted', trim($payment_accepted));
-            }
-        }
-
-        if (GPSF_PAYMENT_NOTES !== '') {
-            $this->xmlWriter->writeElement('g:payment_notes', trim(GPSF_PAYMENT_NOTES));
+        if (strpos($this->identifiersList, '{condition}') === false) {
+            $this->xmlWriter->writeElement('g:condition', GPSF_CONDITION);
         }
 
         $this->xmlWriter->startElement('description');

@@ -9,7 +9,7 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('GPSF_CURRENT_VERSION', '1.0.0-beta1');
+define('GPSF_CURRENT_VERSION', '1.0.0-beta2');
 
 // -----
 // Nothing to do if an admin is not currently logged-in or if the plugin's currently installed
@@ -75,7 +75,7 @@ if (!defined('GPSF_VERSION')) {
 
             ('Feed Currency', 'GPSF_CURRENCY', 'USD', '<br>Choose the currency to be used for the feed.<br>', $cgi, 100, now(), NULL, 'gpsf_cfg_pull_down_currencies('),
 
-            ('Default Feed Language', 'GPSF_LANGUAGE', '1', '<br>Choose the default language used for the feed.<br>', $cgi, 102, now(), NULL, 'gpsf_cfg_pull_down_languages_list('),
+            ('Default Feed Language ID', 'GPSF_LANGUAGE', '1', '<br>Choose the default language used for the feed.<br>', $cgi, 102, now(), NULL, 'gpsf_cfg_pull_down_languages_list('),
 
             ('Skip Duplicate Titles', 'GPSF_SKIP_DUPLICATE_TITLES', 'true', '<br>Skip duplicate titles, i.e. product\'s names. Required if submitting to Google US. Default: <code>true</code>.', $cgi, 200, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
@@ -91,15 +91,15 @@ if (!defined('GPSF_VERSION')) {
 
             ('Expiration Date Base', 'GPSF_EXPIRATION_BASE', 'now', '<br>Expiration Date Base:<ul><li>now - add Adjust to current date;</li><li>product - add Adjust to product date (max(date_added, last_modified, date_available))</li></ul>', $cgi, 300, now(), NULL, 'zen_cfg_select_option([\'now\', \'product\'],'),
 
-            ('Expiration Date Adjust', 'GPSF_EXPIRATION_DAYS', '302', '<br>Expiration date adjustment in days.  Leave blank for Google to auto-set.<br>', $cgi, 302, now(), NULL, NULL),
+            ('Expiration Date Adjust', 'GPSF_EXPIRATION_DAYS', '', '<br>Expiration date adjustment in days.  Leave blank for Google to auto-set (the default).<br>', $cgi, 302, now(), NULL, NULL),
 
             ('ID Source (g:id)', 'GPSF_OFFER_ID', 'id', '<br>Choose the unique identifier to use for each product.  If you choose <code>model</code>, any product with an empty <code>products_model</code> will be skipped for the generated feed.', $cgi, 400, now(), NULL, 'zen_cfg_select_option([\'id\', \'model\'],'),
 
-            ('Include Min quantity on product', 'GPSF_INCLUDE_MIN_QUANITY', 'false', '<br>Include product min quantity in the feed?', $cgi, 402, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
+            ('Using Minimum Order Quantity?', 'GPSF_INCLUDE_MIN_QUANTITY', 'false', '<br>If your site has products with a <em>Product Qty Minimum</em> other than <b>1</b>, should a product\'s minimum order-quantity be considered when determining if a product is out-of-stock?  Default: <b>false</b>.', $cgi, 402, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
             ('Include Out of Stock', 'GPSF_INCLUDE_OUT_OF_STOCK', 'true', '<br>Include out of stock items in the feed?  Default: <code>true</code>', $cgi, 404, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
-            ('Default Product Condition', 'GPSF_CONDITION', 'new', '<br>Choose your products\' default condition. Default: <em>true</em>.', $cgi, 406, now(), NULL, 'zen_cfg_select_option([\'new\', \'used\', \'refurbished\'],'),
+            ('Default Product Condition', 'GPSF_CONDITION', 'new', '<br>Choose your products\' default condition. Default: <em>new</em>.', $cgi, 406, now(), NULL, 'zen_cfg_select_option([\'new\', \'used\', \'refurbished\'],'),
 
             ('Product Type', 'GPSF_PRODUCT_TYPE', 'top', '<br>Use top-level, bottom-level or full-category path, or your default setting as product_type?', $cgi, 408, now(), NULL, 'zen_cfg_select_option([\'default\', \'top\', \'bottom\', \'full\'],'),
 
@@ -121,15 +121,11 @@ if (!defined('GPSF_VERSION')) {
 
             ('Tax Region', 'GPSF_TAX_REGION', '', '<br>The geographic region that a tax rate applies to, e.g., in the US, the two-letter state abbreviation, ZIP code, or ZIP code range using * wildcard (examples: CA, 946*).<br>', $cgi, 504, now(), NULL, NULL),
 
-            ('Payments Accepted', 'GPSF_PAYMENT_METHODS', '', '<br>What payment methods do you accept? Enter them separated by commas.<br>', $cgi, 600, now(), NULL, NULL),
-
-            ('Payment Notes', 'GPSF_PAYMENT_NOTES', '', '<br>Add payment notes (use this for showing you accept Google Checkout).<br>', $cgi, 602, now(), NULL, NULL),
-
-            ('Shipping Options', 'GPSF_SHIPPING', '', '<br>The shipping options available for an item.<br>', $cgi, 700, now(), NULL, NULL),
+            ('Tax on Shipping', 'GPSF_TAX_SHIPPING', 'n', '<br>Do you charge tax on shipping, y for yes or n for no (the default).', $cgi, 506, now(), NULL, 'zen_cfg_select_option([\'y\', \'n\'],'),
 
             ('Select Shipping Method', 'GPSF_SHIPPING_METHOD', 'none', '<br>Select a shipping method from the drop-down list that is used in your store, or leave as <code>none</code> (the default).', $cgi, 702, now(), NULL, 'zen_cfg_select_option([\'flat rate\', \'per item\', \'per weight unit\', \'table rate\', \'zones\', \'none\'],'),
 
-            ('Table Zone ID', 'GPSF_RATE_ZONE', '', '<br>Enter the table rate ID if using a shipping method that uses table rates.<br>', $cgi, 704, now(), NULL, NULL),
+            ('Shipping Zone ID', 'GPSF_RATE_ZONE', '', '<br>Enter the <em>zone id</em> to use if the selected shipping method is <code>zones</code> or if you have an extension that supplies zone-based shipping rates.<br>', $cgi, 704, now(), NULL, NULL),
 
             ('Shipping Country', 'GPSF_SHIPPING_COUNTRY', '223', '<br>Select the destination country for the shipping rates.  Default: 223 (USA).<br>', $cgi, 706, now(), NULL, 'gpsf_cfg_pull_down_country_iso3_list('),
 
@@ -137,17 +133,13 @@ if (!defined('GPSF_VERSION')) {
 
             ('Shipping Service', 'GPSF_SHIPPING_SERVICE', '', '<br>Enter the shipping service type (e.g. Ground).<br>', $cgi, 710, now(), NULL, NULL),
 
-            ('Pickup', 'GPSF_PICKUP', 'do not display', '<br>Local pickup available?', $cgi, 712, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\', \'do not display\'],'),
-
-            ('Tax on Shipping', 'GPSF_TAX_SHIPPING', 'n', '<br>Do you charge tax on shipping, y for yes or n for no (the default).', $cgi, 714, now(), NULL, 'zen_cfg_select_option([\'y\', \'n\'],'),
-
             ('Shipping Label Source', 'GPSF_SHIPPING_LABEL', 'products', '<br>Use the products_id or categories_id as the shipping_label field in Google (allows the webmaster to target the value and setup custom shipping rates per product or category within Google Merchant Center).', $cgi, 716, now(), NULL, 'zen_cfg_select_option([\'products\', \'categories\'],'),
 
             ('Alternate Image URL', 'GPSF_ALTERNATE_IMAGE_URL', '', '<br>Add an alternate URL if your images are hosted offsite (e.g. https://www.domain.com/images/).  Your defined image will be appended to the end of this URL, so don\'t forget the trailing slash!<br>', $cgi, 800, now(), NULL, NULL),
 
             ('Use Image Handler?', 'GPSF_IMAGE_HANDLER', 'false', '<br>Resize images using <em>Image Handler</em> if installed? <b>Note:</b> Setting to true might affect the feed\'s performance and cause timeouts!', $cgi, 802, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
-            ('Include Additional Images', 'GPSF_INCLUDE_ADDITIONAL_IMAGES', 'false', '<br>Include additional images in the feed?  b>Note:</b> Setting to true might affect the feed\'s performance and cause timeouts!', $cgi, 804, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
+            ('Include Additional Images', 'GPSF_INCLUDE_ADDITIONAL_IMAGES', 'false', '<br>Include additional images in the feed?  <b>Note:</b> Setting to true might affect the feed\'s performance and cause timeouts!', $cgi, 804, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
             ('Debug', 'GPSF_DEBUG', 'false', '<br>If set to <code>true</code>, the feed will output messages indicating which products have not been included in the feed due to errors.', $cgi, 5000, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
@@ -164,6 +156,65 @@ if (!defined('GPSF_VERSION')) {
     // Let the logged-in admin know that the plugin's been installed.
     //
     define('GPSF_VERSION', '0.0.0');
+}
+
+// -----
+// Version-specific database adjustments.
+//
+switch (true) {
+    case version_compare(GPSF_VERSION, '1.0.0-beta2', '<'):
+        if (!defined('GPSF_OFFER_ID')) {
+            define('GPSF_OFFER_ID', 'id');
+        }
+        $offer_id = (GPSF_OFFER_ID !== 'id' && GPSF_OFFER_ID !== 'model') ? 'id' : GPSF_OFFER_ID;
+        $db->Execute(
+            "UPDATE " . TABLE_CONFIGURATION . "
+                SET configuration_value = '$offer_id',
+                    configuration_description = '<br>Choose the unique identifier to use for each product.  If you choose <code>model</code>, any product with an empty <code>products_model</code> will be skipped for the generated feed.',
+                    set_function = 'zen_cfg_select_option([\'id\', \'model\'],'
+              WHERE configuration_key = 'GPSF_OFFER_ID'
+              LIMIT 1"
+        );
+        $db->Execute(
+            "UPDATE " . TABLE_CONFIGURATION . "
+                SET configuration_key = 'GPSF_INCLUDE_MIN_QUANTITY',
+                    configuration_title = 'Using Minimum Order Quantity?',
+                    configuration_description = '<br>If your site has products with a <em>Product Qty Minimum</em> other than <b>1</b>, should a product\'s minimum order-quantity be considered when determining if a product is out-of-stock?  Default: <b>false</b>.'
+              WHERE configuration_key = 'GPSF_INCLUDE_MIN_QUANITY'
+              LIMIT 1"
+        );
+        $db->Execute(
+            "UPDATE " . TABLE_CONFIGURATION . "
+                SET configuration_description = '<br>Choose your products\' default condition. Default: <em>new</em>.'
+              WHERE configuration_key = 'GPSF_CONDITION'
+              LIMIT 1"
+        );
+        $db->Execute(
+            "UPDATE " . TABLE_CONFIGURATION . "
+                SET configuration_title = 'Shipping Zone ID',
+                    configuration_description = '<br>Enter the <em>zone id</em> to use if the selected shipping method is <code>zones</code> or if you have an extension that supplies zone-based shipping rates.<br>'
+              WHERE configuration_key = 'GPSF_RATE_ZONE'
+              LIMIT 1"
+        );
+        $db->Execute(
+            "UPDATE " . TABLE_CONFIGURATION . "
+                SET sort_order = 506
+              WHERE configuration_key = 'GPSF_TAX_SHIPPING'
+              LIMIT 1"
+        );
+        $db->Execute(
+            "UPDATE " . TABLE_CONFIGURATION . "
+                SET configuration_description = '<br>Include additional images in the feed?  <b>Note:</b> Setting to true might affect the feed\'s performance and cause timeouts!'
+              WHERE configuration_key = 'GPSF_INCLUDE_ADDITIONAL_IMAGES'
+              LIMIT 1"
+        );
+        $db->Execute(
+            "DELETE FROM " . TABLE_CONFIGURATION . "
+              WHERE configuration_key IN ('GPSF_PAYMENT_METHODS', 'GPSF_PAYMENT_NOTES', 'GPSF_SHIPPING', 'GPSF_PICKUP')"
+        );
+
+    default:            //-Fall through from above processing ...
+        break;
 }
 
 $db->Execute(
