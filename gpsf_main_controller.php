@@ -170,9 +170,10 @@ if ($feed === 'yes') {
     $products_total = $gpsf->getTotalProducts();
     $products_processed = $gpsf->getTotalProductsProcessed();
     $products_skipped = $products_total - $products_processed;
+    $peak_memory_usage_mb = (float)(memory_get_peak_usage(true) / (1024 * 1024));
     echo
         '<p>' .
-            sprintf(TEXT_GPSF_FEED_COMPLETE, $gpsf->microtime_float() - $timer_feed_start) .
+            sprintf(TEXT_GPSF_FEED_COMPLETE, $gpsf->microtime_float() - $timer_feed_start, $peak_memory_usage_mb) .
             '<br>' .
             sprintf(TEXT_GPSF_FEED_PROCESSED, $products_total, $products_processed, $products_skipped) .
         '</p>';

@@ -18,7 +18,7 @@ define('TEXT_GPSF_STARTED', 'Google Product Search Feeder II v%s started ' . dat
 define('TEXT_GPSF_FILE_LOCATION', 'Feed file - ');
 
 //- %f is the number of seconds the feed took to process
-define('TEXT_GPSF_FEED_COMPLETE', 'Product Feed Complete in %.6f seconds.');
+define('TEXT_GPSF_FEED_COMPLETE', 'Product Feed Complete in %.6f seconds.  Peak memory usage: %.2fM');
 
 //- %1$u is the total number of products 'examined' for the feed
 //- %2$u is the number of products processed
