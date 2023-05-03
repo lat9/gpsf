@@ -9,7 +9,7 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('GPSF_CURRENT_VERSION', '1.0.0-beta2');
+define('GPSF_CURRENT_VERSION', '1.0.0-beta3');
 
 // -----
 // Nothing to do if an admin is not currently logged-in or if the plugin's currently installed
@@ -113,6 +113,8 @@ if (!defined('GPSF_VERSION')) {
 
             ('Use cPath in URL', 'GPSF_USE_CPATH', 'false', '<br>Use a product\s &quot;cPath&quot; in each product\'s <code>g:link</code> feed attribute? Default: <em>false</em>', $cgi, 418, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
+            ('Convert Ampersands in Feed Links?', 'GPSF_CONVERT_AMPERSANDS', 'false', '<br>Convert ampersands in feed links to <code>%26</code> (<em>true</em>) or leave as-is (<em>false</em>)?<br><br>Default: <b>false</b>', $cgi, 419, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
+
             ('Google Product Category Default', 'GPSF_DEFAULT_PRODUCT_CATEGORY', '', '<br>Enter a default Google product category from the <a href=\"https://www.google.com/support/merchants/bin/answer.py?answer=160081\" target=\"_blank\" rel=\"noreferrer\">Google Category Taxonomy</a> or leave blank. You can override this default setting by creating a Google Product Category attribute as per the documentation.<br>', $cgi, 420, now(), NULL, NULL),
 
             ('Display Tax', 'GPSF_TAX_DISPLAY', 'false', '<br>Display tax per product? (US only)? Default: <em>false</em>.', $cgi, 500, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
@@ -162,7 +164,7 @@ if (!defined('GPSF_VERSION')) {
 // Version-specific database adjustments.
 //
 switch (true) {
-    case version_compare(GPSF_VERSION, '1.0.0-beta2', '<'):
+    case version_compare(GPSF_VERSION, '1.0.0-beta2', '<'):     //-Fall through from above processing ...
         if (!defined('GPSF_OFFER_ID')) {
             define('GPSF_OFFER_ID', 'id');
         }
@@ -213,7 +215,15 @@ switch (true) {
               WHERE configuration_key IN ('GPSF_PAYMENT_METHODS', 'GPSF_PAYMENT_NOTES', 'GPSF_SHIPPING', 'GPSF_PICKUP')"
         );
 
-    default:            //-Fall through from above processing ...
+    case version_compare(GPSF_VERSION, '1.0.0-beta3', '<'):     //-Fall through from above processing ...
+        $db->Execute(
+            "INSERT IGNORE INTO " . TABLE_CONFIGURATION . "
+                (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function) 
+             VALUES
+                ('Convert Ampersands in Feed Links?', 'GPSF_CONVERT_AMPERSANDS', 'false', '<br>Convert ampersands in feed links to <code>%26</code> (<em>true</em>) or leave as-is (<em>false</em>)?<br><br>Default: <b>false</b>', $cgi, 419, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],')"
+        );
+
+    default:                                                    //-Fall through from above processing ...
         break;
 }
 

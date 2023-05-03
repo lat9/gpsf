@@ -672,6 +672,7 @@ class gpsfFeedGenerator
 
     protected function sanitizeLink($link)
     {
+        $ampersand = (GPSF_CONVERT_AMPERSANDS === 'false') ? '&' : '%26';
         return str_replace(
             [
                 ' ',
@@ -680,8 +681,8 @@ class gpsfFeedGenerator
             ],
             [
                 '%20',
-                '%26',
-                '%26',
+                $ampersand,
+                $ampersand,
             ],
             $link
         );
