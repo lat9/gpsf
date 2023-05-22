@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Merchant Center Feeder II for Zen Cart 1.5.6b and Later</title>
+<style type="text/css">
+a, a:active,
+a:visited {
+    color: #006666;
+}
+a:hover {
+    color:#00CC99;
+}
+body,
+p,
+h1,
+h2,
+h3,
+h4,
+li,
+td {
+    font-family: Verdana, AvantGarde, Tahoma, Arial, sans-serif;
+    font-size: 10pt;
+    color: black;
+    padding: 0px;
+    margin: 20px;
+}
+pre {
+    margin: 20px;
+}
+h1, 
+h2, 
+h3, 
+h4 { 
+    font-weight: bold
+}
+h1 { 
+    font-size: 20px;
+}
+h2 { 
+    font-size: 16px;
+    border-top: 1px solid black;
+    padding-top: 5px;
+}
+ol li,
+ul li { 
+    margin: 5px 0;
+}
+.corefile,
+.impt {
+    color: red;
+}
+.added {
+    color: blue;
+}
+img {
+    margin-left: 20px;
+    max-width: 95%;
+}
+.removed {
+    text-decoration: line-through;
+}
+.smaller {
+    font-size: smaller;
+}
+table {
+    margin-left: 20px;
+}
+table, table th, table td {
+    padding: 0.5rem;
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+th, td {
+    text-align: left;
+}
+table table {
+    margin-top: 0.5rem;
+}
+.event-group {
+    text-transform: uppercase;
+    border-top: 1px solid black;
+    padding-top: 0.5rem;
+}
+.text-center {
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+    <h1>Google Product Search Feeder II for Zen Cart v1.5.6b and later, including v1.5.8a</h1>
+    <h3>Version 1.0.0</h3>
+    <p>Current Support Thread at Zen Cart Forums: <a href="#" target="_blank">TBD</a></p>
+    <p>Zen Cart Download Link: <a href="#" target="_blank">TBD</a></p>
+    <p>GitHub repository: <a href="https://github.com/lat9/gpsf" target="_blank">https://github.com/lat9/gpsf</a></p>
+
+    <p>Applicable feed-related documentation:</p>
+    <ul>
+        <li><a href="https://support.google.com/merchants/answer/160589?hl=en&ref_topic=2473799" target="_blank">RSS 2.0 Specification</a></li>
+        <li><a href="https://support.google.com/merchants/answer/7052112?visit_id=638146965228980471-618519100&hl=en&rd=1" target="_blank">Product data specification</a></li>
+    </ul>
+
+    <h2>Credits</h2>
+    <p>This plugin is based on the 2012-era <em>Google Merchant Center Feeder</em> Zen Cart plugin, provided by @numinix.</p>
+
+    <h2>Purpose</h2>
+
+
+    <h2>Installation and Upgrade</h2>
+    <p><em>GPSF</em><sup>2</sup> is a drop-in plugin for Zen Carts 1.5.6b and later; it's been tested with versions up to and including 1.5.8a on PHP versions from 5.6 through 8.2.  The installation is simple, just follow these steps:</p>
+    <ol>
+        <li>Unzip this plugin's zip-file; you'll see the following files and directories:<ol type="a">
+            <li>/gpsf_main_controller.php</li>
+            <li>/extras/copy_google_product_configuration.php</li>
+            <li>/feed/index.html</li>
+            <li>/feed/google/index.html</li>
+            <li>/includes/classes/gpsfFeedGenerator.php</li>
+            <li>/includes/classes/gpsf/gpsfBase.php</li>
+            <li>/includes/languages/english/gpsf_main_controller.php</li>
+            <li>/YOUR_ADMIN/gpsf_admin.php</li>
+            <li>/YOUR_ADMIN/includes/auto_loaders/config.gpsf_admin.php</li>
+            <li>/YOUR_ADMIN/includes/extra_datafiles/gpsf_admin_filenames.php</li>
+            <li>/YOUR_ADMIN/includes/functions/extra_functions/gpsf_admin_functions.php</li>
+            <li>/YOUR_ADMIN/includes/functions/extra_functions/zen_cfg_read_only.php</li>
+            <li>/YOUR_ADMIN/includes/init_includes/init_gpsf_admin.php</li>
+            <li>/YOUR_ADMIN/includes/languages/english/gpsf_admin.php</li>
+            <li>/YOUR_ADMIN/includes/languages/english/extra_definitions/gpsf_admin_extra_definitions.php</li>
+        </ol></li>
+        <li>Rename the <code>YOUR_ADMIN</code> sub-directory to match your site's Zen Cart admin directory.</li>
+        <li>Copy the plugin's files to your site's file-system.  Don't forget to copy the <code>/feed/google</code> directory and the <code>gpsf_main_controller.php</code>!</li>
+        <li>Log into your Zen Cart admin and the plugin will perform its auto-install procedure.</li>
+        <li>You'll see a <em>Google Product Search Feeder II</em> element under the admin's <em>Configuration</em> tab; proceed to the configuration step, see below.</li>
+    </ol>
+
+    <h2 id="config">Configuration</h2>
+    <p>The plugin adds its <em>Google Product Search Feeder II</em> group under the admin's <em>Configuration</em>.  Refer to the plugin's <a href="https://github.com/lat9/gpsf/wiki/Configuration-and-Feed-File-Naming-Conventions" target="_blank">wiki</a> for additional information.</p>
+
+    <h2>Version History</h2>
+    <ul>
+        <li>v1.0.0, 2023-05-03 (lat9)<ul>
+            <li>Initial release.
+        </ul></li>
+    </ul>
+</body>
+</html>
