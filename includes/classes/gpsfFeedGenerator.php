@@ -297,7 +297,7 @@ class gpsfFeedGenerator
 
             list($categories_list, $cPath) = $this->getCategoryInfo($product['master_categories_id']);
             $cPath_href = (GPSF_USE_CPATH === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
-            $link = zen_href_link($product['type_handler'] . '.info', $cPath_href . 'products_id=' . $products_id, 'NONSSL', false);
+            $link = zen_href_link($product['type_handler'] . '_info', $cPath_href . 'products_id=' . $products_id, 'NONSSL', false);
 
             $id = false;
             if (GPSF_OFFER_ID === 'id') {
@@ -915,7 +915,7 @@ class gpsfFeedGenerator
         }
 
         $cPath_href = (GPSF_USE_CPATH === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
-        $link = zen_href_link($product['type_handler'] . '.info', $cPath_href . 'products_id=' . $product['products_id'], 'NONSSL', false);
+        $link = zen_href_link($product['type_handler'] . '_info', $cPath_href . 'products_id=' . $product['products_id'], 'NONSSL', false);
         $this->xmlWriter->writeElement('link', $this->sanitizeLink($link));
 
         if (strpos($this->identifiersList, '{mpn}') === false) {
