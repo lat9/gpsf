@@ -26,10 +26,10 @@ if ($configuration->EOF) {
         "INSERT INTO " . TABLE_CONFIGURATION_GROUP . " 
             (configuration_group_title, configuration_group_description, sort_order, visible) 
          VALUES 
-            ('$configurationGroupTitle', 'Set Google Product Search Feeder II Options', '1', '1')"
+            ('$configurationGroupTitle', 'Set Google Product Search Feeder II Options', 1, 1)"
     );
     $cgi = $db->Insert_ID(); 
-    $db->Execute("UPDATE " . TABLE_CONFIGURATION_GROUP . " SET sort_order = $cgi WHERE configuration_group_id = $cgi");
+    $db->Execute("UPDATE " . TABLE_CONFIGURATION_GROUP . " SET sort_order = $cgi WHERE configuration_group_id = $cgi LIMIT 1");
 } else {
     $cgi = $configuration->fields['configuration_group_id'];
 }
@@ -163,69 +163,12 @@ if (!defined('GPSF_VERSION')) {
 // -----
 // Version-specific database adjustments.
 //
+/*
 switch (true) {
-    case version_compare(GPSF_VERSION, '1.0.0-beta2', '<'):     //-Fall through from above processing ...
-        if (!defined('GPSF_OFFER_ID')) {
-            define('GPSF_OFFER_ID', 'id');
-        }
-        $offer_id = (GPSF_OFFER_ID !== 'id' && GPSF_OFFER_ID !== 'model') ? 'id' : GPSF_OFFER_ID;
-        $db->Execute(
-            "UPDATE " . TABLE_CONFIGURATION . "
-                SET configuration_value = '$offer_id',
-                    configuration_description = '<br>Choose the unique identifier to use for each product.  If you choose <code>model</code>, any product with an empty <code>products_model</code> will be skipped for the generated feed.',
-                    set_function = 'zen_cfg_select_option([\'id\', \'model\'],'
-              WHERE configuration_key = 'GPSF_OFFER_ID'
-              LIMIT 1"
-        );
-        $db->Execute(
-            "UPDATE " . TABLE_CONFIGURATION . "
-                SET configuration_key = 'GPSF_INCLUDE_MIN_QUANTITY',
-                    configuration_title = 'Using Minimum Order Quantity?',
-                    configuration_description = '<br>If your site has products with a <em>Product Qty Minimum</em> other than <b>1</b>, should a product\'s minimum order-quantity be considered when determining if a product is out-of-stock?  Default: <b>false</b>.'
-              WHERE configuration_key = 'GPSF_INCLUDE_MIN_QUANITY'
-              LIMIT 1"
-        );
-        $db->Execute(
-            "UPDATE " . TABLE_CONFIGURATION . "
-                SET configuration_description = '<br>Choose your products\' default condition. Default: <em>new</em>.'
-              WHERE configuration_key = 'GPSF_CONDITION'
-              LIMIT 1"
-        );
-        $db->Execute(
-            "UPDATE " . TABLE_CONFIGURATION . "
-                SET configuration_title = 'Shipping Zone ID',
-                    configuration_description = '<br>Enter the <em>zone id</em> to use if the selected shipping method is <code>zones</code> or if you have an extension that supplies zone-based shipping rates.<br>'
-              WHERE configuration_key = 'GPSF_RATE_ZONE'
-              LIMIT 1"
-        );
-        $db->Execute(
-            "UPDATE " . TABLE_CONFIGURATION . "
-                SET sort_order = 506
-              WHERE configuration_key = 'GPSF_TAX_SHIPPING'
-              LIMIT 1"
-        );
-        $db->Execute(
-            "UPDATE " . TABLE_CONFIGURATION . "
-                SET configuration_description = '<br>Include additional images in the feed?  <b>Note:</b> Setting to true might affect the feed\'s performance and cause timeouts!'
-              WHERE configuration_key = 'GPSF_INCLUDE_ADDITIONAL_IMAGES'
-              LIMIT 1"
-        );
-        $db->Execute(
-            "DELETE FROM " . TABLE_CONFIGURATION . "
-              WHERE configuration_key IN ('GPSF_PAYMENT_METHODS', 'GPSF_PAYMENT_NOTES', 'GPSF_SHIPPING', 'GPSF_PICKUP')"
-        );
-
-    case version_compare(GPSF_VERSION, '1.0.0-beta3', '<'):     //-Fall through from above processing ...
-        $db->Execute(
-            "INSERT IGNORE INTO " . TABLE_CONFIGURATION . "
-                (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function) 
-             VALUES
-                ('Convert Ampersands in Feed Links?', 'GPSF_CONVERT_AMPERSANDS', 'false', '<br>Convert ampersands in feed links to <code>%26</code> (<em>true</em>) or leave as-is (<em>false</em>)?<br><br>Default: <b>false</b>', $cgi, 419, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],')"
-        );
-
     default:                                                    //-Fall through from above processing ...
         break;
 }
+*/
 
 $db->Execute(
     "UPDATE " . TABLE_CONFIGURATION . "
