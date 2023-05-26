@@ -127,21 +127,38 @@ if ($feed === 'yes') {
         exit(ERROR_GPSF_DIRECTORY_NOT_WRITEABLE);
     }
 
-    $fp = fopen($outfile, 'wb');
+    // -----
+    // See if the lock file is present and, if so, dated within the last hour.
+    // If so, a feed's in the process of re-generating and we'll exit so as not
+    // to overwrite another in-process generation.
+    //
+    $lockfile = "$outfile.lock";
+    if (file_exists($lockfile) && filemtime($lockfile) > time() - (1 * 60 * 60)) {
+        exit("Pre-existing lock file ($lockfile) found, another feed is currently in process!");
+    }
+
+    // -----
+    // Open the to-be-generated feed-file for writing, to see if it's writable.
+    //
+    $fp = fopen($outfile, 'ab');
     if ($fp === false) {
         exit("Unable to open '$outfile' for writing; check permissions.");
     }
 
-    // acquire an exclusive lock
-    $lockfile = "$outfile.lock";
-    if (file_exists($lockfile) || !flock($fp, LOCK_EX)) {
-        // Last time file ws modified grater than current time minus one hour
-        if (filemtime($lockfile) > time() - (1 * 60 * 60)) {
-            fclose($fp);
-            exit('File already opened by another process!');
-        }
+    // -----
+    // Acquire a lock on the to-be-generated feed-file, exiting if the lock
+    // request fails.
+    //
+    if (flock($fp, LOCK_EX) === false) {
+        fclose($fp);
+        exit("Unable to lock '$outfile' for the processing; feed not generated.");
     }
 
+    // -----
+    // Update the last-updated time on the lock file and, now that we know that the
+    // feed-file's writable and locked, truncate the feed-file prior to the current
+    // feed's start.
+    //
     touch($lockfile);
     ftruncate($fp, 0);
 
@@ -155,7 +172,9 @@ if ($feed === 'yes') {
     // release the lock
     flock($fp, LOCK_UN);
     fclose($fp);
-    unlink($lockfile);
+    if (file_exists($lockfile)) {
+        unlink($lockfile);
+    }
 
     if (GPSF_COMPRESS === 'true' && function_exists('gzopen')) {
         $gzcontent = file_get_contents($outfile);
