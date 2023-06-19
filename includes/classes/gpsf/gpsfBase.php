@@ -38,7 +38,7 @@ class gpsfBase
     // $additional_where_clause
     //    Contains a string of additional 'AND' elements to be added to the feed's database query.
     //
-    public function getAdditionalQueryFields(string $additional_fields_base, string $additional_tables_base):array
+    public function getAdditionalQueryFields(string $additional_fields_base, string $additional_tables_base): array
     {
         $additional_fields = '';
         $additional_tables = '';
@@ -58,7 +58,7 @@ class gpsfBase
     // The extension returns an empty string ('') if the product is to be included or
     // a message (which is 'logged' if the GPSF debug is enabled.
     //
-    public function bypassProductInFeed(string $products_id, array $product):string
+    public function bypassProductInFeed(string $products_id, array $product): string
     {
         return '';
     }
@@ -71,7 +71,7 @@ class gpsfBase
     //
     // Returning (bool)false will cause the product to be not included in the feed.
     //
-    public function getProductsFeedId(string $products_id, $id, array $product):string
+    public function getProductsFeedId(string $products_id, $id, array $product)
     {
         return $id;
     }
@@ -80,7 +80,7 @@ class gpsfBase
     // Gives an extension the means to modify a product's description; for example, the description
     // could be appended with an additional field.
     //
-    public function modifyProductsDescription(string $products_id, string $products_description, array $product):string
+    public function modifyProductsDescription(string $products_id, string $products_description, array $product): string
     {
         return $products_description;
     }
@@ -105,12 +105,11 @@ class gpsfBase
     //
     // Note: It is the extension's responsibility to properly format any non-string attribute type.  For
     // example, the 'adult' attribute should be set to (string)'true'/'false' values, not (bool)true/false.
-    // Any URL-type attributes returned should be have spaces (' ') converted to %20 and ampersands (&) converted
-    // to %26.
+    // Any URL-type attributes returned should be have spaces (' ') converted to %20.
     //
     // If an attribute is set to (bool)false, the feed's associated value will not be included.
     //
-    public function getProductsAttributes(string $products_id, array $product, array $categories_list, array $cPath, array $custom_fields):array
+    public function getProductsAttributes(string $products_id, array $product, array $categories_list, array $cPath, array $custom_fields): array
     {
         $extension_custom_fields = [];
 
@@ -121,7 +120,7 @@ class gpsfBase
     // Either returns an extension-specific value associated with the product's shipping cost or (float)-1.0
     // to have the 'base' feed calculations apply.
     //
-    public function getProductsShippingRate(string $products_id, $products_weight, $products_price, string $product_is_always_free_shipping):float
+    public function getProductsShippingRate(string $products_id, $products_weight, $products_price, string $product_is_always_free_shipping): float
     {
         return -1.0;
     }
@@ -132,7 +131,7 @@ class gpsfBase
     // If no override is necessary, this method simply returns the input $price and $sale_price in
     // a simple array.
     //
-    public function getProductPricing(string $products_id, array $product, $price, $sale_price):array
+    public function getProductPricing(string $products_id, array $product, $price, $sale_price): array
     {
         return [
             $price,
