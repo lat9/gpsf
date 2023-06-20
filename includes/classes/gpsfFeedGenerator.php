@@ -349,7 +349,7 @@ class gpsfFeedGenerator
             $this->createBaseProduct($id, $product, $products_title, $tax_rate, $price, $sale_price);
 
             foreach ($custom_fields as $key => $value) {
-                if ($value === false) {
+                if ($value === false || $key === '') {
                     continue;
                 }
                 $this->xmlWriter->writeElement('g:' . $key, $value);
