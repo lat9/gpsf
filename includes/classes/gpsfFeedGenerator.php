@@ -1327,7 +1327,7 @@ class gpsfFeedGenerator
     // offset skips the first X number of elements in the array or the first X characters in a string
     protected function isStringInArray(string $find_string, array $values):bool
     {
-        $string_to_find = '/\b' . $find_string . '\b/i';
+        $string_to_find = '@\b' . $find_string . '\b@i';
         foreach ($values as $key => $value) {
             if (preg_match($string_to_find, $value) === 1) {
                 return true;
