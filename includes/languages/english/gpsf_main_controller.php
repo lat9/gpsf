@@ -28,16 +28,3 @@ define('TEXT_GPSF_FEED_PROCESSED', '%1$u total products. %2$u products processed
 define('ERROR_GPSF_DIRECTORY_NOT_WRITEABLE', 'Your Google Product Search folder is not writeable! Please chmod the /' . GPSF_DIRECTORY . ' folder to 755 or 777 depending on your host.');
 define('ERROR_GPSF_DIRECTORY_DOES_NOT_EXIST', 'Your Google Product Search output directory does not exist! Please create a /' . GPSF_DIRECTORY . ' directory and chmod to 755 or 777 depending on your host.');
 define('ERROR_GPSF_OPEN_FILE', 'Error opening Google Product Search output file "' . DIR_FS_CATALOG . GPSF_DIRECTORY . GPSF_OUTPUT_FILENAME . '"');
-
-define('TEXT_GPSF_UPLOAD_STARTED', 'Upload started...');
-define('TEXT_GPSF_UPLOAD_FAILED', 'Upload failed...');
-define('TEXT_GPSF_UPLOAD_OK', 'Upload ok!');
-
-define('GPSF_FTP_FAILED', 'Your hosting does not support FTP functions.');
-define('GPSF_FTP_CONNECTION_FAILED', 'FTP connection failed:');
-define('GPSF_FTP_CONNECTION_OK', 'FTP connection successful:');
-define('GPSF_FTP_LOGIN_FAILED', 'FTP login failed:');
-define('GPSF_FTP_LOGIN_OK', 'FTP login was successful.');
-define('GPSF_FTP_CURRENT_DIRECTORY', 'FTP current directory is:');
-define('GPSF_FTP_UPLOAD_FAILED', 'FTP upload failed.');
-define('GPSF_FTP_UPLOAD_SUCCESS', 'FTP upload successful.');

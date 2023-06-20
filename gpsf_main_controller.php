@@ -67,7 +67,6 @@ if ($type !== 'products') {
 }
 
 $feed = $gpsf->isFeedGeneration();
-$upload = $gpsf->isFeedUpload();
 
 require zen_get_file_directory(DIR_WS_LANGUAGES . $_SESSION['language'] . '/', 'gpsf_main_controller.php', 'false');
 ?>
@@ -82,37 +81,33 @@ if ($languages->EOF) {
 }
 $gpsf->setFeedLanguage($languages->fields);
 
-$upload_file = '';
 $limit = '';
 $offset = '';
-if (isset($_REQUEST['upload_file'])) {
-    $upload_file = DIR_FS_CATALOG . GPSF_DIRECTORY . $_REQUEST['upload_file'];
-} else {
-    // sql limiters
-    $query_limit = 0;
-    if ((int)GPSF_MAX_PRODUCTS > 0 || (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0)) {
-        $query_limit = (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0) ? (int) $_REQUEST['limit'] : (int)GPSF_MAX_PRODUCTS;
-        $limit = ' LIMIT ' . $query_limit;
-    }
-    $query_offset = 0;
-    if ((int)GPSF_START_PRODUCTS > 0 || (isset($_REQUEST['offset']) && (int)$_REQUEST['offset'] > 0)) {
-        $query_offset = (isset($_REQUEST['offset']) && (int)$_REQUEST['offset'] > 0) ? (int)$_REQUEST['offset'] : (int)GPSF_START_PRODUCTS;
-        $offset = ' OFFSET ' . $query_offset;
-    }
-    $outfile = DIR_FS_CATALOG . GPSF_DIRECTORY . GPSF_OUTPUT_FILENAME . '_' . $type . '_' . $languages->fields['code'];
-    if ($query_limit > 0) {
-        $outfile .= '_' . $query_limit;
-    }
-    if ($query_offset > 0) {
-        $outfile .= '_' . $query_offset;
-    }
-    $outfile .= '.xml'; //example domain_products.xml
+
+// sql limiters
+$query_limit = 0;
+if ((int)GPSF_MAX_PRODUCTS > 0 || (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0)) {
+    $query_limit = (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0) ? (int) $_REQUEST['limit'] : (int)GPSF_MAX_PRODUCTS;
+    $limit = ' LIMIT ' . $query_limit;
 }
+$query_offset = 0;
+if ((int)GPSF_START_PRODUCTS > 0 || (isset($_REQUEST['offset']) && (int)$_REQUEST['offset'] > 0)) {
+    $query_offset = (isset($_REQUEST['offset']) && (int)$_REQUEST['offset'] > 0) ? (int)$_REQUEST['offset'] : (int)GPSF_START_PRODUCTS;
+    $offset = ' OFFSET ' . $query_offset;
+}
+$outfile = DIR_FS_CATALOG . GPSF_DIRECTORY . GPSF_OUTPUT_FILENAME . '_' . $type . '_' . $languages->fields['code'];
+if ($query_limit > 0) {
+    $outfile .= '_' . $query_limit;
+}
+if ($query_offset > 0) {
+    $outfile .= '_' . $query_offset;
+}
+$outfile .= '.xml'; //example domain_products.xml
 
 ob_start();
 echo '<p>' . sprintf(TEXT_GPSF_STARTED, GPSF_VERSION) . '</p>';
-echo '<p>' . TEXT_GPSF_FILE_LOCATION . (($upload_file !== '') ? $upload_file : $outfile) . '</p>';
-echo '<p>Processing: Feed - ' . ($feed === 'yes' ? 'Yes' : 'No') . ', Upload - ' . ($upload === 'yes' ? 'Yes' : 'No') . '</p>';
+echo '<p>' . TEXT_GPSF_FILE_LOCATION . $outfile . '</p>';
+echo '<p>Processing: Feed - ' . ($feed === 'yes' ? 'Yes' : 'No') . '</p>';
 echo '<p>PHP Memory Limit: ' . ini_get('memory_limit') . '</p>';
 ob_flush();
 flush();
@@ -198,26 +193,6 @@ if ($feed === 'yes') {
         '</p>';
 
     $gpsf->googleOutputDebug();
-}
-
-// -----
-// If we've been requested to upload a previously-generated feed ...
-//
-if ($upload === 'yes') {
-    echo TEXT_GPSF_UPLOAD_STARTED . NL;
-    if ($upload_file === '') {
-        $upload_file = $outfile; // use file just created if no upload file was specified
-    }
-    if ($gpsf->uploadFeed($upload_file) === false) {
-        echo TEXT_GPSF_UPLOAD_FAILED . NL;
-    } else {
-        echo TEXT_GPSF_UPLOAD_OK . NL;
-        $db->Execute(
-            "UPDATE " . TABLE_CONFIGURATION . "
-                SET configuration_value = '" . date('Y/m/d H:i:s') . "'
-              WHERE configuration_key = 'GPSF_UPLOADED_DATE'"
-        );
-    }
 }
 ?>
 </body>

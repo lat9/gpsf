@@ -9,7 +9,7 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('GPSF_CURRENT_VERSION', '1.0.0-beta3');
+define('GPSF_CURRENT_VERSION', '1.0.0-beta4');
 
 // -----
 // Nothing to do if an admin is not currently logged-in or if the plugin's currently installed
@@ -43,14 +43,6 @@ if (!defined('GPSF_VERSION')) {
 
             ('Enable?', 'GPSF_ENABLED', 'false', '<br>Enable the generation of the feed?', $cgi, 1, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
-            ('Google Merchant Center FTP Username', 'GPSF_USERNAME', '', '<br>Enter your Google Merchant Center FTP username.<br>', $cgi, 10, now(), NULL, NULL),
-
-            ('Google Merchant Center FTP Password', 'GPSF_PASSWORD', '', '<br>Enter your Google Merchant Center FTP password<br>', $cgi, 11, now(), NULL, NULL),
-
-            ('Google Merchant Center Server', 'GPSF_SERVER', 'uploads.google.com', '<br>Enter google-feed server. Default: uploads.google.com<br>', $cgi, 12, now(), NULL, NULL),
-
-            ('Google Merchant Center PASV', 'GPSF_PASV', 'false', '<br>Turn PASV mode on or off for FTP upload?', $cgi, 13, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
-
             ('Security Key', 'GPSF_ACCESS_KEY', '', '<br>Enter a random string of numbers and characters to ensure only the authorized users can access the feed.<br>', $cgi, 14, now(), NULL, NULL),
 
             ('Max Execution Time', 'GPSF_MAX_EXECUTION_TIME', '300', '<br>Override your PHP configuration by entering a max execution time in seconds for the tool. Leave blank to use your site\'s default.<br>', $cgi, 20, now(), NULL, NULL),
@@ -70,8 +62,6 @@ if (!defined('GPSF_VERSION')) {
             ('Feed File Prefix', 'GPSF_OUTPUT_FILENAME', 'domain', '<br>Identify the first characters used for the filename of the feed\'s output <code>.xml</code> file.  The default (<em>domain</em>) results in feed files named <code>domain_products_*.xml</code>.<br>', $cgi, 52, now(), NULL, NULL),
 
             ('Compress Feed File', 'GPSF_COMPRESS', 'false', '<br>Compress the feed\'s output .xml file?  Requires the PHP <code>gzip</code> extension to be installed.  Default: <code>false</code>', $cgi, 54, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
-
-            ('Last FTP Upload', 'GPSF_UPLOADED_DATE', '0001-01-01 00:00:00', '<br>Date and time of the last FTP upload.<br>', $cgi, 56, now(), NULL, NULL),
 
             ('Feed Currency', 'GPSF_CURRENCY', 'USD', '<br>Choose the currency to be used for the feed.<br>', $cgi, 100, now(), NULL, 'gpsf_cfg_pull_down_currencies('),
 
@@ -163,12 +153,15 @@ if (!defined('GPSF_VERSION')) {
 // -----
 // Version-specific database adjustments.
 //
-/*
 switch (true) {
+    case version_compare(GPSF_VERSION, '1.0.0', '<'):
+        $db->Execute(
+            "DELETE FROM " . TABLE_CONFIGURATION . "
+               WHERE configuration_key IN ('GPSF_USERNAME', 'GPSF_PASSWORD', 'GPSF_SERVER', 'GPSF_PASV', 'GPSF_UPLOADED_DATE')"
+        );
     default:                                                    //-Fall through from above processing ...
         break;
 }
-*/
 
 $db->Execute(
     "UPDATE " . TABLE_CONFIGURATION . "

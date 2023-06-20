@@ -108,7 +108,6 @@ class gpsfFeedGenerator
         }
         
         $this->feedParameters['feed'] = ($parameters[0] === 'fy') ? 'yes' : 'no';
-        $this->feedParameters['upload'] = ($parameters[1] === 'uy') ? 'yes' : 'no';
         $this->feedParameters['type'] = 'products';
         if (isset($parameters[2])) {
             if ($parameters[2] === 'td') {
@@ -119,7 +118,6 @@ class gpsfFeedGenerator
                 trigger_error("Unknown 'type' parameter ($feed_parameters) specified.", E_USER_WARNING);
                 $feed_parameters_ok = false;
                 $this->feedParameters['feed'] = 'no';
-                $this->feedParameters['upload'] = 'no';
             }
         }
         return $feed_parameters_ok;
@@ -127,10 +125,6 @@ class gpsfFeedGenerator
     public function isFeedGeneration()
     {
         return $this->feedParameters['feed'];
-    }
-    public function isFeedUpload()
-    {
-        return $this->feedParameters['upload'];
     }
     public function getFeedType()
     {
@@ -1221,100 +1215,6 @@ class gpsfFeedGenerator
             }
         }
         return $products_actual_price;
-    }
-
-    // =====
-    // FTP FUNCTIONS
-    // =====
-
-    // -----
-    // Upload the feed; previously named ftp_file_upload.
-    //
-    public function uploadFeed($local_file)
-    {
-        if (!is_callable('ftp_connect')) {
-            echo GPSF_FTP_FAILED . NL;
-            return false;
-        }
-
-        ob_start();
-
-        $url = GPSF_SERVER;
-        $ftp_file = basename($local_file);
-
-       $cd = ftp_connect($url);
-        if ($cd === false) {
-            $out = $this->getFtpStatusCloseOb();
-            echo GPSF_FTP_CONNECTION_FAILED . ' ' . $url . NL . $out . NL;
-            return false;
-        }
-
-        echo GPSF_FTP_CONNECTION_OK . ' ' . $url . NL;
-        $login_result = ftp_login($cd, GPSF_USERNAME, GPSF_PASSWORD);
-        if ($login_result === false) {
-            $out = $this->getFtpStatusCloseOb();
-            echo GPSF_FTP_LOGIN_FAILED . NL . $out . NL;
-            ftp_close($cd);
-            return false;
-        }
-
-        echo GPSF_FTP_LOGIN_OK . NL;
-        echo GPSF_FTP_CURRENT_DIRECTORY . '&nbsp;' . ftp_pwd($cd) . NL;
-        ftp_pasv($cd, (GPSF_PASV === 'true'));
-
-        $upload = ftp_put($cd, $ftp_file, $local_file, FTP_ASCII);
-        $out = $this->getFtpStatusCloseOb();
-        $raw = ftp_rawlist($cd, $ftp_file, true);
-        if ($raw !== false) {
-            $out .= implode($raw, '<br>');
-        }
-
-        if ($upload === false) {
-            echo GPSF_FTP_UPLOAD_FAILED . NL;
-            if ($raw !== false) {
-                echo $raw[0] . NL;
-            }
-            echo $out . NL;
-            ftp_close($cd);
-            return false;
-        }
-
-        echo GPSF_FTP_UPLOAD_SUCCESS . NL;
-        echo $raw[0] . NL . $out . NL;
-        ftp_close($cd);
-        return true;
-    }
-
-    // -----
-    // Previously named ftp_get_error_from_ob.
-    //
-    protected function getFtpStatusCloseOb()
-    {
-        $out = ob_get_contents();
-        ob_end_clean();
-        $out = str_replace(
-            [
-                '\\',
-                '<!--error-->',
-                '<br>',
-                '<br />',
-                "\n",
-                'in <b>'
-            ],
-            [
-                '/',
-                '',
-                '',
-                '',
-                '',
-                ''
-            ],
-            $out
-        );
-        if (strpos($out, DIR_FS_CATALOG) !== false){
-            $out = substr($out, 0, strpos($out, DIR_FS_CATALOG));
-        }
-        return $out;
     }
 
     public function microtime_float()

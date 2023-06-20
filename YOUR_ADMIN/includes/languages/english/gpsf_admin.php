@@ -40,7 +40,6 @@ define('GPSF_MAX_PRODUCTS_IN_FEED', 'Maximum number of products in feed: ');
 
 define('GPSF_BUTTON_GENERATE_FEED', 'Generate Feed');
 define('GPSF_BUTTON_DELETE', 'Delete');
-define('GPSF_BUTTON_UPLOAD', 'Upload');
 
 define('GPSF_PROCESSING_FEED_TEXT', 'Processing feed ... please wait ...');
 define('GPSF_FEED_STARTED_AT', 'Feed started at');

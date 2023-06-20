@@ -208,9 +208,6 @@ if ($feed_files === []) {
                             <td class="upload-file"><?php echo $next_file; ?></td>
                             <td class="text-center"><?php echo number_format((float)(filesize($gpsf_directory . $next_file) / 1024), 2, '.', ','); ?>KB</td>
                             <td class="text-center">
-                                <a role="button" class="btn btn-primary btn-sm upload-feed" href="<?php echo sprintf($file_href_template, $next_file); ?>">
-                                    <?php echo GPSF_BUTTON_UPLOAD; ?>
-                                </a>
                                 <a role="button" class="btn btn-danger btn-sm" href="<?php echo zen_href_link(FILENAME_GPSF_ADMIN, "file=$next_file&action=delete"); ?>">
                                     <?php echo GPSF_BUTTON_DELETE; ?>
                                 </a>
