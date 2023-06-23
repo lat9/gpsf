@@ -342,12 +342,7 @@ class gpsfFeedGenerator
 
             $this->createBaseProduct($id, $product, $products_title, $tax_rate, $price, $sale_price);
 
-            foreach ($custom_fields as $key => $value) {
-                if ($value === false || $key === '') {
-                    continue;
-                }
-                $this->xmlWriter->writeElement('g:' . $key, $value);
-            }
+            $this->writeCustomFields($custom_fields);
 
             // add universal elements/attributes to products
             $this->addUniversalAttributes($product, $products_description, $products_image);
@@ -377,6 +372,23 @@ class gpsfFeedGenerator
         // specified file-pointer.
         //
         $this->finalizeProductsFeed();
+    }
+
+    // by checking for an array, sub-attributes of an xml element are now allowed.
+    // pRoseLA
+    private function writeCustomFields(array $array) {
+        foreach ($array as $key => $value) {
+            if ($value === false || $key === '') {
+                continue;
+            }
+            if (is_array($value)) {
+                $this->xmlWriter->startElement('g:' . $key);
+                $this->writeCustomFields($value);
+                $this->xmlWriter->endElement();
+            } else {
+                $this->xmlWriter->writeElement('g:' . $key, $value);
+            }
+        }
     }
 
     protected function initializeProductsFeed($limit, $offset)
@@ -857,14 +869,26 @@ class gpsfFeedGenerator
         list($categories_list, $cPath) = $this->getCategoryInfo($product['master_categories_id']);
         foreach ($this->extensions as $extension_class) {
             $extension_custom_fields = $extension_class->getProductsAttributes($products_id, $product, $categories_list, $cPath, $custom_fields);
-            $new_custom_fields = [];
-            foreach ($extension_custom_fields as $key => $value) {
-                $key = strtolower($key);
-                $new_custom_fields[$key] = ($value === false) ? false : $this->sanitizeXml($value);
-            }
+            $new_custom_fields = $this->processCustomFields($extension_custom_fields);
         }
 
         return array_merge($custom_fields, $new_custom_fields);
+    }
+
+    // allows for sub attributes of xml element.
+    // proseLA
+    private function processCustomFields(array $array): array
+    {
+        $return = [];
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $return[$key] = $this->processCustomFields($value);
+            } else {
+                $key = strtolower($key);
+                $return[$key] = ($value === false) ? false : $this->sanitizeXml($value);
+            }
+        }
+        return $return;
     }
 
     // takes already created $item and adds universal attributes from $products
