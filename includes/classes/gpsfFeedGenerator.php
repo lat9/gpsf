@@ -945,7 +945,7 @@ class gpsfFeedGenerator
             $unique_identifiers++;
         }
 
-        if (strpos($this->identifiersList, '{gtin}') === true && $this->identiersSet['gtin'] !== false) {
+        if (strpos($this->identifiersList, '{gtin}') === true && $this->identifiersSet['gtin'] !== false) {
             $unique_identifiers++;
         }
 
