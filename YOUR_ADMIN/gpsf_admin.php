@@ -205,7 +205,7 @@ if ($feed_files === []) {
 ?>
                         <tr>
                             <td class="text-center"><?php echo date('d/m/Y H:i:s', filemtime($gpsf_directory . $next_file)); ?></td>
-                            <td class="upload-file"><?php echo $next_file; ?></td>
+                            <td class="upload-file"><a href="<?= HTTP_SERVER . DIR_WS_CATALOG . GPSF_DIRECTORY . $next_file; ?>" target="_blank"><?= $next_file; ?></a></td>
                             <td class="text-center"><?php echo number_format((float)(filesize($gpsf_directory . $next_file) / 1024), 2, '.', ','); ?>KB</td>
                             <td class="text-center">
                                 <a role="button" class="btn btn-danger btn-sm" href="<?php echo zen_href_link(FILENAME_GPSF_ADMIN, "file=$next_file&action=delete"); ?>">
