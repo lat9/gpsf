@@ -732,7 +732,7 @@ class gpsfFeedGenerator
     //
     protected function createBaseProduct($id, $product, $products_title, $tax_rate, $price, $sale_price)
     {
-        $this->xmlWriter->startElement('title');
+        $this->xmlWriter->startElement('g:title');
         $this->xmlWriter->writeCData(substr($products_title, 0, 150-12));
         $this->xmlWriter->endElement();
 
@@ -934,7 +934,7 @@ class gpsfFeedGenerator
 
         $cPath_href = (GPSF_USE_CPATH === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
         $link = zen_href_link($product['type_handler'] . '_info', $cPath_href . 'products_id=' . $product['products_id'], 'NONSSL', false);
-        $this->xmlWriter->writeElement('link', $this->sanitizeLink($link));
+        $this->xmlWriter->writeElement('g:link', $this->sanitizeLink($link));
 
         if (strpos($this->identifiersList, '{mpn}') === false) {
             if ($product['products_model'] !== '') {
@@ -957,7 +957,7 @@ class gpsfFeedGenerator
             $this->xmlWriter->writeElement('g:condition', GPSF_CONDITION);
         }
 
-        $this->xmlWriter->startElement('description');
+        $this->xmlWriter->startElement('g:description');
         $this->xmlWriter->writeCData(substr($products_description, 0, 5000-12));
         $this->xmlWriter->endElement();
 
