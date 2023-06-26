@@ -9,7 +9,7 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('GPSF_CURRENT_VERSION', '1.0.0-beta4');
+define('GPSF_CURRENT_VERSION', '1.0.0-beta5');
 
 // -----
 // Nothing to do if an admin is not currently logged-in or if the plugin's currently installed
@@ -52,10 +52,6 @@ if (!defined('GPSF_VERSION')) {
             ('Maximum Products in Feed', 'GPSF_MAX_PRODUCTS', '0', '<br>Set to 0 (the default) for all products.<br>', $cgi, 30, now(), NULL, NULL),
 
             ('Starting Offset for Partial Feed', 'GPSF_START_PRODUCTS', '0', '<br>For a partial feed, identify the offset at which the feed starts.  Set to 0 (the default) to start at the beginning.<br>', $cgi, 32, now(), NULL, NULL),
-
-            ('Website Address', 'GPSF_ADDRESS', '', '<br>Enter your site\'s website address.<br>', $cgi, 40, now(), NULL, NULL),
-
-            ('Store Description', 'GPSF_DESCRIPTION', '', '<br>Enter a short description of your store.<br>', $cgi, 42, now(), NULL, NULL),
 
             ('Output Directory', 'GPSF_DIRECTORY', 'feed/google/', '<br>Set the name of your feed\'s output directory.  Default: <code>feed/google</code><br>', $cgi, 50, now(), NULL, NULL),
 
@@ -157,7 +153,7 @@ switch (true) {
     case version_compare(GPSF_VERSION, '1.0.0', '<'):
         $db->Execute(
             "DELETE FROM " . TABLE_CONFIGURATION . "
-               WHERE configuration_key IN ('GPSF_USERNAME', 'GPSF_PASSWORD', 'GPSF_SERVER', 'GPSF_PASV', 'GPSF_UPLOADED_DATE')"
+               WHERE configuration_key IN ('GPSF_USERNAME', 'GPSF_PASSWORD', 'GPSF_SERVER', 'GPSF_PASV', 'GPSF_UPLOADED_DATE', 'GPSF_ADDRESS', 'GPSF_DESCRIPTION')"
         );
     default:                                                    //-Fall through from above processing ...
         break;

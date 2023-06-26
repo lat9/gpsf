@@ -436,8 +436,8 @@ class gpsfFeedGenerator
         $this->xmlWriter->writeCData($this->sanitizeXml(STORE_NAME));
         $this->xmlWriter->endElement();
 
-        $this->xmlWriter->writeElement('link', GPSF_ADDRESS);
-        $this->xmlWriter->writeElement('description', $this->sanitizeXml(GPSF_DESCRIPTION));
+        $this->xmlWriter->writeElement('link', HTTP_SERVER . DIR_WS_CATALOG);
+        $this->xmlWriter->writeElement('description', $this->sanitizeXml(HOME_PAGE_META_DESCRIPTION));
         fwrite($this->fp, $this->xmlWriter->flush(true));
         fflush($this->fp);
 
