@@ -603,11 +603,12 @@ class gpsfFeedGenerator
 
         $images_found = 0;
         $products_image = DIR_WS_IMAGES . $products_image;
+        $formatting_additional_images = true;
         foreach (glob(DIR_WS_IMAGES . $image_directory . $image_filename . '*' . $image_extension) as $next_image) {
             if ($next_image === $products_image) {
                 continue;
             }
-            $this->xmlWriter->writeElement('g:additional_image_link', $this->getProductsImageUrl(str_replace(DIR_WS_IMAGES, '', $next_image)));
+            $this->xmlWriter->writeElement('g:additional_image_link', $this->getProductsImageUrl(str_replace(DIR_WS_IMAGES, '', $next_image), $formatting_additional_images));
             $images_found++;
             if ($images_found === 9) {
                 break;
@@ -616,10 +617,10 @@ class gpsfFeedGenerator
     }
 
     // creates the url for the products_image
-    protected function getProductsImageUrl($products_image)
+    protected function getProductsImageUrl($products_image, $formatting_additional_images = false)
     {
         // -----
-        // See if an extension wants to override the determination of a product's image.
+        // See if an extension wants to override the determination of a product's base image.
         //
         // The method returns:
         //
@@ -627,7 +628,7 @@ class gpsfFeedGenerator
         // - (string)URL when returning the image's URL.
         // - null if the product's image, and thus the product, should not be included in the feed.
         //
-        if ($this->extensions !== null) {
+        if ($formatting_additional_images === false && $this->extensions !== null) {
             foreach ($this->extensions as $extension_class) {
                 $extension_image_url = $extension_class->getProductsImageUrl($products_image);
                 if ($extension_image_url !== false) {
@@ -864,15 +865,16 @@ class gpsfFeedGenerator
         return $attributes;
     }
 
-    protected function getExtensionsAttributes(string $products_id, array $product, array $custom_fields):array
+    protected function getExtensionsAttributes(string $products_id, array $product, array $custom_fields): array
     {
         list($categories_list, $cPath) = $this->getCategoryInfo($product['master_categories_id']);
         foreach ($this->extensions as $extension_class) {
             $extension_custom_fields = $extension_class->getProductsAttributes($products_id, $product, $categories_list, $cPath, $custom_fields);
             $new_custom_fields = $this->processCustomFields($extension_custom_fields);
+            $custom_fields = array_merge($custom_fields, $new_custom_fields);
         }
 
-        return array_merge($custom_fields, $new_custom_fields);
+        return $custom_fields;
     }
 
     // allows for sub attributes of xml element.
@@ -968,7 +970,7 @@ class gpsfFeedGenerator
         }
     }
 
-    protected function sanitizeString($str):string
+    protected function sanitizeString($str): string
     {
         $str = (string)$str;
         $str = str_replace(
@@ -1249,7 +1251,7 @@ class gpsfFeedGenerator
 
     // returns the array key of first needle in needles found or false
     // offset skips the first X number of elements in the array or the first X characters in a string
-    protected function isStringInArray(string $find_string, array $values):bool
+    protected function isStringInArray(string $find_string, array $values): bool
     {
         $string_to_find = '@\b' . $find_string . '\b@i';
         foreach ($values as $key => $value) {
@@ -1271,7 +1273,7 @@ class gpsfFeedGenerator
     // (bool)true if either the debug is not enabled or the maximum number of skipped products
     //      has not been reached.
     //
-    protected function addSkippedProduct($products_id, $message):bool
+    protected function addSkippedProduct($products_id, $message): bool
     {
         if (GPSF_DEBUG === 'false') {
             return true;
