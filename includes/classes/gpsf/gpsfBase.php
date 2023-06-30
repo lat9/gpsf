@@ -8,6 +8,25 @@
 class gpsfBase
 {
     // -----
+    // This value indicates the version of this base-class, which is not the same as the version of the
+    // plugin itself.  It'll be updated if any new methods are introduced or additional
+    // parameters added to existing methods.
+    //
+    private
+        $gpsfBaseVersion = '1.0.0';
+
+    // -----
+    // This method returns the *private* base-class version, which indicates the version
+    // associated with class methods *in this base class*.  It cannot be overridden
+    // by a class extension, but the value returned can be used by class extensions
+    // to "do the right thing" if/when another method or method-parameter is introduced.
+    //
+    final public function getGpsfBaseVersion()
+    {
+        return $this->gpsfBaseVersion;
+    }
+
+    // -----
     // Issued from gpsfFeedGenerator::getAdditionalQueryFields to see if there are additional
     // site-specific database fields and/or tables to include in the feed's product-gathering
     // query.
