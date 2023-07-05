@@ -73,12 +73,26 @@ unset($products_count);
 // If not unset, the variable $key will be filled in for an empty GPSF_ACCESS_KEY!
 //
 unset($key);
+
+// -----
+// The initial version of GPSF-2 supports zc156, zc157 and zc158.  zc158b will be removing
+// the 'legacy' stylesheets and javascript provided in previous versions.  As such, determine
+// the Zen Cart base version in use to maintain the downwardly-compatible use of this module.
+//
+$gspf_zc_version = PROJECT_VERSION_MAJOR . '.' . PROJECT_VERSION_MINOR;
+$admin_html_head_supported = ($gspf_zc_version >= '1.5.7');
+$body_onload = ($admin_html_head_supported === true) ? '' : ' onload="init();"';
 ?>
 <!doctype html>
 <html <?php echo HTML_PARAMS; ?>>
 <head>
 <meta charset="<?php echo CHARSET; ?>">
 <title><?php echo TITLE; ?></title>
+<?php
+if ($admin_html_head_supported === true) {
+    require DIR_WS_INCLUDES . 'admin_html_head.php';
+} else {
+?>
 <link rel="stylesheet" href="includes/stylesheet.css">
 <link rel="stylesheet" href="includes/cssjsmenuhover.css" media="all" id="hoverJS">
 <script src="includes/menu.js"></script>
@@ -93,8 +107,11 @@ function init()
     }
 }
 </script>
+<?php
+}
+?>
 </head>
-<body onload="init();">
+<body<?php echo $body_onload; ?>>
     <?php require DIR_WS_INCLUDES . 'header.php'; ?>
 <?php
 $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER;
