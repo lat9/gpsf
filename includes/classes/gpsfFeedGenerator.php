@@ -290,6 +290,12 @@ class gpsfFeedGenerator
             }
 
             list($categories_list, $cPath) = $this->getCategoryInfo($product['master_categories_id']);
+            if ($categories_list === null) {
+                if ($this->addSkippedProduct($products_id, $products_name . ': Master categories_id (' . $product['master_categories_id'] . ') does not exist') === false) {
+                    break;
+                }
+                continue;
+            }
             $cPath_href = (GPSF_USE_CPATH === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
             $link = zen_href_link($product['type_handler'] . '_info', $cPath_href . 'products_id=' . $products_id, 'NONSSL', false);
 
@@ -711,8 +717,11 @@ class gpsfFeedGenerator
             $category_names = $this->categoryInfoCache[$master_categories_id]['category_names'];
             $cPath = $this->categoryInfoCache[$master_categories_id]['cPath'];
         } else {
-            // build the cPath
+            // build the cPath.  If the master categories id doesn't exist, return two null values.
             $cPath_array = zen_generate_category_path($master_categories_id);
+            if (empty($cPath_array)) {
+                return [null, null];
+            }
             $category_names = [];
             $cPath = [];
             $cPath_array[0] = array_reverse($cPath_array[0]);
@@ -835,10 +844,10 @@ class gpsfFeedGenerator
         $attributes_info = $db->Execute(
             "SELECT po.products_options_name, pov.products_options_values_name
                FROM " . TABLE_PRODUCTS_ATTRIBUTES . " pa
-                    LEFT JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov
+                    INNER JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov
                         ON pov.products_options_values_id = pa.options_values_id
                        AND pov.language_id = " . $this->feedLanguage['languages_id'] . "
-                    LEFT JOIN " . TABLE_PRODUCTS_OPTIONS . " po
+                    INNER JOIN " . TABLE_PRODUCTS_OPTIONS . " po
                         ON po.products_options_id = pa.options_id
                        AND po.language_id = " . $this->feedLanguage['languages_id'] . "
               WHERE pa.products_id = $products_id
