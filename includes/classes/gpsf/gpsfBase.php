@@ -182,4 +182,14 @@ class gpsfBase
     {
         return false;
     }
+
+    // -----
+    // Gives an extension a means to override a product's 'g:title' feed attribute (normally the
+    // products::products_name value).  The $products_title value parameter contains the product's
+    // current name.
+    //
+    public function getProductsTitle(string $products_id, string $products_title, array $product): string
+    {
+        return $products_title;
+    }
 }

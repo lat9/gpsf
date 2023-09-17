@@ -280,7 +280,13 @@ class gpsfFeedGenerator
             if (GPSF_META_TITLE === 'true' && $product['metatags_title'] !== '') {
                 $products_title = $this->sanitizeXml($product['metatags_title']);
             } else {
-                $products_title = $this->sanitizeXml($products_name);
+                $products_title = $products_name;
+                if ($this->extensions !== null) {
+                    foreach ($this->extensions as $extension_class) {
+                        $products_title = $extension_class->getProductsTitle($products_id, $products_title, $product);
+                    }
+                }
+                $products_title = $this->sanitizeXml($products_title);
             }
             if (empty($products_title)) {
                 if ($this->addSkippedProduct($products_id, $products_name . ': title cannot be empty') === false) {
