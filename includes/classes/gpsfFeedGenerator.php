@@ -806,6 +806,7 @@ class gpsfFeedGenerator
 
         if (GPSF_WEIGHT === 'true' && $product['products_weight'] > 0) {
             $this->xmlWriter->writeElement('g:product_weight', $product['products_weight'] . ' ' . GPSF_UNITS);
+            $this->xmlWriter->writeElement('g:shipping_weight', $product['products_weight'] . ' ' . GPSF_UNITS);
         }
 
         if (GPSF_SHIPPING_METHOD !== 'none') {
