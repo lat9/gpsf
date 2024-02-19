@@ -106,7 +106,7 @@ class gpsfFeedGenerator
             trigger_error("Unknown feed parameters ($feed_parameters) supplied.", E_USER_WARNING);
             return false;
         }
-        
+
         $this->feedParameters['feed'] = ($parameters[0] === 'fy') ? 'yes' : 'no';
         $this->feedParameters['type'] = 'products';
         if (isset($parameters[2])) {
@@ -265,7 +265,7 @@ class gpsfFeedGenerator
                     $products_description = $extension_class->modifyProductsDescription($products_id, $products_description, $product);
                 }
             }
-            $products_description = $this->sanitizeXml($products_description, $products_id);
+            $products_description = $this->sanitizeXml($products_description);
             if (empty($products_description)) {
                 if ($this->addSkippedProduct($products_id, $products_name . ': Product description cannot be empty.') === false) {
                     break;
@@ -827,7 +827,7 @@ class gpsfFeedGenerator
 
                 if (GPSF_WEIGHT === 'true' && $product['products_weight'] > 0) {
                     $this->xmlWriter->writeElement('g:shipping_weight', $product['products_weight'] . ' ' . GPSF_UNITS);
-                } 
+                }
 
                 if (GPSF_SHIPPING_LABEL === 'categories') {
                     $this->xmlWriter->writeElement('g:shipping_label', $product['master_categories_id']);
@@ -1102,7 +1102,7 @@ class gpsfFeedGenerator
 
         unset($this->xmlWriter);
     }
-    
+
 // SHIPPING FUNCTIONS //
 
     protected function getCountriesIsoCode2($countries_id)
@@ -1115,7 +1115,7 @@ class gpsfFeedGenerator
               WHERE countries_id = " . (int)$countries_id . "
               LIMIT 1";
         $countries = $db->Execute($countries_query);
- 
+
         return ($countries->EOF) ? '??' : $countries->fields['countries_iso_code_2'];
     }
 
@@ -1276,7 +1276,7 @@ class gpsfFeedGenerator
             }
         }
         // we should only get here if nothing was returned
-        return false; 
+        return false;
     }
 
     // -----
