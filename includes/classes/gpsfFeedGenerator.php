@@ -785,7 +785,11 @@ class gpsfFeedGenerator
         } elseif ($product['products_date_available'] === null || strtotime($product['products_date_available']) < time()) {
             $this->xmlWriter->writeElement('g:availability', 'in stock');
         } else {
-            $this->xmlWriter->writeElement('g:availability_date', date('Y-m-d', strtotime($product['products_date_available']) . 'T00:00:00'));
+            // -----
+            // Format the product's availability date in ISO 8601 format (2024-02-12T00:00:00+00:00),
+            // noting that the availability is scheduled at midnight on the date available.
+            //
+            $this->xmlWriter->writeElement('g:availability_date', date('c', strtotime($product['products_date_available'] . ' 00:00:00')));
             $this->xmlWriter->writeElement('g:availability', 'preorder');
         }
 
