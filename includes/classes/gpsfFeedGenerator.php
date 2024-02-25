@@ -918,7 +918,7 @@ class gpsfFeedGenerator
         } elseif (GPSF_PRODUCT_TYPE === 'bottom') {
             $product_type = end($product_type); // sets last category in array as bottom-level
         } elseif (GPSF_PRODUCT_TYPE === 'full') {
-            $product_type = implode(',', $categories_list);
+            $product_type = implode(' > ', $categories_list);
         } else {
             $product_type = '';
         }
