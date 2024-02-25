@@ -1,9 +1,9 @@
 <?php
 // -----
 // Google Product Search Feeder II, admin tool.
-// Copyright 2023, https://vinosdefrutastropicales.com
+// Copyright 2023-2024, https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.0
+// Last updated: v1.0.1
 //
 /**
  * Based on:
@@ -277,16 +277,10 @@ class gpsfFeedGenerator
             // Determine the product's 'title', which must be at least 3 characters long.  This is
             // either its meta-tag title (if enabled and not empty) or the product's name otherwise.
             //
-            if (GPSF_META_TITLE === 'true' && $product['metatags_title'] !== '') {
+            if (GPSF_META_TITLE === 'true' && !empty($product['metatags_title'])) {
                 $products_title = $this->sanitizeXml($product['metatags_title']);
             } else {
-                $products_title = $products_name;
-                if ($this->extensions !== null) {
-                    foreach ($this->extensions as $extension_class) {
-                        $products_title = $extension_class->getProductsTitle($products_id, $products_title, $product);
-                    }
-                }
-                $products_title = $this->sanitizeXml($products_title);
+                $products_title = $this->sanitizeXml($products_name);
             }
             if (empty($products_title)) {
                 if ($this->addSkippedProduct($products_id, $products_name . ': title cannot be empty') === false) {
@@ -296,12 +290,6 @@ class gpsfFeedGenerator
             }
 
             list($categories_list, $cPath) = $this->getCategoryInfo($product['master_categories_id']);
-            if ($categories_list === null) {
-                if ($this->addSkippedProduct($products_id, $products_name . ': Master categories_id (' . $product['master_categories_id'] . ') does not exist') === false) {
-                    break;
-                }
-                continue;
-            }
             $cPath_href = (GPSF_USE_CPATH === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
             $link = zen_href_link($product['type_handler'] . '_info', $cPath_href . 'products_id=' . $products_id, 'NONSSL', false);
 
@@ -723,11 +711,8 @@ class gpsfFeedGenerator
             $category_names = $this->categoryInfoCache[$master_categories_id]['category_names'];
             $cPath = $this->categoryInfoCache[$master_categories_id]['cPath'];
         } else {
-            // build the cPath.  If the master categories id doesn't exist, return two null values.
+            // build the cPath
             $cPath_array = zen_generate_category_path($master_categories_id);
-            if (empty($cPath_array)) {
-                return [null, null];
-            }
             $category_names = [];
             $cPath = [];
             $cPath_array[0] = array_reverse($cPath_array[0]);
@@ -806,7 +791,6 @@ class gpsfFeedGenerator
 
         if (GPSF_WEIGHT === 'true' && $product['products_weight'] > 0) {
             $this->xmlWriter->writeElement('g:product_weight', $product['products_weight'] . ' ' . GPSF_UNITS);
-            $this->xmlWriter->writeElement('g:shipping_weight', $product['products_weight'] . ' ' . GPSF_UNITS);
         }
 
         if (GPSF_SHIPPING_METHOD !== 'none') {
@@ -851,10 +835,10 @@ class gpsfFeedGenerator
         $attributes_info = $db->Execute(
             "SELECT po.products_options_name, pov.products_options_values_name
                FROM " . TABLE_PRODUCTS_ATTRIBUTES . " pa
-                    INNER JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov
+                    LEFT JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov
                         ON pov.products_options_values_id = pa.options_values_id
                        AND pov.language_id = " . $this->feedLanguage['languages_id'] . "
-                    INNER JOIN " . TABLE_PRODUCTS_OPTIONS . " po
+                    LEFT JOIN " . TABLE_PRODUCTS_OPTIONS . " po
                         ON po.products_options_id = pa.options_id
                        AND po.language_id = " . $this->feedLanguage['languages_id'] . "
               WHERE pa.products_id = $products_id
