@@ -1,9 +1,9 @@
 <?php
 // -----
 // Google Product Search Feeder II, admin tool.
-// Copyright 2023, https://vinosdefrutastropicales.com
+// Copyright 2023-2024, https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.0
+// Last updated: v1.0.1
 //
 /**
  * Based on:
@@ -75,7 +75,7 @@ unset($products_count);
 unset($key);
 
 // -----
-// The initial version of GPSF-2 supports zc156, zc157 and zc158.  zc158b will be removing
+// The initial version of GPSF-2 supports zc156 through zc200.  Future versions will be removing
 // the 'legacy' stylesheets and javascript provided in previous versions.  As such, determine
 // the Zen Cart base version in use to maintain the downwardly-compatible use of this module.
 //
@@ -86,13 +86,13 @@ $body_onload = ($admin_html_head_supported === true) ? '' : ' onload="init();"';
 <!doctype html>
 <html <?php echo HTML_PARAMS; ?>>
 <head>
-<meta charset="<?php echo CHARSET; ?>">
-<title><?php echo TITLE; ?></title>
 <?php
 if ($admin_html_head_supported === true) {
     require DIR_WS_INCLUDES . 'admin_html_head.php';
 } else {
 ?>
+<meta charset="<?php echo CHARSET; ?>">
+<title><?php echo TITLE; ?></title>
 <link rel="stylesheet" href="includes/stylesheet.css">
 <link rel="stylesheet" href="includes/cssjsmenuhover.css" media="all" id="hoverJS">
 <script src="includes/menu.js"></script>
