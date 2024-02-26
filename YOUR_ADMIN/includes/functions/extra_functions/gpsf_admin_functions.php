@@ -14,7 +14,7 @@
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
  * @version $Id: google_product_search_functions.php 5 2011-11-17 11:19:31Z numinix $
  */
-function gpsf_cfg_pull_down_currencies($currencies_id, $key = '')
+function gpsf_cfg_pull_down_currencies($currencies_id, $key = ''): string
 {
     global $db;
 
@@ -34,7 +34,7 @@ function gpsf_cfg_pull_down_currencies($currencies_id, $key = '')
     return zen_draw_pull_down_menu($name, $currencies_array, $currencies_id);
 }
 
-function gpsf_cfg_pull_down_country_iso3_list($countries_id, $key = '')
+function gpsf_cfg_pull_down_country_iso3_list($countries_id, $key = ''): string
 {
     global $db;
 
@@ -47,8 +47,8 @@ function gpsf_cfg_pull_down_country_iso3_list($countries_id, $key = '')
     $countries_array = [];
     foreach ($countries as $next_country) {
         $countries_array[] = [
-            'id' => $countries->fields['countries_id'],
-             'text' => $countries->fields['countries_iso_code_3'],
+            'id' => $next_country['countries_id'],
+            'text' => $next_country['countries_iso_code_3'],
         ];
     }
     return zen_draw_pull_down_menu($name, $countries_array, $countries_id);
