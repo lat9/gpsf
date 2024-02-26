@@ -98,27 +98,33 @@ class gpsfFeedGenerator
 
     public function setFeedParameters($feed_parameters)
     {
+        $feed = 'yes';
+        $type = 'products';
         $feed_parameters_ok = true;
 
-        $parameters = explode('_', $feed_parameters);
-        if (count($parameters) < 2) {
-            trigger_error("Unknown feed parameters ($feed_parameters) supplied.", E_USER_WARNING);
-            return false;
-        }
-
-        $this->feedParameters['feed'] = ($parameters[0] === 'fy') ? 'yes' : 'no';
-        $this->feedParameters['type'] = 'products';
-        if (isset($parameters[2])) {
-            if ($parameters[2] === 'td') {
-                $this->feedParameters['type'] = 'documents';
-            } elseif ($parameters[2] === 'tn') {
-                $this->feedParameters['type'] = 'news';
-            } elseif ($parameters[2] !== 'tp') {
-                trigger_error("Unknown 'type' parameter ($feed_parameters) specified.", E_USER_WARNING);
-                $feed_parameters_ok = false;
-                $this->feedParameters['feed'] = 'no';
+        if ($feed_parameters !== '') {
+            foreach (explode('_', $feed_parameters) as $next_param) {
+                if (strpos($next_param, 'f') === 0) {
+                    if ($next_param !== 'fy') {
+                        $feed = 'no';
+                    }
+                } elseif (strpos($next_param, 't') === 0) {
+                    if ($next_param === 'td') {
+                        $type = 'documents';
+                    } elseif ($next_param === 'tn') {
+                        $type = 'news';
+                    } elseif ($next_param !== 'tp') {
+                        trigger_error("Unknown 'type' parameter ($feed_parameters) specified.", E_USER_WARNING);
+                        $feed_parameters_ok = false;
+                        $feed = 'no';
+                    }
+                }
             }
         }
+        $this->feedParameters = [
+            'feed' => $feed,
+            'type' => $type,
+        ];
         return $feed_parameters_ok;
     }
     public function isFeedGeneration()

@@ -22,13 +22,9 @@ if (!defined('GPSF_ENABLED') || GPSF_ENABLED !== 'true') {
     die('Google Product Search Feeder II is disabled');
 }
 // process parameters
-$key = isset($_REQUEST['key']) ? $_REQUEST['key'] : null;
+$key = $_REQUEST['key'] ?? '';
 if ($key !== GPSF_ACCESS_KEY) {
     exit('Incorrect key supplied!');
-}
-
-if (!isset($_REQUEST['feed'])) {
-    exit('Missing feed type.');
 }
 
 if ((int)GPSF_MAX_EXECUTION_TIME > 0) {
@@ -55,14 +51,16 @@ $gpsf = new gpsfFeedGenerator();
 
 // -----
 // Retrieve the parameters based on the requested feed type, normally in the format
-// ?feed=f[y|n]_u[y|n][_tp]
+// ?feed=f[y|n]_u[y|n][_tp].  As of v1.0.1, this parameter is optional and defaults
+// to feed=fy_tp (generate products' feed) if not supplied.
 //
-if ($gpsf->setFeedParameters($_REQUEST['feed']) === false) {
+$feed_parameters = $_REQUEST['feed'] ?? '';
+if ($gpsf->setFeedParameters($feed_parameters) === false) {
     exit('Unknown "feed" parameters received, see associated log.');
 }
 $type = $gpsf->getFeedType();
 if ($type !== 'products') {
-    trigger_error("Only a 'products' feed is currently supported; '$type' indicated in {$_REQUEST['feed']}.", E_USER_WARNING);
+    trigger_error("Only a 'products' feed is currently supported; '$type' indicated in $feed_parameters.", E_USER_WARNING);
     exit("Unsupported feed type ($type) indicated, nothing more to do.");
 }
 
@@ -79,7 +77,7 @@ $offset = '';
 // sql limiters
 $query_limit = 0;
 if ((int)GPSF_MAX_PRODUCTS > 0 || (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0)) {
-    $query_limit = (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0) ? (int) $_REQUEST['limit'] : (int)GPSF_MAX_PRODUCTS;
+    $query_limit = (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0) ? (int)$_REQUEST['limit'] : (int)GPSF_MAX_PRODUCTS;
     $limit = ' LIMIT ' . $query_limit;
 }
 $query_offset = 0;

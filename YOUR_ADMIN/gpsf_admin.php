@@ -168,8 +168,8 @@ $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTRO
                     </div>
                 </form>
                 <div>
-                    <h2><?= GPSF_CRON_URL_TEXT; ?></h2>
-                    <code><?= 'wget \'' . HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER . '.php?feed=fy_un_tp&key=' . GPSF_ACCESS_KEY . '\'' ?></code>
+                    <h2><?= GPSF_CRON_URL_TEXT ?></h2>
+                    <code><?= 'wget \'' . HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER . '.php?key=' . GPSF_ACCESS_KEY . '\'' ?></code>
                     <br>
                     <br>
                     <p><?= GPSF_CRON_COPY_TEXT ?></p>
