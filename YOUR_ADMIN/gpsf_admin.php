@@ -84,15 +84,15 @@ $admin_html_head_supported = ($gspf_zc_version >= '1.5.7');
 $body_onload = ($admin_html_head_supported === true) ? '' : ' onload="init();"';
 ?>
 <!doctype html>
-<html <?php echo HTML_PARAMS; ?>>
+<html <?= HTML_PARAMS ?>>
 <head>
 <?php
 if ($admin_html_head_supported === true) {
     require DIR_WS_INCLUDES . 'admin_html_head.php';
 } else {
 ?>
-<meta charset="<?php echo CHARSET; ?>">
-<title><?php echo TITLE; ?></title>
+<meta charset="<?= CHARSET ?>">
+<title><?= TITLE ?></title>
 <link rel="stylesheet" href="includes/stylesheet.css">
 <link rel="stylesheet" href="includes/cssjsmenuhover.css" media="all" id="hoverJS">
 <script src="includes/menu.js"></script>
@@ -111,77 +111,77 @@ function init()
 }
 ?>
 </head>
-<body<?php echo $body_onload; ?>>
+<body<?= $body_onload ?>>
     <?php require DIR_WS_INCLUDES . 'header.php'; ?>
 <?php
 $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER;
 ?>
-    <h1 class="pageHeading"><?php echo sprintf(HEADING_TITLE, GPSF_VERSION); ?></h1>
+    <h1 class="pageHeading"><?= sprintf(HEADING_TITLE, GPSF_VERSION) ?></h1>
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-4">
                 <div>
-                    <div class="col-md-8 text-right"><?php echo GPSF_MAX_MEMORY_TEXT; ?></div>
-                    <div class="col-md-4"><?php echo (GPSF_MEMORY_LIMIT === '') ? ini_get('memory_limit') : ((int)GPSF_MEMORY_LIMIT . 'M'); ?></div>
+                    <div class="col-md-8 text-right"><?= GPSF_MAX_MEMORY_TEXT ?></div>
+                    <div class="col-md-4"><?= (GPSF_MEMORY_LIMIT === '') ? ini_get('memory_limit') : ((int)GPSF_MEMORY_LIMIT . 'M') ?></div>
                 </div>
                 <div>
                     <div class="col-md-8 text-right">Maximum input time:</div>
-                    <div class="col-md-4"><?php echo (ini_get('max_input_time') === -1) ? 'Same as below' : ini_get('max_input_time'); ?></div>
+                    <div class="col-md-4"><?= (ini_get('max_input_time') === -1) ? 'Same as below' : ini_get('max_input_time') ?></div>
                 </div>
                 <div>
-                    <div class="col-md-8 text-right"><?php echo GPSF_MAX_EXECUTION_TIME_TEXT; ?></div>
-                    <div class="col-md-4"><?php echo (GPSF_MAX_EXECUTION_TIME === '') ? ini_get('max_execution_time') : GPSF_MAX_EXECUTION_TIME; ?></div>
+                    <div class="col-md-8 text-right"><?= GPSF_MAX_EXECUTION_TIME_TEXT ?></div>
+                    <div class="col-md-4"><?= (GPSF_MAX_EXECUTION_TIME === '') ? ini_get('max_execution_time') : GPSF_MAX_EXECUTION_TIME ?></div>
                 </div>
                 <div>
-                    <div class="col-md-8 text-right"><?php echo GPSF_MAX_PRODUCTS_IN_FEED; ?></div>
-                    <div class="col-md-4"><?php echo number_format((float)$maximum_products_in_feed, 0, '', ','); ?></div>
+                    <div class="col-md-8 text-right"><?= GPSF_MAX_PRODUCTS_IN_FEED ?></div>
+                    <div class="col-md-4"><?= number_format((float)$maximum_products_in_feed, 0, '', ',') ?></div>
                 </div>
-                <form method="get" id="feed" action="<?php echo $gpsf_main_controller; ?>.php" class="form-horizontal" target="_blank">
-                    <?php echo zen_draw_hidden_field('key', GPSF_ACCESS_KEY); ?>
-                    <?php echo zen_draw_hidden_field('feed', 'fy_un_tp'); ?>
+                <form method="get" id="feed" action="<?= $gpsf_main_controller ?>.php" class="form-horizontal" target="_blank">
+                    <?= zen_draw_hidden_field('key', GPSF_ACCESS_KEY) ?>
+                    <?= zen_draw_hidden_field('feed', 'fy_un_tp') ?>
                     <div class="form-group">
-                        <?php echo zen_draw_label(GPSF_MAX_PRODUCTS_TEXT, 'limit', 'class="col-sm-3 control-label"'); ?>
+                        <?= zen_draw_label(GPSF_MAX_PRODUCTS_TEXT, 'limit', 'class="col-sm-3 control-label"') ?>
                         <div class="col-sm-9">
-                            <?php echo zen_draw_input_field('limit', ((int)GPSF_MAX_PRODUCTS > 0) ? (int)GPSF_MAX_PRODUCTS : '0', 'class="form-control" id="limit"'); ?>
+                            <?= zen_draw_input_field('limit', ((int)GPSF_MAX_PRODUCTS > 0) ? (int)GPSF_MAX_PRODUCTS : '0', 'class="form-control" id="limit"') ?>
                         </div>
                     </div>
                     <div class="form-group">
-                        <?php echo zen_draw_label(GPSF_STARTING_POINT_TEXT, 'offset', 'class="col-sm-3 control-label"'); ?>
+                        <?= zen_draw_label(GPSF_STARTING_POINT_TEXT, 'offset', 'class="col-sm-3 control-label"') ?>
                         <div class="col-sm-9">
-                            <?php echo zen_draw_input_field('offset', ((int)GPSF_START_PRODUCTS > 0) ? (int)GPSF_START_PRODUCTS : '0', 'class="form-control" id="offset"'); ?>
+                            <?= zen_draw_input_field('offset', ((int)GPSF_START_PRODUCTS > 0) ? (int)GPSF_START_PRODUCTS : '0', 'class="form-control" id="offset"') ?>
                         </div>
                     </div>
                     <div class="form-group">
-                        <?php echo zen_draw_label(GPSF_CURRENCY_TEXT, 'currency_code', 'class="col-sm-3 control-label"'); ?>
+                        <?= zen_draw_label(GPSF_CURRENCY_TEXT, 'currency_code', 'class="col-sm-3 control-label"') ?>
                         <div class="col-sm-9">
-                            <?php echo zen_draw_pull_down_menu('currency_code', $currency_options, GPSF_CURRENCY, 'class="form-control" id="currency_code"'); ?>
+                            <?= zen_draw_pull_down_menu('currency_code', $currency_options, GPSF_CURRENCY, 'class="form-control" id="currency_code"') ?>
                         </div>
                     </div>
                     <div class="form-group">
-                        <?php echo zen_draw_label(GPSF_LANGUAGE_TEXT, 'language-code', 'class="col-sm-3 control-label"'); ?>
+                        <?= zen_draw_label(GPSF_LANGUAGE_TEXT, 'language-code', 'class="col-sm-3 control-label"') ?>
                         <div class="col-sm-9">
-                            <?php echo zen_draw_pull_down_menu('language', $language_options, DEFAULT_LANGUAGE, 'class="form-control" id="language-code"'); ?>
+                            <?= zen_draw_pull_down_menu('language', $language_options, DEFAULT_LANGUAGE, 'class="form-control" id="language-code"') ?>
                         </div>
                     </div>
                     <div class="form-group text-right">
-                        <button id="feed-generate" type="submit" class="btn btn-primary"><?php echo GPSF_BUTTON_GENERATE_FEED; ?></button>
+                        <button id="feed-generate" type="submit" class="btn btn-primary"><?= GPSF_BUTTON_GENERATE_FEED ?></button>
                     </div>
                 </form>
                 <div>
-                    <h2><?php echo GPSF_CRON_URL_TEXT; ?></h2>
-                    <code><?php echo 'wget \'' . HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER . '.php?feed=fy_un_tp&key=' . GPSF_ACCESS_KEY . '\''; ?></code>
+                    <h2><?= GPSF_CRON_URL_TEXT; ?></h2>
+                    <code><?= 'wget \'' . HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER . '.php?feed=fy_un_tp&key=' . GPSF_ACCESS_KEY . '\'' ?></code>
                     <br>
                     <br>
-                    <p><?php echo GPSF_CRON_COPY_TEXT; ?></p>
+                    <p><?= GPSF_CRON_COPY_TEXT ?></p>
                 </div>
                 <div>
-                    <h2><?php echo GPSF_MERCHANT_CENTER_TEXT; ?></h2>
+                    <h2><?= GPSF_MERCHANT_CENTER_TEXT ?></h2>
                     <ul>
                         <li><a href="https://www.google.com/retail/solutions/merchant-center/" target="_blank" rel="noreferrer noopener">
-                            <?php echo GPSF_ACCOUNT_LINK_TEXT; ?>
+                            <?= GPSF_ACCOUNT_LINK_TEXT ?>
                         </a></li>
                         <li><a href="https://www.google.com/support/merchants/bin/answer.py?hl=en&answer=188494#other" target="_blank" rel="noreferrer noopener">
-                            <?php echo GPSF_FEED_SPECIFICATIONS_LINK_TEXT; ?>
+                            <?= GPSF_FEED_SPECIFICATIONS_LINK_TEXT ?>
                         </a></li>
                     </ul>
                 </div>
@@ -190,10 +190,10 @@ $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTRO
                 <table class="table table-responsive table-bordered">
                     <thead>
                         <tr>
-                            <th class="text-center"><?php echo GPSF_DATE_HEADER; ?></th>
-                            <th><?php echo GPSF_FILENAME_HEADER; ?></th>
-                            <th class="text-center"><?php echo GPSF_FILESIZE_HEADER; ?></th>
-                            <th class="text-center"><?php echo GPSF_ACTION; ?></th>
+                            <th class="text-center"><?= GPSF_DATE_HEADER ?></th>
+                            <th><?= GPSF_FILENAME_HEADER ?></th>
+                            <th class="text-center"><?= GPSF_FILESIZE_HEADER ?></th>
+                            <th class="text-center"><?= GPSF_ACTION ?></th>
                         </tr>
                     </thead>
                     <tbody id="feed-files">
@@ -213,20 +213,19 @@ if (!empty($found_files)) {
 if ($feed_files === []) {
 ?>
                         <tr>
-                            <td colspan="4" class="text-center"><?php echo GPSF_NO_FILES_FOUND_TEXT; ?></td>
+                            <td colspan="4" class="text-center"><?= GPSF_NO_FILES_FOUND_TEXT ?></td>
                         </tr>
 <?php
 } else {
-    $file_href_template = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER . '.php?feed=fn_uy&upload_file=%s&key=' . GPSF_ACCESS_KEY; 
     foreach ($feed_files as $next_file) {
 ?>
                         <tr>
-                            <td class="text-center"><?php echo date('d/m/Y H:i:s', filemtime($gpsf_directory . $next_file)); ?></td>
-                            <td class="upload-file"><a href="<?= HTTP_SERVER . DIR_WS_CATALOG . GPSF_DIRECTORY . $next_file; ?>" target="_blank"><?= $next_file; ?></a></td>
-                            <td class="text-center"><?php echo number_format((float)(filesize($gpsf_directory . $next_file) / 1024), 2, '.', ','); ?>KB</td>
+                            <td class="text-center"><?= date('d/m/Y H:i:s', filemtime($gpsf_directory . $next_file)) ?></td>
+                            <td class="upload-file"><a href="<?= HTTP_SERVER . DIR_WS_CATALOG . GPSF_DIRECTORY . $next_file ?>" target="_blank"><?= $next_file ?></a></td>
+                            <td class="text-center"><?= number_format((float)(filesize($gpsf_directory . $next_file) / 1024), 2, '.', ',') ?>KB</td>
                             <td class="text-center">
-                                <a role="button" class="btn btn-danger btn-sm" href="<?php echo zen_href_link(FILENAME_GPSF_ADMIN, "file=$next_file&action=delete"); ?>">
-                                    <?php echo GPSF_BUTTON_DELETE; ?>
+                                <a role="button" class="btn btn-danger btn-sm" href="<?= zen_href_link(FILENAME_GPSF_ADMIN, "file=$next_file&action=delete") ?>">
+                                    <?= GPSF_BUTTON_DELETE ?>
                                 </a>
                             </td>
                         </tr>
@@ -237,12 +236,12 @@ if ($feed_files === []) {
                     </tbody>
                 </table>
                 <div id="feed-container" class="text-center">
-                    <h2><?php echo GPSF_PROCESSING_FEED_TEXT; ?></h2>
+                    <h2><?= GPSF_PROCESSING_FEED_TEXT ?></h2>
                     <h3>
-                        <?php echo GPSF_FEED_STARTED_AT; ?> <span id="feed-start-time"></span>
+                        <?= GPSF_FEED_STARTED_AT ?> <span id="feed-start-time"></span>
                     </h3>
                     <h4>
-                        <?php echo GPSF_ELAPSED_TIME; ?> <span id="feed-elapsed-time"></span>
+                        <?= GPSF_ELAPSED_TIME ?> <span id="feed-elapsed-time"></span>
                     </h4>
                 </div>
                 <div id="feed-output" class="text-center"></div>
@@ -287,10 +286,10 @@ if ($feed_files === []) {
             jQuery('*').css('cursor', 'wait');
             jQuery('#feed-container').show();
 
-            jQuery.get('<?php echo $gpsf_main_controller . '.php'; ?>', jQuery(this).serialize())
+            jQuery.get('<?= $gpsf_main_controller . '.php' ?>', jQuery(this).serialize())
             .done(function(data, textStatus, jqXHR) {
                 var lockMessage = '';
-                jQuery.get('<?php echo zen_href_link(FILENAME_GPSF_ADMIN); ?>', function(data2) {
+                jQuery.get('<?= zen_href_link(FILENAME_GPSF_ADMIN) ?>', function(data2) {
                     var availableDownloads = jQuery(data2).find('#feed-files').html();
                     jQuery('#feed-files').html(availableDownloads);
                     if (availableDownloads.indexOf('.xml.lock') >= 0) {
