@@ -3,9 +3,9 @@
 // Google Product Search Feeder II.  A one-time tool to copy the older google product
 // search configuration settings to this plugin's settings.
 //
-// Copyright (C), 2023.  https://vinosdefrutastropicales.com
+// Copyright (C), 2023-2024.  https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.0
+// Last updated: v1.0.1
 //
 // INSTRUCTIONS:
 // - Copy this file to the root of your site's file-system.
@@ -46,7 +46,6 @@ $settings_to_copy = [
     'GOOGLE_PRODUCTS_CONDITION' => 'GPSF_CONDITION',
     'GOOGLE_PRODUCTS_DEFAULT_PRODUCT_TYPE' => 'GPSF_DEFAULT_PRODUCT_TYPE',
     'GOOGLE_PRODUCTS_PRODUCT_TYPE' => 'GPSF_PRODUCT_TYPE',
-    'GOOGLE_PRODUCTS_LANGUAGE' => 'GPSF_LANGUAGE',
     'GOOGLE_PRODUCTS_WEIGHT' => 'GPSF_WEIGHT',
     'GOOGLE_PRODUCTS_UNITS' => 'GPSF_UNITS',
     'GOOGLE_PRODUCTS_META_TITLE' => 'GPSF_META_TITLE',

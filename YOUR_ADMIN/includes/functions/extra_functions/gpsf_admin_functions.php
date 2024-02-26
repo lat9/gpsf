@@ -1,9 +1,9 @@
 <?php
 // -----
 // Google Product Search Feeder II, admin tool.
-// Copyright 2023, https://vinosdefrutastropicales.com
+// Copyright 2023-2024, https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.0
+// Last updated: v1.0.1
 //
 /**
  * Based on:
@@ -52,24 +52,4 @@ function gpsf_cfg_pull_down_country_iso3_list($countries_id, $key = '')
         ];
     }
     return zen_draw_pull_down_menu($name, $countries_array, $countries_id);
-}
-
-function gpsf_cfg_pull_down_languages_list($languages_id, $key = '')
-{
-    global $db;
-
-    $name = (($key !== '') ? "configuration[$key]" : 'configuration_value');
-    $languages = $db->Execute(
-        'SELECT name, languages_id
-           FROM ' . TABLE_LANGUAGES . '
-          ORDER BY name'
-    );
-    $languages_array = [];
-    foreach ($languages as $next_language) {
-        $languages_array[] = [
-            'id' => $languages->fields['languages_id'],
-            'text' => $languages->fields['name'],
-        ];
-    }
-    return zen_draw_pull_down_menu($name, $languages_array, $languages_id);
 }

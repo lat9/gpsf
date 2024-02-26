@@ -25,14 +25,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete') {
 }
 
 $available_languages = $db->Execute(
-    "SELECT code, languages_id
+    "SELECT code
        FROM " . TABLE_LANGUAGES . "
       ORDER BY code ASC"
 );
 $language_options = [];
 foreach ($available_languages as $next_language) {
     $language_options[] = [
-        'id' => $next_language['languages_id'],
+        'id' => $next_language['code'],
         'text' => $next_language['code'],
     ];
 }
@@ -158,9 +158,9 @@ $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTRO
                         </div>
                     </div>
                     <div class="form-group">
-                        <?php echo zen_draw_label(GPSF_LANGUAGE_TEXT, 'language_id', 'class="col-sm-3 control-label"'); ?>
+                        <?php echo zen_draw_label(GPSF_LANGUAGE_TEXT, 'language-code', 'class="col-sm-3 control-label"'); ?>
                         <div class="col-sm-9">
-                            <?php echo zen_draw_pull_down_menu('language_id', $language_options, GPSF_LANGUAGE, 'class="form-control" id="language_id"'); ?>
+                            <?php echo zen_draw_pull_down_menu('language', $language_options, DEFAULT_LANGUAGE, 'class="form-control" id="language-code"'); ?>
                         </div>
                     </div>
                     <div class="form-group text-right">

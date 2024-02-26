@@ -9,7 +9,7 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('GPSF_CURRENT_VERSION', '1.0.1-beta1');
+define('GPSF_CURRENT_VERSION', '1.0.1-beta2');
 
 // -----
 // Nothing to do if an admin is not currently logged-in or if the plugin's currently installed
@@ -60,8 +60,6 @@ if (!defined('GPSF_VERSION')) {
             ('Compress Feed File', 'GPSF_COMPRESS', 'false', '<br>Compress the feed\'s output .xml file?  Requires the PHP <code>gzip</code> extension to be installed.  Default: <code>false</code>', $cgi, 54, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
             ('Feed Currency', 'GPSF_CURRENCY', 'USD', '<br>Choose the currency to be used for the feed.<br>', $cgi, 100, now(), NULL, 'gpsf_cfg_pull_down_currencies('),
-
-            ('Default Feed Language ID', 'GPSF_LANGUAGE', '1', '<br>Choose the default language used for the feed.<br>', $cgi, 102, now(), NULL, 'gpsf_cfg_pull_down_languages_list('),
 
             ('Skip Duplicate Titles', 'GPSF_SKIP_DUPLICATE_TITLES', 'true', '<br>Skip duplicate titles, i.e. product\'s names. Required if submitting to Google US. Default: <code>true</code>.', $cgi, 200, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
@@ -154,6 +152,12 @@ switch (true) {
         $db->Execute(
             "DELETE FROM " . TABLE_CONFIGURATION . "
                WHERE configuration_key IN ('GPSF_USERNAME', 'GPSF_PASSWORD', 'GPSF_SERVER', 'GPSF_PASV', 'GPSF_UPLOADED_DATE', 'GPSF_ADDRESS', 'GPSF_DESCRIPTION')"
+        );
+    case version_compare(GPSF_VERSION, '1.0.1', '<'):           //-Fall through from above processing ...
+        $db->Execute(
+            "DELETE FROM " . TABLE_CONFIGURATION . "
+              WHERE configuration_key = 'GPSF_LANGUAGE'
+              LIMIT 1"
         );
     default:                                                    //-Fall through from above processing ...
         break;

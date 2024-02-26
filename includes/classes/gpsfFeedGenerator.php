@@ -29,7 +29,6 @@ class gpsfFeedGenerator
         $extensions,
 
         $feedParameters = [],
-        $feedLanguage,
 
         $fp,
         $currencyCode,
@@ -129,12 +128,6 @@ class gpsfFeedGenerator
     public function getFeedType()
     {
         return $this->feedParameters['type'];
-    }
-
-    public function setFeedLanguage($language_info)
-    {
-        $this->feedLanguage = $language_info;
-        $_SESSION['languages_id'] = $this->feedLanguage['languages_id'];
     }
 
     public function getTotalProducts()
@@ -461,7 +454,7 @@ class gpsfFeedGenerator
                         ON p.manufacturers_id = m.manufacturers_id
                     LEFT JOIN " . TABLE_PRODUCTS_DESCRIPTION . " pd
                         ON p.products_id = pd.products_id
-                       AND pd.language_id = " . $this->feedLanguage['languages_id'] . "
+                       AND pd.language_id = " . $_SESSION['languages_id'] . "
                     LEFT JOIN " . TABLE_PRODUCT_TYPES . " pt
                         ON p.products_type = pt.type_id
                     LEFT JOIN " . TABLE_PRODUCTS_TO_CATEGORIES . " p2c
@@ -841,10 +834,10 @@ class gpsfFeedGenerator
                FROM " . TABLE_PRODUCTS_ATTRIBUTES . " pa
                     LEFT JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov
                         ON pov.products_options_values_id = pa.options_values_id
-                       AND pov.language_id = " . $this->feedLanguage['languages_id'] . "
+                       AND pov.language_id = " . $_SESSION['languages_id'] . "
                     LEFT JOIN " . TABLE_PRODUCTS_OPTIONS . " po
                         ON po.products_options_id = pa.options_id
-                       AND po.language_id = " . $this->feedLanguage['languages_id'] . "
+                       AND po.language_id = " . $_SESSION['languages_id'] . "
               WHERE pa.products_id = $products_id
               ORDER BY products_attributes_id ASC"
         );
