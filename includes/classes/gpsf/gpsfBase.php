@@ -12,8 +12,7 @@ class gpsfBase
     // plugin itself.  It'll be updated if any new methods are introduced or additional
     // parameters added to existing methods.
     //
-    private
-        $gpsfBaseVersion = '1.0.0';
+    private $gpsfBaseVersion = '1.0.0';
 
     // -----
     // This method returns the *private* base-class version, which indicates the version
@@ -21,7 +20,7 @@ class gpsfBase
     // by a class extension, but the value returned can be used by class extensions
     // to "do the right thing" if/when another method or method-parameter is introduced.
     //
-    final public function getGpsfBaseVersion()
+    final public function getGpsfBaseVersion(): string
     {
         return $this->gpsfBaseVersion;
     }
@@ -35,7 +34,7 @@ class gpsfBase
     // additions as identified in the parameters passed:
     //
     // - TABLE_PRODUCTS (p):
-    //      p.products_id, p.products_model, , p.products_image, p.products_tax_class_id, p.products_price,
+    //      p.products_id, p.products_model, p.products_image, p.products_tax_class_id, p.products_price,
     //      p.products_priced_by_attribute, p.products_type, p.master_categories_id,
     //      GREATEST(p.products_date_added, IFNULL(p.products_last_modified, 0), IFNULL(p.products_date_available, 0)) AS base_date,
     //      p.products_date_available, p.products_quantity, p.products_weight, p.product_is_always_free_shipping
@@ -75,7 +74,7 @@ class gpsfBase
     // a message returned.
     //
     // The extension returns an empty string ('') if the product is to be included or
-    // a message (which is 'logged' if the GPSF debug is enabled.
+    // a message (which is 'logged' if the GPSF debug is enabled).
     //
     public function bypassProductInFeed(string $products_id, array $product): string
     {
@@ -114,7 +113,7 @@ class gpsfBase
     // The input $categories_list array contains the name(s) of the product's parent category-chain; element 0
     // contains the product's topmost category's name.
     //
-    // The input $cPath array conains the category id value(s) of the product's parent category-chain; element 0
+    // The input $cPath array contains the category id value(s) of the product's parent category-chain; element 0
     // contains the product's topmost category ID.
     //
     // The input $custom_fields array identifies any custom fields already gathered.
@@ -124,7 +123,7 @@ class gpsfBase
     //
     // Note: It is the extension's responsibility to properly format any non-string attribute type.  For
     // example, the 'adult' attribute should be set to (string)'true'/'false' values, not (bool)true/false.
-    // Any URL-type attributes returned should be have spaces (' ') converted to %20.
+    // Any URL-type attributes returned should have spaces (' ') encoded as %20.
     //
     // If an attribute is set to (bool)false, the feed's associated value will not be included.
     //
@@ -162,7 +161,7 @@ class gpsfBase
     // Gives an extension a means to override the determination/generation of a product's image
     // for the feed.
     //
-    // If no override is necessary, this method returns (bool)false.  Otherwise it returns either the string
+    // If no override is necessary, this method returns (bool)false. Otherwise it returns either the string
     // URL associated with the specified image or null if the image is not present and the product
     // should not be included in the feed.
     //
