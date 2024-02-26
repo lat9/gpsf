@@ -125,11 +125,12 @@ img {
 
     <h2>Version History</h2>
     <ul>
-        <li>v1.0.0-beta1, 2024-02-25 (lat9)<ul>
+        <li>v1.0.1-beta1, 2024-02-26 (lat9, torvista)<ul>
             <li>BUGFIX: Products invalidly disallowed when meta-tags-as-titles is enabled.</li>
             <li>BUGFIX: Correct PHP Fatal error when a product has an availability date in the future.</li>
             <li>BUGFIX: Admin tool's meta/charset and title tags only apply to legacy admin installations.</li>
             <li>BUGFIX: Correct <var>g:product_type</var> breadcrumb delimiters when <code>GPSF_PRODUCT_TYPE</code> is set to 'full'.</li>
+            <li>BUGFIX: Remove unneeded parameter when sanitizing a product's description.</li>
             <li>The following files were changed:<ol>
                 <li>/includes/classes/gpsfFeedGenerator.php</li>
                 <li>/YOUR_ADMIN/gpsf_admin.php</li>
