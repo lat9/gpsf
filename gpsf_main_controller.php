@@ -1,9 +1,9 @@
 <?php
 // -----
 // Google Product Search Feeder II, main script (cronable).
-// Copyright 2023, https://vinosdefrutastropicales.com
+// Copyright 2023-2024, https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.0
+// Last updated: v1.0.1
 //
 /**
  * Based on
@@ -73,14 +73,6 @@ require zen_get_file_directory(DIR_WS_LANGUAGES . $_SESSION['language'] . '/', '
 <html>
 <body>
 <?php
-$language_id = (isset($_GET['language_id']) ? $_GET['language_id'] : GPSF_LANGUAGE);
-$languages_query = "SELECT code, languages_id, directory FROM " . TABLE_LANGUAGES . " WHERE languages_id = " . (int)$language_id . " LIMIT 1";
-$languages = $db->Execute($languages_query);
-if ($languages->EOF) {
-    exit('Unknown language specified for feed, nothing further to do.');
-}
-$gpsf->setFeedLanguage($languages->fields);
-
 $limit = '';
 $offset = '';
 
