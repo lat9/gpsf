@@ -893,32 +893,45 @@ class gpsfFeedGenerator
     // takes already created $item and adds universal attributes from $products
     protected function addUniversalAttributes($product, $products_description, $products_image)
     {
-         $unique_identifiers = 0;
+        $unique_identifiers = 0;
 
         list($categories_list, $cPath) = $this->getCategoryInfo($product['master_categories_id']);
 
-        if (!empty($product['manufacturers_name'])) {
+        // -----
+        // If the product's 'brand' has been overridden by a site-specific extension, simply
+        // indicate that a unique-identifier has been supplied; other, use the product's
+        // manufacturer's name, if supplied.
+        //
+        if (strpos($this->identifiersList, '{brand}') !== false) {
+            $unique_identifiers++;
+        } elseif (!empty($product['manufacturers_name'])) {
             $unique_identifiers++;
             $this->xmlWriter->startElement('g:brand');
             $this->xmlWriter->writeCData(substr($this->sanitizeXml($product['manufacturers_name']), 0, 70-12));
             $this->xmlWriter->endElement();
         }
 
-        if (GPSF_PRODUCT_TYPE === 'default' && GPSF_DEFAULT_PRODUCT_TYPE !== '') {
-            $product_type = htmlentities(GPSF_DEFAULT_PRODUCT_TYPE);
-        } elseif (GPSF_PRODUCT_TYPE === 'top') {
-            $product_type = $categories_list[0];
-        } elseif (GPSF_PRODUCT_TYPE === 'bottom') {
-            $product_type = end($product_type); // sets last category in array as bottom-level
-        } elseif (GPSF_PRODUCT_TYPE === 'full') {
-            $product_type = implode(' > ', $categories_list);
-        } else {
-            $product_type = '';
-        }
-        if (!empty($product_type)) {
-            $this->xmlWriter->startElement('g:product_type');
-            $this->xmlWriter->writeCData(substr($this->sanitizeXml($product_type), 0, 750));
-            $this->xmlWriter->endElement();
+        // -----
+        // If the 'product_type' hasn't been overridden by a site-specific extension,
+        // determine the default value to be used.
+        //
+        if (strpos($this->identifiersList, '{product_type}') === false) {
+            if (GPSF_PRODUCT_TYPE === 'default' && GPSF_DEFAULT_PRODUCT_TYPE !== '') {
+                $product_type = htmlentities(GPSF_DEFAULT_PRODUCT_TYPE);
+            } elseif (GPSF_PRODUCT_TYPE === 'top') {
+                $product_type = $categories_list[0];
+            } elseif (GPSF_PRODUCT_TYPE === 'bottom') {
+                $product_type = end($product_type); // sets last category in array as bottom-level
+            } elseif (GPSF_PRODUCT_TYPE === 'full') {
+                $product_type = implode(' > ', $categories_list);
+            } else {
+                $product_type = '';
+            }
+            if (!empty($product_type)) {
+                $this->xmlWriter->startElement('g:product_type');
+                $this->xmlWriter->writeCData(substr($this->sanitizeXml($product_type), 0, 750));
+                $this->xmlWriter->endElement();
+            }
         }
 
         $this->xmlWriter->writeElement('g:image_link', $products_image);
@@ -931,9 +944,15 @@ class gpsfFeedGenerator
             $this->xmlWriter->writeElement('g:expiration_date', $this->getProductsExpirationDate($product['base_date']));
         }
 
-        $cPath_href = (GPSF_USE_CPATH === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
-        $link = zen_href_link($product['type_handler'] . '_info', $cPath_href . 'products_id=' . $product['products_id'], 'NONSSL', false);
-        $this->xmlWriter->writeElement('g:link', $this->sanitizeLink($link));
+        // -----
+        // If the product's link hasn't been overridden by a site-specific extension,
+        // add the default value.
+        //
+        if (strpos($this->identifiersList, '{link}') === false) {
+            $cPath_href = (GPSF_USE_CPATH === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
+            $link = zen_href_link($product['type_handler'] . '_info', $cPath_href . 'products_id=' . $product['products_id'], 'NONSSL', false);
+            $this->xmlWriter->writeElement('g:link', $this->sanitizeLink($link));
+        }
 
         if (strpos($this->identifiersList, '{mpn}') === false) {
             if ($product['products_model'] !== '') {
@@ -944,7 +963,7 @@ class gpsfFeedGenerator
             $unique_identifiers++;
         }
 
-        if (strpos($this->identifiersList, '{gtin}') === true && $this->identifiersSet['gtin'] !== false) {
+        if (strpos($this->identifiersList, '{gtin}') !== false && $this->identifiersSet['gtin'] !== false) {
             $unique_identifiers++;
         }
 
