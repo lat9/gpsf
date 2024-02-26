@@ -87,7 +87,7 @@ if ((int)GPSF_START_PRODUCTS > 0 || (isset($_REQUEST['offset']) && (int)$_REQUES
     $query_offset = (isset($_REQUEST['offset']) && (int)$_REQUEST['offset'] > 0) ? (int)$_REQUEST['offset'] : (int)GPSF_START_PRODUCTS;
     $offset = ' OFFSET ' . $query_offset;
 }
-$outfile = DIR_FS_CATALOG . GPSF_DIRECTORY . GPSF_OUTPUT_FILENAME . '_' . $type . '_' . $languages->fields['code'];
+$outfile = DIR_FS_CATALOG . GPSF_DIRECTORY . GPSF_OUTPUT_FILENAME . '_' . $type . '_' . $_SESSION['languages_code'];
 if ($query_limit > 0) {
     $outfile .= '_' . $query_limit;
 }
