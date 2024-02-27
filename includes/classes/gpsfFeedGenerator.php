@@ -982,7 +982,7 @@ class gpsfFeedGenerator
         }
 
         $this->xmlWriter->startElement('g:description');
-        $this->xmlWriter->writeCData($this->substr(str_replace('  ', ' ', $products_description), 0, 5000-12));
+        $this->xmlWriter->writeCData($this->substr(preg_replace('/\s+/', ' ', $products_description), 0, 5000-12));
         $this->xmlWriter->endElement();
 
         if ($this->defaultGoogleProductCategory !== false && strpos($this->identifiersList, '{google_product_category}') === false) {
