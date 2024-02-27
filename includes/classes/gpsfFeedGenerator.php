@@ -733,7 +733,7 @@ class gpsfFeedGenerator
     protected function createBaseProduct($id, $product, $products_title, $tax_rate, $price, $sale_price)
     {
         $this->xmlWriter->startElement('g:title');
-        $this->xmlWriter->writeCData(substr($products_title, 0, 150-12));
+        $this->xmlWriter->writeCData($this->substr($products_title, 0, 150-12));
         $this->xmlWriter->endElement();
 
         $this->xmlWriter->writeElement('g:id', $id);
@@ -913,7 +913,7 @@ class gpsfFeedGenerator
         } elseif (!empty($product['manufacturers_name'])) {
             $unique_identifiers++;
             $this->xmlWriter->startElement('g:brand');
-            $this->xmlWriter->writeCData(substr($this->sanitizeXml($product['manufacturers_name']), 0, 70-12));
+            $this->xmlWriter->writeCData($this->substr($this->sanitizeXml($product['manufacturers_name']), 0, 70-12));
             $this->xmlWriter->endElement();
         }
 
@@ -935,7 +935,7 @@ class gpsfFeedGenerator
             }
             if (!empty($product_type)) {
                 $this->xmlWriter->startElement('g:product_type');
-                $this->xmlWriter->writeCData(substr($this->sanitizeXml($product_type), 0, 750));
+                $this->xmlWriter->writeCData($this->substr($this->sanitizeXml($product_type), 0, 750));
                 $this->xmlWriter->endElement();
             }
         }
@@ -982,7 +982,7 @@ class gpsfFeedGenerator
         }
 
         $this->xmlWriter->startElement('g:description');
-        $this->xmlWriter->writeCData(substr($products_description, 0, 5000-12));
+        $this->xmlWriter->writeCData($this->substr(str_replace('  ', ' ', $products_description), 0, 5000-12));
         $this->xmlWriter->endElement();
 
         if ($this->defaultGoogleProductCategory !== false && strpos($this->identifiersList, '{google_product_category}') === false) {
@@ -990,6 +990,12 @@ class gpsfFeedGenerator
             $this->xmlWriter->writeCData($this->defaultGoogleProductCategory);
             $this->xmlWriter->endElement();
         }
+    }
+
+    protected function substr($string, $start, $length): string
+    {
+        return (function_exists('mb_substr')) ?
+            mb_substr($string, $start, $length, CHARSET) : substr($string, $start, $length);
     }
 
     protected function sanitizeString($str): string
