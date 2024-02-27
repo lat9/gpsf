@@ -71,7 +71,7 @@ img {
 </head>
 
 <body>
-    <h1>Google Product Search Feeder II for Zen Cart v1.5.6b and later, including v1.5.8a</h1>
+    <h1>Google Product Search Feeder II for Zen Cart v1.5.6b and later, including v2.0.0</h1>
     <h3>Version 1.0.1</h3>
     <p>Current Support Thread at Zen Cart Forums: <a href="https://www.zen-cart.com/showthread.php?229785-Google-Product-Search-Feeder-II-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?229785-Google-Product-Search-Feeder-II-Support-Thread</a></p>
     <p>Zen Cart Download Link: <a href="https://www.zen-cart.com/downloads.php?do=file&id=2379" target="_blank">https://www.zen-cart.com/downloads.php?do=file&id=2379</a></p>
@@ -89,7 +89,7 @@ img {
     </ul>
 
     <h2>Installation and Upgrade</h2>
-    <p><em>GPSF</em><sup>2</sup> is a drop-in plugin for Zen Carts 1.5.6b and later; it's been tested with versions up to and including 1.5.8a on PHP versions from 7.0 through 8.2.  The installation is simple, just follow these steps:</p>
+    <p><em>GPSF</em><sup>2</sup> is a drop-in plugin for Zen Carts 1.5.6b and later; it's been tested with versions up to and including v2.0.0 on PHP versions 7.3 through 8.3.  The installation is simple, just follow these steps:</p>
     <ol>
         <li>Unzip this plugin's zip-file; you'll see the following files and directories:<ol type="a">
             <li>/gpsf_main_controller.php</li>
@@ -110,7 +110,7 @@ img {
         </ol></li>
         <li>Rename the <code>YOUR_ADMIN</code> sub-directory to match your site's Zen Cart admin directory.</li>
         <li>Copy the plugin's files to your site's file-system.  Don't forget to copy the <code>/feed/google</code> directory and the <code>gpsf_main_controller.php</code>!</li>
-        <li>Log into your Zen Cart admin and the plugin will perform its auto-install procedure.</li>
+        <li>Log into your Zen Cart admin and the plugin will perform its auto-install/upgrade procedure.</li>
         <li>You'll see a <em>Google Product Search Feeder II</em> element under the admin's <em>Configuration</em> tab; proceed to the configuration step, see below.</li>
     </ol>
     <p>Once the plugin has performed its automatic installation, you'll see two additional links on your site's admin's menus:</p>
@@ -118,9 +118,13 @@ img {
         <li><code>Configuration :: Google Product Search Feeder II</code></li>
         <li><code>Tools :: Google Product Search Feeder II</code></li>
     </ol>
+    <h3>Cron Jobs: Upgrading to v1.0.1</h3>
+    <p>v1.0.1 of <em>GPSF</em> changes the way that a site identifies the language to be used for a generated feed. In v1.0.0, the <code>language_id</code> parameter indicated the language <code>id</code> to be used, e.g. <code>language_id=1</code> might refer to the English language.  For v1.0.1, this was changed to use the more Zen-Cart standard <code>language</code> parameter, e.g. <code>language=en</code> for English.</p>
+    <p><em>Especially</em> if you have a multi-language site and generated feeds via cron jobs for each of the site's languages, <b><i>be sure to</i></b> update your site's cron-tab to reflect this change!  Otherwise, the language used for a given language's feed will most likely not be as expected. The v1.0.1 feed-generation tool will log a PHP Warning if it finds that a <code>language_id</code> parameter is specified.</p>
+    <p>Refer to <a href="https://github.com/lat9/gpsf/wiki/Creating-a-Cron-Job" target="_blank">this</a> <em>GPSF</em> Wiki article for details.</p>
 
     <h2 id="config">Configuration</h2>
-    <p>The plugin adds its <em>Google Product Search Feeder II</em> group under the admin's <em>Configuration</em>.  Refer to the plugin's <a href="https://github.com/lat9/gpsf/wiki/Configuration-and-Feed-File-Naming-Conventions" target="_blank">wiki</a> for additional information.</p>
+    <p>The plugin adds its <em>Google Product Search Feeder II</em> group under the admin's <em>Configuration</em>.  Refer to the plugin's <a href="https://github.com/lat9/gpsf/wiki/Configuration-and-Feed-File-Naming-Conventions" target="_blank">Wiki</a> for additional information.</p>
     <p><b>Note:</b> If you are converting from a previous version of a Google-Feed, i.e. the <a href="https://www.zen-cart.com/downloads.php?do=file&id=1375" target="_blank">Google Merchant Center Feeder</a>, you can use the script present in this zip-file's <code>/extras/copy_google_product_configuration.php</code> to copy your previous product-feed settings to their new home.  Just copy that file to the root of your site's file-system and run it via your browser's command-line, e.g. <code>https://www.example.com/copy_google_product_configuration.php</code>.  Once you've run the conversion script, be sure to remove it from your site!</p>
 
     <h2>Version History</h2>
