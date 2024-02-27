@@ -169,8 +169,22 @@ $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTRO
                 </form>
                 <div>
                     <h2><?= GPSF_CRON_URL_TEXT ?></h2>
-                    <code><?= 'wget \'' . HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER . '.php?key=' . GPSF_ACCESS_KEY . '\'' ?></code>
+<?php
+$base_cron_url = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER . '.php?key=' . GPSF_ACCESS_KEY;
+if (count($languages) === 1) {
+?>
+                    <code><?= 'wget \'' . $base_cron_url . '\'' ?></code>
                     <br>
+<?php
+} else {
+    foreach ($languages as $next_lang) {
+?>
+                    <code><?= 'wget \'' . $base_cron_url . '&language=' . $next_lang['code'] . '\'' ?></code> (<?= $next_lang['name'] ?>)
+                    <br>
+<?php
+    }
+}
+?>
                     <br>
                     <p><?= GPSF_CRON_COPY_TEXT ?></p>
                 </div>
