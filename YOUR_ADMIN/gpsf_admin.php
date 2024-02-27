@@ -236,7 +236,7 @@ if ($feed_files === []) {
                     </tbody>
                 </table>
                 <div id="feed-container" class="text-center">
-                    <h2><?= GPSF_PROCESSING_FEED_TEXT ?></h2>
+                    <h2 id="feed-text"><?= GPSF_PROCESSING_FEED_TEXT ?></h2>
                     <h3>
                         <?= GPSF_FEED_STARTED_AT ?> <span id="feed-start-time"></span>
                     </h3>
@@ -264,7 +264,7 @@ if ($feed_files === []) {
                     totalSeconds = 0;
                 }
 
-                if (totalSeconds !== 0 && jQuery('#feed-elapsed-time').is(':hidden')) {
+                if (totalSeconds !== 0 && jQuery('#feed-output').html() != '') {
                     return;
                 }
 
@@ -296,7 +296,7 @@ if ($feed_files === []) {
                         lockMessage = '<p class="text-danger">Since an .xml.lock file is present, the feed might have run out of either memory or time.  Check your <code>/logs</code> directory for details.</p>';
                     }
                 });
-                jQuery('#feed-container').hide();
+                jQuery('#feed-text').hide();
                 jQuery('#feed-output').html(data + lockMessage);
                 jQuery('*').css('cursor', 'default');
                 jQuery('#feed-generate').prop('disabled', false);
@@ -310,19 +310,9 @@ if ($feed_files === []) {
                     jQuery('#feed-output').html('<p class="text-danger">Request failed, ' + jqXHR.statusText + ' (' + jqXHR.status + ').</p>');
                 }
 
-                jQuery('#feed-container').hide();
+                jQuery('#feed-text').hide();
                 jQuery('*').css('cursor', 'default');
                 jQuery('#feed-generate').prop('disabled', false);
-            });
-            return false;
-        });
-
-        jQuery('.upload-feed').on('click', function(e) {
-            e.preventDefault();
-            jQuery('*').css('cursor', 'wait');
-            jQuery.get(jQuery(this).prop('href'), '', function(data) {
-                jQuery('#feed-output').html(data);
-                jQuery('*').css('cursor', 'default');
             });
             return false;
         });
