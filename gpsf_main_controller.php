@@ -21,10 +21,22 @@ require 'includes/application_top.php';
 if (!defined('GPSF_ENABLED') || GPSF_ENABLED !== 'true') {
     die('Google Product Search Feeder II is disabled');
 }
+
 // process parameters
 $key = $_REQUEST['key'] ?? '';
 if ($key !== GPSF_ACCESS_KEY) {
     exit('Incorrect key supplied!');
+}
+
+// -----
+// The language-parameter's name changed from 'language_id' in v1.0.0 to
+// 'language' in v1.0.1, so that the base Zen Cart language initialization
+// could "do its thing".  If a 'language_id' parameter is supplied, it's
+// likely that a site didn't update their cron job(s) to reflect the change
+// in parameter name, so a PHP Warning log is generated as a subtle reminder.
+//
+if (isset($_GET['language_id'])) {
+    trigger_error("The 'language_id' parameter for the feed is no longer supported and the feed's generation might be impacted.  Use a 'language' parameter instead.", E_USER_WARNING);
 }
 
 if ((int)GPSF_MAX_EXECUTION_TIME > 0) {
