@@ -501,11 +501,11 @@ class gpsfFeedGenerator
         }
 
         if (GPSF_POS_CATEGORIES !== '') {
-            $where .= ' AND p2c.categories_id IN (' . GPSF_POS_CATEGORIES . ')';
+            $where .= ' AND p.master_categories_id IN (' . GPSF_POS_CATEGORIES . ')';
         }
 
         if (GPSF_NEG_CATEGORIES !== '') {
-            $where .= ' AND p2c.categories_id NOT IN (' . GPSF_NEG_CATEGORIES . ')';
+            $where .= ' AND p.master_categories_id NOT IN (' . GPSF_NEG_CATEGORIES . ')';
         }
 
         $order_by = (GPSF_SKIP_DUPLICATE_TITLES === 'true') ? ' ORDER BY pd.products_name ASC, p.products_id ASC' : ' ORDER BY p.products_id ASC';
