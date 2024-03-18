@@ -3,13 +3,13 @@
 // An initialization script to install the Google Product Search Feeder II.
 // Copyright 2023-2024, https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.1
+// Last updated: v1.0.2
 //
 if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('GPSF_CURRENT_VERSION', '1.0.1');
+define('GPSF_CURRENT_VERSION', '1.0.2-beta1');
 
 // -----
 // Nothing to do if an admin is not currently logged-in or if the plugin's currently installed

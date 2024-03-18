@@ -3,7 +3,7 @@
 // Google Product Search Feeder II, admin tool.
 // Copyright 2023-2024, https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.1
+// Last updated: v1.0.2
 //
 /**
  * Based on:
@@ -785,10 +785,9 @@ class gpsfFeedGenerator
             $this->xmlWriter->writeElement('g:availability', 'in stock');
         } else {
             // -----
-            // Format the product's availability date in ISO 8601 format (2024-02-12T00:00:00+00:00),
-            // noting that the availability is scheduled at midnight on the date available.
+            // Format the product's availability date in ISO 8601 format (2024-02-12T00:00:00+00:00).
             //
-            $this->xmlWriter->writeElement('g:availability_date', date('c', strtotime($product['products_date_available'] . ' 00:00:00')));
+            $this->xmlWriter->writeElement('g:availability_date', date('c', strtotime($product['products_date_available'])));
             $this->xmlWriter->writeElement('g:availability', 'preorder');
         }
 
