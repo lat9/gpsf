@@ -3,7 +3,7 @@
 // Google Product Search Feeder II, admin tool.
 // Copyright 2023-2024, https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.2
+// Last updated: v1.0.3
 //
 /**
  * Based on:
@@ -458,12 +458,12 @@ class gpsfFeedGenerator
                FROM " . TABLE_PRODUCTS . " p
                     LEFT JOIN " . TABLE_MANUFACTURERS . " m
                         ON p.manufacturers_id = m.manufacturers_id
-                    LEFT JOIN " . TABLE_PRODUCTS_DESCRIPTION . " pd
+                    INNER JOIN " . TABLE_PRODUCTS_DESCRIPTION . " pd
                         ON p.products_id = pd.products_id
                        AND pd.language_id = " . $_SESSION['languages_id'] . "
-                    LEFT JOIN " . TABLE_PRODUCT_TYPES . " pt
+                    INNER JOIN " . TABLE_PRODUCT_TYPES . " pt
                         ON p.products_type = pt.type_id
-                    LEFT JOIN " . TABLE_PRODUCTS_TO_CATEGORIES . " p2c
+                    INNER JOIN " . TABLE_PRODUCTS_TO_CATEGORIES . " p2c
                         ON p2c.products_id = p.products_id" . $additional_tables;
 
         // -----
@@ -837,10 +837,10 @@ class gpsfFeedGenerator
         $attributes_info = $db->Execute(
             "SELECT po.products_options_name, pov.products_options_values_name
                FROM " . TABLE_PRODUCTS_ATTRIBUTES . " pa
-                    LEFT JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov
+                    INNER JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov
                         ON pov.products_options_values_id = pa.options_values_id
                        AND pov.language_id = " . $_SESSION['languages_id'] . "
-                    LEFT JOIN " . TABLE_PRODUCTS_OPTIONS . " po
+                    INNER JOIN " . TABLE_PRODUCTS_OPTIONS . " po
                         ON po.products_options_id = pa.options_id
                        AND po.language_id = " . $_SESSION['languages_id'] . "
               WHERE pa.products_id = $products_id
