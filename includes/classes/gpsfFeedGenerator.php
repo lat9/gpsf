@@ -175,7 +175,8 @@ class gpsfFeedGenerator
 
             // -----
             // Check to see if the extension indicates that the current product should be
-            // bypassed for the feed.
+            // bypassed for the feed.  Also give an extension the chance to modify the
+            // product's name (g:title).
             //
             if ($this->extensions !== null) {
                 $extension_bypass_product = false;
@@ -185,6 +186,7 @@ class gpsfFeedGenerator
                         $extension_bypass_product = true;
                         break;
                     }
+                    $products_name = $extension_class->getProductsTitle($products_id, $products_name, $product);
                 }
                 if ($extension_bypass_product === true) {
                     if ($this->addSkippedProduct($products_id, $products_name . ": Bypassed by extension ($extension_message).") === false) {
