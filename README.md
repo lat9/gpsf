@@ -6,3 +6,5 @@ For additional questions and documentation, please see the [GPSF Wiki](https://g
 Google API Documentation: https://support.google.com/merchants/answer/6324350?hl=en&ref_topic=6324338&sjid=18306132101193605684-NA
 
 Zen Cart Support Thread: https://www.zen-cart.com/showthread.php?229785-Google-Product-Search-Feeder-II-Support-Thread
+
+Zen Cart Plugin Download Link: https://www.zen-cart.com/downloads.php?do=file&id=2379
