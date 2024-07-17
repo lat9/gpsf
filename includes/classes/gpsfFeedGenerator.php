@@ -3,7 +3,7 @@
 // Google Product Search Feeder II, admin tool.
 // Copyright 2023-2024, https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.3
+// Last updated: v1.0.4
 //
 /**
  * Based on:
@@ -87,6 +87,7 @@ class gpsfFeedGenerator
                     continue;
                 }
                 if ($base_loaded === false) {
+                    $base_loaded = true;
                     require $dir_fs_gpsf_classes . 'gpsfBase.php';
                     $this->extensions = [];
                 }
