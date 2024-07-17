@@ -16,6 +16,10 @@
  * @version $Id: googleProducts.php 24 2012-10-04 19:20:18Z numinix $
  * @author Numinix Technology
  */
+use App\Models\PluginControl;
+use App\Models\PluginControlVersion;
+use Zencart\PluginManager\PluginManager;
+
 class gpsfFeedGenerator
 {
     const FEED_OUTPUT_FREQUENCY = 2500;
@@ -93,6 +97,30 @@ class gpsfFeedGenerator
                 }
                 require $next_file;
                 $this->extensions[] = new $file_pathinfo['filename']();
+            }
+
+            if (class_exists('Zencart\PluginManager\PluginManager')) {
+                $pluginManager = new PluginManager(new PluginControl(), new \App\Models\PluginControlVersion());
+                $installedPlugins = $pluginManager->getInstalledPlugins();
+                foreach ($installedPlugins as $plugin) {
+                    $dir_plugin_fs_gpsf_classes = DIR_FS_CATALOG . 'zc_plugins/' . $plugin['unique_key'] . '/' . $plugin['version'] . '/catalog/includes/classes/gpsf/';
+                    if (!is_dir($dir_plugin_fs_gpsf_classes)) {
+                        continue;
+                    }
+                    foreach (glob($dir_plugin_fs_gpsf_classes . '*.php') as $next_file) {
+                        $extension_class = pathinfo($next_file, PATHINFO_FILENAME);
+                        if (class_exists($extension_class)) {
+                            continue;
+                        }
+                        if ($base_loaded === false) {
+                            $base_loaded = true;
+                            require $dir_fs_gpsf_classes . 'gpsfBase.php';
+                            $this->extensions = [];
+                        }
+                        require $next_file;
+                        $this->extensions[] = new $extension_class();
+                    }
+                }
             }
         }
     }
