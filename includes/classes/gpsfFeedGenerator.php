@@ -817,17 +817,17 @@ class gpsfFeedGenerator
         }
 
         if (STOCK_CHECK !== 'true') {
-            $this->xmlWriter->writeElement('g:availability', 'in stock');
+            $this->xmlWriter->writeElement('g:availability', 'in_stock');
         } elseif ($product['products_quantity'] > 0) {
             if (isset($product['products_quantity_order_min']) && $product['products_quantity_order_min'] > $product['products_quantity']) {
                 $this->xmlWriter->writeElement('g:availability', 'out_of_stock');
             } else {
-                $this->xmlWriter->writeElement('g:availability', 'in stock');
+                $this->xmlWriter->writeElement('g:availability', 'in_stock');
             }
         } elseif (STOCK_ALLOW_CHECKOUT !== 'true') {
-            $this->xmlWriter->writeElement('g:availability', 'out of stock');
+            $this->xmlWriter->writeElement('g:availability', 'out_of_stock');
         } elseif ($product['products_date_available'] === null || strtotime($product['products_date_available']) < time()) {
-            $this->xmlWriter->writeElement('g:availability', 'in stock');
+            $this->xmlWriter->writeElement('g:availability', 'in_stock');
         } else {
             // -----
             // Format the product's availability date in ISO 8601 format (2024-02-12T00:00:00+00:00).
