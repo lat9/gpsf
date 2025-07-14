@@ -71,8 +71,8 @@ img {
 </head>
 
 <body>
-    <h1>Google Product Search Feeder II for Zen Cart v1.5.6b and later, including v2.0.x</h1>
-    <h3>Version 1.0.4</h3>
+    <h1>Google Product Search Feeder II for Zen Cart v1.5.6b and later, including v2.0.x and v2.1.0</h1>
+    <h3>Version 1.0.5</h3>
     <p>Current Support Thread at Zen Cart Forums: <a href="https://www.zen-cart.com/showthread.php?229785-Google-Product-Search-Feeder-II-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?229785-Google-Product-Search-Feeder-II-Support-Thread</a></p>
     <p>Zen Cart Download Link: <a href="https://www.zen-cart.com/downloads.php?do=file&id=2379" target="_blank">https://www.zen-cart.com/downloads.php?do=file&id=2379</a></p>
     <p>GitHub repository: <a href="https://github.com/lat9/gpsf" target="_blank">https://github.com/lat9/gpsf</a></p>
@@ -129,6 +129,13 @@ img {
 
     <h2>Version History</h2>
     <ul>
+        <li>v1.0.5-beta1, 2025-07-14 (lat9)<ul>
+            <li>BUGFIX: Enable shipping to be set via Google Merchant Center configuration.</li>
+            <li>The following files were changed:<ol>
+                <li>/includes/classes/gpsfFeedGenerator.php</li>
+                <li>/YOUR_ADMIN/includes/init_includes/init_gpsf_admin.php</li>
+            </ol></li>
+        </ul></li>
         <li>v1.0.4, 2024-07-19 (lat9)<ul>
             <li>BUGFIX: Multiple extension resulted in PHP Fatal error (class redefinition).</li>
             <li>BUGFIX: <samp>getProductsTitle</samp> extension method is never called.</li>
