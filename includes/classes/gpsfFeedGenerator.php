@@ -860,10 +860,6 @@ class gpsfFeedGenerator
                 }
                 $this->xmlWriter->writeElement('g:price', $this->formatPriceElement($shipping_rate));
 
-                if (GPSF_WEIGHT === 'true' && $product['products_weight'] > 0) {
-                    $this->xmlWriter->writeElement('g:shipping_weight', $product['products_weight'] . ' ' . GPSF_UNITS);
-                }
-
                 if (GPSF_SHIPPING_LABEL === 'categories') {
                     $this->xmlWriter->writeElement('g:shipping_label', $product['master_categories_id']);
                 } else {
@@ -871,6 +867,10 @@ class gpsfFeedGenerator
                 }
 
                 $this->xmlWriter->endElement();  //- END g:shipping
+            }
+
+            if (GPSF_WEIGHT === 'true' && $product['products_weight'] > 0) {
+                $this->xmlWriter->writeElement('g:shipping_weight', $product['products_weight'] . ' ' . GPSF_UNITS);
             }
         }
     }
