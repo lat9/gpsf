@@ -1281,7 +1281,7 @@ class gpsfFeedGenerator
 
         $zones_cost = constant('MODULE_SHIPPING_ZONES_COST_' . $table_zone);
         $zones_table = preg_split("/[:,]/", $zones_cost);
-        for ($i = 0, $n = count($table_cost); $i < $n; $i += 2) {
+        for ($i = 0, $n = count($zones_table); $i < $n; $i += 2) {
             if ($rate_basis <= $zones_table[$i]) {
                 if (strpos($zones_table[$i+1], '%') !== false) {
                     $shipping = ($zones_table[$i+1] / 100) * $products_price;
