@@ -1,15 +1,15 @@
 <?php
 // -----
 // An initialization script to install the Google Product Search Feeder II.
-// Copyright 2023-2024, https://vinosdefrutastropicales.com
+// Copyright 2023-2025, https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.4
+// Last updated: v1.0.5
 //
 if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('GPSF_CURRENT_VERSION', '1.0.4');
+define('GPSF_CURRENT_VERSION', '1.0.5-beta1');
 
 // -----
 // Nothing to do if an admin is not currently logged-in or if the plugin's currently installed
@@ -157,6 +157,14 @@ switch (true) {
         $db->Execute(
             "DELETE FROM " . TABLE_CONFIGURATION . "
               WHERE configuration_key = 'GPSF_LANGUAGE'
+              LIMIT 1"
+        );
+    case version_compare(GPSF_VERSION, '1.0.5', '<'):           //-Fall through from above processing ...
+        $db->Execute(
+            "UPDATE " . TABLE_CONFIGURATION . "
+                SET set_function = 'zen_cfg_select_option([\'flat rate\', \'per item\', \'per weight unit\', \'table rate\', \'zones\', \'merchant-center\', \'none\'],',
+                    configuration_description = '<br>Select a shipping method from the drop-down list that is used in your store or leave as <code>none</code> (the default). If you have set up shipping services in your Google Merchant Center, use <code>merchant-center</code>.'
+              WHERE configuration_key = 'GPSF_SHIPPING_METHOD'
               LIMIT 1"
         );
     default:                                                    //-Fall through from above processing ...

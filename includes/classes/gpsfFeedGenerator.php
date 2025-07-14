@@ -1,9 +1,9 @@
 <?php
 // -----
 // Google Product Search Feeder II, admin tool.
-// Copyright 2023-2024, https://vinosdefrutastropicales.com
+// Copyright 2023-2025, https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.4
+// Last updated: v1.0.5
 //
 /**
  * Based on:
@@ -587,6 +587,20 @@ class gpsfFeedGenerator
             }
         }
 
+        // -----
+        // If the site's products table includes products_width, products_length or
+        // products_height fields and those additional fields aren't already
+        // present in the $additional_fields to grab, add them in.
+        //
+        global $sniffer;
+        foreach (['products_length', 'products_width', 'products_height'] as $next_field) {
+            $field_name = 'p.' . $next_field;
+            if (strpos($additional_fields, $field_name) !== false || $sniffer->field_exists(TABLE_PRODUCTS, $next_field) === false) {
+                continue;
+            }
+            $additional_fields .= ', ' . $field_name;
+        }
+
         return [
             $additional_fields,
             $additional_tables,
@@ -826,7 +840,11 @@ class gpsfFeedGenerator
             $this->xmlWriter->writeElement('g:product_weight', $product['products_weight'] . ' ' . GPSF_UNITS);
         }
 
-        if (GPSF_SHIPPING_METHOD !== 'none') {
+        if (GPSF_SHIPPING_METHOD === 'merchant-center') {
+            if ($product['products_weight'] > 0) {
+                $this->xmlWriter->writeElement('g:shipping_weight', $product['products_weight'] . ' ' . GPSF_UNITS);
+            }
+        } elseif (GPSF_SHIPPING_METHOD !== 'none') {
             $shipping_rate = $this->getProductsShippingRate($product['products_id'], $product['products_weight'], $price, $product['product_is_always_free_shipping']);
 
             if ((float)$shipping_rate >= 0) {
