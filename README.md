@@ -1,5 +1,5 @@
-# Zen Cart&reg; Google Product Search Feeder II, v1.0.4
-An update to the Numinix version, now supporting Zen Carts 1.5.6b and above.  Validated on PHP versions 7.0 through 8.3.
+# Zen Cart&reg; Google Product Search Feeder II, v1.0.5
+An update to the Numinix version, now supporting Zen Carts 1.5.6b and above.  Validated on PHP versions 7.0 through 8.4.
 
 For additional questions and documentation, please see the [GPSF Wiki](https://github.com/lat9/gpsf/wiki).
 
