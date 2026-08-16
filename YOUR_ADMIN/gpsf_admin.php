@@ -1,9 +1,9 @@
 <?php
 // -----
 // Google Product Search Feeder II, admin tool.
-// Copyright 2023-2024, https://vinosdefrutastropicales.com
+// Copyright 2023-2026, https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.1
+// Last updated: v1.1.0
 //
 /**
  * Based on:
@@ -18,8 +18,8 @@
 require 'includes/application_top.php';
 
 if (isset($_GET['action']) && $_GET['action'] === 'delete') {
-    if (is_file(DIR_FS_CATALOG . GPSF_DIRECTORY . $_GET['file'])) {
-        unlink(DIR_FS_CATALOG . GPSF_DIRECTORY . $_GET['file']);
+    if (is_file(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . $_GET['file'])) {
+        unlink(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . $_GET['file']);
     }
     zen_redirect(zen_href_link(FILENAME_GPSF_ADMIN));
 }
@@ -64,7 +64,7 @@ $products_count = $db->Execute(
         AND p.product_is_free != 1
         AND p.products_image IS NOT NULL
         AND p.products_image != ''
-        AND p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "'"
+        AND p.products_image != '" . zen_config('PRODUCTS_IMAGE_NO_IMAGE') . "'"
 );
 $maximum_products_in_feed = $products_count->fields['total'];
 unset($products_count);
@@ -116,13 +116,13 @@ function init()
 <?php
 $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER;
 ?>
-    <h1 class="pageHeading"><?= sprintf(HEADING_TITLE, GPSF_VERSION) ?></h1>
+    <h1 class="pageHeading"><?= sprintf(HEADING_TITLE, zen_config('GPSF_VERSION')) ?></h1>
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-4">
                 <div>
                     <div class="col-md-8 text-right"><?= GPSF_MAX_MEMORY_TEXT ?></div>
-                    <div class="col-md-4"><?= (GPSF_MEMORY_LIMIT === '') ? ini_get('memory_limit') : ((int)GPSF_MEMORY_LIMIT . 'M') ?></div>
+                    <div class="col-md-4"><?= (zen_config('GPSF_MEMORY_LIMIT') === '') ? ini_get('memory_limit') : ((int)zen_config('GPSF_MEMORY_LIMIT') . 'M') ?></div>
                 </div>
                 <div>
                     <div class="col-md-8 text-right">Maximum input time:</div>
@@ -130,37 +130,37 @@ $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTRO
                 </div>
                 <div>
                     <div class="col-md-8 text-right"><?= GPSF_MAX_EXECUTION_TIME_TEXT ?></div>
-                    <div class="col-md-4"><?= (GPSF_MAX_EXECUTION_TIME === '') ? ini_get('max_execution_time') : GPSF_MAX_EXECUTION_TIME ?></div>
+                    <div class="col-md-4"><?= (zen_config('GPSF_MAX_EXECUTION_TIME') === '') ? ini_get('max_execution_time') : zen_config('GPSF_MAX_EXECUTION_TIME') ?></div>
                 </div>
                 <div>
                     <div class="col-md-8 text-right"><?= GPSF_MAX_PRODUCTS_IN_FEED ?></div>
                     <div class="col-md-4"><?= number_format((float)$maximum_products_in_feed, 0, '', ',') ?></div>
                 </div>
                 <form method="get" id="feed" action="<?= $gpsf_main_controller ?>.php" class="form-horizontal" target="_blank">
-                    <?= zen_draw_hidden_field('key', GPSF_ACCESS_KEY) ?>
+                    <?= zen_draw_hidden_field('key', zen_config('GPSF_ACCESS_KEY')) ?>
                     <?= zen_draw_hidden_field('feed', 'fy_un_tp') ?>
                     <div class="form-group">
                         <?= zen_draw_label(GPSF_MAX_PRODUCTS_TEXT, 'limit', 'class="col-sm-3 control-label"') ?>
                         <div class="col-sm-9">
-                            <?= zen_draw_input_field('limit', ((int)GPSF_MAX_PRODUCTS > 0) ? (int)GPSF_MAX_PRODUCTS : '0', 'class="form-control" id="limit"') ?>
+                            <?= zen_draw_input_field('limit', ((int)zen_config('GPSF_MAX_PRODUCTS') > 0) ? (int)zen_config('GPSF_MAX_PRODUCTS') : '0', 'class="form-control" id="limit"') ?>
                         </div>
                     </div>
                     <div class="form-group">
                         <?= zen_draw_label(GPSF_STARTING_POINT_TEXT, 'offset', 'class="col-sm-3 control-label"') ?>
                         <div class="col-sm-9">
-                            <?= zen_draw_input_field('offset', ((int)GPSF_START_PRODUCTS > 0) ? (int)GPSF_START_PRODUCTS : '0', 'class="form-control" id="offset"') ?>
+                            <?= zen_draw_input_field('offset', ((int)zen_config('GPSF_START_PRODUCTS') > 0) ? (int)zen_config('GPSF_START_PRODUCTS') : '0', 'class="form-control" id="offset"') ?>
                         </div>
                     </div>
                     <div class="form-group">
                         <?= zen_draw_label(GPSF_CURRENCY_TEXT, 'currency_code', 'class="col-sm-3 control-label"') ?>
                         <div class="col-sm-9">
-                            <?= zen_draw_pull_down_menu('currency_code', $currency_options, GPSF_CURRENCY, 'class="form-control" id="currency_code"') ?>
+                            <?= zen_draw_pull_down_menu('currency_code', $currency_options, zen_config('GPSF_CURRENCY'), 'class="form-control" id="currency_code"') ?>
                         </div>
                     </div>
                     <div class="form-group">
                         <?= zen_draw_label(GPSF_LANGUAGE_TEXT, 'language-code', 'class="col-sm-3 control-label"') ?>
                         <div class="col-sm-9">
-                            <?= zen_draw_pull_down_menu('language', $language_options, DEFAULT_LANGUAGE, 'class="form-control" id="language-code"') ?>
+                            <?= zen_draw_pull_down_menu('language', $language_options, zen_config('DEFAULT_LANGUAGE'), 'class="form-control" id="language-code"') ?>
                         </div>
                     </div>
                     <div class="form-group text-right">
@@ -170,7 +170,7 @@ $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTRO
                 <div>
                     <h2><?= GPSF_CRON_URL_TEXT ?></h2>
 <?php
-$base_cron_url = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER . '.php?key=' . GPSF_ACCESS_KEY;
+$base_cron_url = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER . '.php?key=' . zen_config('GPSF_ACCESS_KEY');
 if (count($languages) === 1) {
 ?>
                     <code><?= 'wget \'' . $base_cron_url . '\'' ?></code>
@@ -212,7 +212,7 @@ if (count($languages) === 1) {
                     </thead>
                     <tbody id="feed-files">
 <?php
-$gpsf_directory = DIR_FS_CATALOG . GPSF_DIRECTORY;
+$gpsf_directory = DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY');
 $feed_files = [];
 $found_files = glob($gpsf_directory . '*.*');
 if (!empty($found_files)) {
@@ -235,7 +235,7 @@ if ($feed_files === []) {
 ?>
                         <tr>
                             <td class="text-center"><?= date('d/m/Y H:i:s', filemtime($gpsf_directory . $next_file)) ?></td>
-                            <td class="upload-file"><a href="<?= HTTP_SERVER . DIR_WS_CATALOG . GPSF_DIRECTORY . $next_file ?>" target="_blank"><?= $next_file ?></a></td>
+                            <td class="upload-file"><a href="<?= HTTP_SERVER . DIR_WS_CATALOG . zen_config('GPSF_DIRECTORY') . $next_file ?>" target="_blank"><?= $next_file ?></a></td>
                             <td class="text-center"><?= number_format((float)(filesize($gpsf_directory . $next_file) / 1024), 2, '.', ',') ?>KB</td>
                             <td class="text-center">
                                 <a role="button" class="btn btn-danger btn-sm" href="<?= zen_href_link(FILENAME_GPSF_ADMIN, "file=$next_file&action=delete") ?>">
