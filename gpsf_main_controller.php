@@ -18,13 +18,13 @@
  */
 require 'includes/application_top.php';
 
-if (!defined('GPSF_ENABLED') || GPSF_ENABLED !== 'true') {
+if (zen_config('GPSF_ENABLED') !== 'true') {
     die('Google Product Search Feeder II is disabled');
 }
 
 // process parameters
 $key = $_REQUEST['key'] ?? '';
-if ($key !== GPSF_ACCESS_KEY) {
+if ($key !== zen_config('GPSF_ACCESS_KEY')) {
     exit('Incorrect key supplied!');
 }
 
@@ -39,13 +39,14 @@ if (isset($_GET['language_id'])) {
     trigger_error("The 'language_id' parameter for the feed is no longer supported and the feed's generation might be impacted.  Use a 'language' parameter instead.", E_USER_WARNING);
 }
 
-if ((int)GPSF_MAX_EXECUTION_TIME > 0) {
-    ini_set('max_execution_time', (int)GPSF_MAX_EXECUTION_TIME);
-    set_time_limit((int)GPSF_MAX_EXECUTION_TIME);
+$gpsf_max_execution_time = (int)zen_config('GPSF_MAX_EXECUTION_TIME');
+if ($gpsf_max_execution_time > 0) {
+    ini_set('max_execution_time', $gpsf_max_execution_time);
+    set_time_limit($gpsf_max_execution_time);
 }
 ini_set('max_input_time', -1);
-if ((int)GPSF_MEMORY_LIMIT > 0) {
-    ini_set('memory_limit', (int)GPSF_MEMORY_LIMIT . 'M');
+if ((int)zen_config('GPSF_MEMORY_LIMIT') > 0) {
+    ini_set('memory_limit', (int)zen_config('GPSF_MEMORY_LIMIT') . 'M');
 }
 
 // -----
@@ -88,16 +89,16 @@ $offset = '';
 
 // sql limiters
 $query_limit = 0;
-if ((int)GPSF_MAX_PRODUCTS > 0 || (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0)) {
-    $query_limit = (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0) ? (int)$_REQUEST['limit'] : (int)GPSF_MAX_PRODUCTS;
+if ((int)zen_config('GPSF_MAX_PRODUCTS') > 0 || (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0)) {
+    $query_limit = (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0) ? (int)$_REQUEST['limit'] : (int)zen_config('GPSF_MAX_PRODUCTS');
     $limit = ' LIMIT ' . $query_limit;
 }
 $query_offset = 0;
-if ((int)GPSF_START_PRODUCTS > 0 || (isset($_REQUEST['offset']) && (int)$_REQUEST['offset'] > 0)) {
-    $query_offset = (isset($_REQUEST['offset']) && (int)$_REQUEST['offset'] > 0) ? (int)$_REQUEST['offset'] : (int)GPSF_START_PRODUCTS;
+if ((int)zen_config('GPSF_START_PRODUCTS') > 0 || (isset($_REQUEST['offset']) && (int)$_REQUEST['offset'] > 0)) {
+    $query_offset = (isset($_REQUEST['offset']) && (int)$_REQUEST['offset'] > 0) ? (int)$_REQUEST['offset'] : (int)zen_config('GPSF_START_PRODUCTS');
     $offset = ' OFFSET ' . $query_offset;
 }
-$outfile = DIR_FS_CATALOG . GPSF_DIRECTORY . GPSF_OUTPUT_FILENAME . '_' . $type . '_' . $_SESSION['languages_code'];
+$outfile = DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . zen_config('GPSF_OUTPUT_FILENAME') . '_' . $type . '_' . $_SESSION['languages_code'];
 if ($query_limit > 0) {
     $outfile .= '_' . $query_limit;
 }
@@ -107,7 +108,7 @@ if ($query_offset > 0) {
 $outfile .= '.xml'; //example domain_products.xml
 
 ob_start();
-echo '<p>' . sprintf(TEXT_GPSF_STARTED, GPSF_VERSION) . '</p>';
+echo '<p>' . sprintf(TEXT_GPSF_STARTED, zen_config('GPSF_VERSION')) . '</p>';
 echo '<p>' . TEXT_GPSF_FILE_LOCATION . $outfile . '</p>';
 echo '<p>Processing: Feed - ' . ($feed === 'yes' ? 'Yes' : 'No') . '</p>';
 echo '<p>PHP Memory Limit: ' . ini_get('memory_limit') . '</p>';
@@ -118,9 +119,9 @@ flush();
 // If we're generating a feed ...
 //
 if ($feed === 'yes') {
-    if (is_dir(DIR_FS_CATALOG . GPSF_DIRECTORY) === false) {
+    if (is_dir(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY')) === false) {
         exit(ERROR_GPSF_DIRECTORY_DOES_NOT_EXIST);
-    } elseif (is_writeable(DIR_FS_CATALOG . GPSF_DIRECTORY) === false) {
+    } elseif (is_writeable(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY')) === false) {
         exit(ERROR_GPSF_DIRECTORY_NOT_WRITEABLE);
     }
 
@@ -173,7 +174,7 @@ if ($feed === 'yes') {
         unlink($lockfile);
     }
 
-    if (GPSF_COMPRESS === 'true' && function_exists('gzopen')) {
+    if (zen_config('GPSF_COMPRESS') === 'true' && function_exists('gzopen')) {
         $gzcontent = file_get_contents($outfile);
         unlink($outfile);
 

@@ -98,6 +98,7 @@ img {
             <li>/feed/google/index.html</li>
             <li>/includes/classes/gpsfFeedGenerator.php</li>
             <li>/includes/classes/gpsf/gpsfBase.php</li>
+            <li>/includes/functions/extra_functions/zen_config.php <span class="smaller">(Added in v1.1.0)</span></li>
             <li><span class="removed">/includes/languages/english/gpsf_main_controller.php</span> <span class="smaller">(Removed in v1.1.0)</span></li>
             <li>/includes/languages/english/lang.gpsf_main_controller.php <span class="smaller">(Added in v1.1.0)</span></li>
             <li>/YOUR_ADMIN/gpsf_admin.php</li>
@@ -105,6 +106,7 @@ img {
             <li>/YOUR_ADMIN/includes/extra_datafiles/gpsf_admin_filenames.php</li>
             <li>/YOUR_ADMIN/includes/functions/extra_functions/gpsf_admin_functions.php</li>
             <li>/YOUR_ADMIN/includes/functions/extra_functions/zen_cfg_read_only.php</li>
+            <li>/YOUR_ADMIN/includes/functions/extra_functions/zen_config.php <span class="smaller">(Added in v1.1.0)</span></li>
             <li>/YOUR_ADMIN/includes/init_includes/init_gpsf_admin.php</li>
             <li><span class="removed">/YOUR_ADMIN/includes/languages/english/gpsf_admin.php</span> <span class="smaller">(Removed in v1.1.0)</span></li>
             <li>/YOUR_ADMIN/includes/languages/english/lang.gpsf_admin.php <span class="smaller">(Added in v1.1.0)</span></li>
@@ -134,10 +136,15 @@ img {
     <ul>
         <li>v1.1.0-beta1, 2026-08-16 (lat9)<ul>
             <li>BUGFIX: Update to use array-based language files, supporting zc300 and later.</li>
+            <li>INTROP: Use and provide a polyfill for <code>zen_config</code>, introduced in zc300.</li>
             <li>The following files were changed, <span class="added">added</span> or <span class="removed">removed</span>:<ol>
                 <li>/gpsf_main_controller.php</li>
+                <li>/includes/classes/gpsfFeedGenerator.php</li>
+                <li><span class="added">/includes/functions/extra_functions/zen_config.php</span></li>
                 <li><span class="removed">/includes/languages/english/gpsf_main_controller.php</span></li>
                 <li><span class="added">/includes/languages/english/lang.gpsf_main_controller.php</span></li>
+                <li><span class="added">/YOUR_ADMIN/includes/functions/extra_functions/zen_config.php</span></li>
+                <li>/YOUR_ADMIN/gpsf_admin.php</li>
                 <li>/YOUR_ADMIN/includes/init_includes/init_gpsf_admin.php</li>
                 <li><span class="removed">/YOUR_ADMIN/includes/languages/english/extra_definitions/gpsf_admin_extra_definitions.php</span></li>
                 <li><span class="added">/YOUR_ADMIN/includes/languages/english/extra_definitions/lang.gpsf_admin_extra_definitions.php</span></li>

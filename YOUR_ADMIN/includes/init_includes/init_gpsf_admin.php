@@ -15,7 +15,7 @@ define('GPSF_CURRENT_VERSION', '1.1.0-beta1');
 // Nothing to do if an admin is not currently logged-in or if the plugin's currently installed
 // and at the current version.
 //
-if (empty($_SESSION['admin_id']) || (defined('GPSF_VERSION') && GPSF_VERSION === GPSF_CURRENT_VERSION)) {
+if (empty($_SESSION['admin_id']) || zen_config('GPSF_VERSION') === GPSF_CURRENT_VERSION)) {
     return;
 }
 
@@ -34,7 +34,7 @@ if ($configuration->EOF) {
     $cgi = $configuration->fields['configuration_group_id'];
 }
 
-if (!defined('GPSF_VERSION')) {
+if (zen_config('GPSF_VERSION') === null) {
     $db->Execute(
         "INSERT INTO " . TABLE_CONFIGURATION . "
             (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function) 
@@ -137,29 +137,25 @@ if (!defined('GPSF_VERSION')) {
     //
     zen_register_admin_page('configGpsf', 'BOX_CONFIGURATION_GPSF', 'FILENAME_CONFIGURATION', "gID=$cgi", 'configuration', 'Y');
     zen_register_admin_page('toolGpsf', 'BOX_GPSF', 'FILENAME_GPSF_ADMIN', '', 'tools', 'Y');
-
-    // -----
-    // Let the logged-in admin know that the plugin's been installed.
-    //
-    define('GPSF_VERSION', '0.0.0');
 }
 
 // -----
 // Version-specific database adjustments.
 //
+$gpsf_version = zen_config('GPSF_VERSION', '0.0.0');
 switch (true) {
-    case version_compare(GPSF_VERSION, '1.0.0', '<'):
+    case version_compare($gpsf_version, '1.0.0', '<'):
         $db->Execute(
             "DELETE FROM " . TABLE_CONFIGURATION . "
                WHERE configuration_key IN ('GPSF_USERNAME', 'GPSF_PASSWORD', 'GPSF_SERVER', 'GPSF_PASV', 'GPSF_UPLOADED_DATE', 'GPSF_ADDRESS', 'GPSF_DESCRIPTION')"
         );
-    case version_compare(GPSF_VERSION, '1.0.1', '<'):           //-Fall through from above processing ...
+    case version_compare($gpsf_version, '1.0.1', '<'):           //-Fall through from above processing ...
         $db->Execute(
             "DELETE FROM " . TABLE_CONFIGURATION . "
               WHERE configuration_key = 'GPSF_LANGUAGE'
               LIMIT 1"
         );
-    case version_compare(GPSF_VERSION, '1.0.5', '<'):           //-Fall through from above processing ...
+    case version_compare($gpsf_version, '1.0.5', '<'):           //-Fall through from above processing ...
         $db->Execute(
             "UPDATE " . TABLE_CONFIGURATION . "
                 SET set_function = 'zen_cfg_select_option([\'flat rate\', \'per item\', \'per weight unit\', \'table rate\', \'zones\', \'merchant-center\', \'none\'],',
