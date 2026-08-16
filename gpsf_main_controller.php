@@ -1,9 +1,9 @@
 <?php
 // -----
 // Google Product Search Feeder II, main script (cronable).
-// Copyright 2023-2024, https://vinosdefrutastropicales.com
+// Copyright 2023-2026, https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.1
+// Last updated: v1.1.0
 //
 /**
  * Based on
@@ -78,7 +78,7 @@ if ($type !== 'products') {
 
 $feed = $gpsf->isFeedGeneration();
 
-require zen_get_file_directory(DIR_WS_LANGUAGES . $_SESSION['language'] . '/', 'gpsf_main_controller.php', 'false');
+zen_include_language_file('gpsf_main_controller.php', '/', 'inline');
 ?>
 <html>
 <body>

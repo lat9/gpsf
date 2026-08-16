@@ -72,7 +72,7 @@ img {
 
 <body>
     <h1>Google Product Search Feeder II for Zen Cart v1.5.6b and later, including v2.0.x and v2.1.0</h1>
-    <h3>Version 1.0.5</h3>
+    <h3>Version 1.1.0</h3>
     <p>Current Support Thread at Zen Cart Forums: <a href="https://www.zen-cart.com/showthread.php?229785-Google-Product-Search-Feeder-II-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?229785-Google-Product-Search-Feeder-II-Support-Thread</a></p>
     <p>Zen Cart Download Link: <a href="https://www.zen-cart.com/downloads.php?do=file&id=2379" target="_blank">https://www.zen-cart.com/downloads.php?do=file&id=2379</a></p>
     <p>GitHub repository: <a href="https://github.com/lat9/gpsf" target="_blank">https://github.com/lat9/gpsf</a></p>
@@ -98,15 +98,18 @@ img {
             <li>/feed/google/index.html</li>
             <li>/includes/classes/gpsfFeedGenerator.php</li>
             <li>/includes/classes/gpsf/gpsfBase.php</li>
-            <li>/includes/languages/english/gpsf_main_controller.php</li>
+            <li><span class="removed">/includes/languages/english/gpsf_main_controller.php</span> <span class="smaller">(Removed in v1.1.0)</span></li>
+            <li>/includes/languages/english/lang.gpsf_main_controller.php <span class="smaller">(Added in v1.1.0)</span></li>
             <li>/YOUR_ADMIN/gpsf_admin.php</li>
             <li>/YOUR_ADMIN/includes/auto_loaders/config.gpsf_admin.php</li>
             <li>/YOUR_ADMIN/includes/extra_datafiles/gpsf_admin_filenames.php</li>
             <li>/YOUR_ADMIN/includes/functions/extra_functions/gpsf_admin_functions.php</li>
             <li>/YOUR_ADMIN/includes/functions/extra_functions/zen_cfg_read_only.php</li>
             <li>/YOUR_ADMIN/includes/init_includes/init_gpsf_admin.php</li>
-            <li>/YOUR_ADMIN/includes/languages/english/gpsf_admin.php</li>
-            <li>/YOUR_ADMIN/includes/languages/english/extra_definitions/gpsf_admin_extra_definitions.php</li>
+            <li><span class="removed">/YOUR_ADMIN/includes/languages/english/gpsf_admin.php</span> <span class="smaller">(Removed in v1.1.0)</span></li>
+            <li>/YOUR_ADMIN/includes/languages/english/lang.gpsf_admin.php <span class="smaller">(Added in v1.1.0)</span></li>
+            <li><span class="removed">/YOUR_ADMIN/includes/languages/english/extra_definitions/gpsf_admin_extra_definitions.php</span> <span class="smaller">(Removed in v1.1.0)</span></li>
+            <li>/YOUR_ADMIN/includes/languages/english/extra_definitions/lang.gpsf_admin_extra_definitions.php <span class="smaller">(Added in v1.1.0)</span></li>
         </ol></li>
         <li>Rename the <code>YOUR_ADMIN</code> sub-directory to match your site's Zen Cart admin directory.</li>
         <li>Copy the plugin's files to your site's file-system.  Don't forget to copy the <code>/feed/google</code> directory and the <code>gpsf_main_controller.php</code>!</li>
@@ -129,6 +132,19 @@ img {
 
     <h2>Version History</h2>
     <ul>
+        <li>v1.1.0-beta1, 2026-08-16 (lat9)<ul>
+            <li>BUGFIX: Update to use array-based language files, supporting zc300 and later.</li>
+            <li>The following files were changed, <span class="added">added</span> or <span class="removed">removed</span>:<ol>
+                <li>/gpsf_main_controller.php</li>
+                <li><span class="removed">/includes/languages/english/gpsf_main_controller.php</span></li>
+                <li><span class="added">/includes/languages/english/lang.gpsf_main_controller.php</span></li>
+                <li>/YOUR_ADMIN/includes/init_includes/init_gpsf_admin.php</li>
+                <li><span class="removed">/YOUR_ADMIN/includes/languages/english/extra_definitions/gpsf_admin_extra_definitions.php</span></li>
+                <li><span class="added">/YOUR_ADMIN/includes/languages/english/extra_definitions/lang.gpsf_admin_extra_definitions.php</span></li>
+                <li><span class="removed">/YOUR_ADMIN/includes/languages/english/gpsf_admin.php</span></li>
+                <li><span class="added">/YOUR_ADMIN/includes/languages/english/lang.gpsf_admin.php</span></li>
+            </ol></li>
+        </ul></li>
         <li>v1.0.5, 2025-07-23 (lat9)<ul>
             <li>BUGFIX: Enable shipping to be set via Google Merchant Center configuration.</li>
             <li>BUGFIX: <code>g:availability</code> values need underscores.</li>
