@@ -12,10 +12,20 @@ if (!defined('IS_ADMIN_FLAG')) {
 define('GPSF_CURRENT_VERSION', '1.1.0-beta1');
 
 // -----
-// Nothing to do if an admin is not currently logged-in or if the plugin's currently installed
-// and at the current version.
+// No installation actions are required if an admin is not currently logged-in or if the plugin's
+// currently installed and at the current version ... but we'll check for the presence of the `xmlwriter`
+// PHP extension, which is required for the plugin's operation.
 //
 if (empty($_SESSION['admin_id']) || zen_config('GPSF_VERSION') === GPSF_CURRENT_VERSION) {
+    if (extension_loaded('xmlwriter') === false) {
+        $messageStack->add(sprintf(ERROR_GPSF_MISSING_XMLWRITER, BOX_GPSF), 'error');
+        $db->Execute(
+            "UPDATE " . TABLE_CONFIGURATION . "
+                SET configuration_value = 'false'
+              WHERE configuration_key = 'GPSF_ENABLED'
+              LIMIT 1"
+        );
+    }
     return;
 }
 
