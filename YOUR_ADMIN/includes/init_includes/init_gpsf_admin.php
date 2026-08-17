@@ -17,7 +17,7 @@ define('GPSF_CURRENT_VERSION', '1.1.0-beta1');
 // PHP extension, which is required for the plugin's operation.
 //
 if (empty($_SESSION['admin_id']) || zen_config('GPSF_VERSION') === GPSF_CURRENT_VERSION) {
-    if (extension_loaded('xmlwriter') === false) {
+    if (extension_loaded('xmlwriter') === false && zen_config('GPSF_ENABLED') === 'true') {
         $messageStack->add(sprintf(ERROR_GPSF_MISSING_XMLWRITER, BOX_GPSF), 'error');
         $db->Execute(
             "UPDATE " . TABLE_CONFIGURATION . "
