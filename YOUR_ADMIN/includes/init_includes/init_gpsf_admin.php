@@ -15,7 +15,7 @@ define('GPSF_CURRENT_VERSION', '1.1.0-beta1');
 // Nothing to do if an admin is not currently logged-in or if the plugin's currently installed
 // and at the current version.
 //
-if (empty($_SESSION['admin_id']) || zen_config('GPSF_VERSION') === GPSF_CURRENT_VERSION)) {
+if (empty($_SESSION['admin_id']) || zen_config('GPSF_VERSION') === GPSF_CURRENT_VERSION) {
     return;
 }
 

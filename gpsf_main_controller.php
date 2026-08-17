@@ -89,13 +89,13 @@ $offset = '';
 
 // sql limiters
 $query_limit = 0;
-if ((int)zen_config('GPSF_MAX_PRODUCTS') > 0 || (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0)) {
-    $query_limit = (isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] > 0) ? (int)$_REQUEST['limit'] : (int)zen_config('GPSF_MAX_PRODUCTS');
+if ((int)zen_config('GPSF_MAX_PRODUCTS') > 0 || (int)($_REQUEST['limit'] ?? 0) > 0) {
+    $query_limit = ((int)($_REQUEST['limit'] ?? 0) > 0) ? (int)$_REQUEST['limit'] : (int)zen_config('GPSF_MAX_PRODUCTS');
     $limit = ' LIMIT ' . $query_limit;
 }
 $query_offset = 0;
-if ((int)zen_config('GPSF_START_PRODUCTS') > 0 || (isset($_REQUEST['offset']) && (int)$_REQUEST['offset'] > 0)) {
-    $query_offset = (isset($_REQUEST['offset']) && (int)$_REQUEST['offset'] > 0) ? (int)$_REQUEST['offset'] : (int)zen_config('GPSF_START_PRODUCTS');
+if ((int)zen_config('GPSF_START_PRODUCTS') > 0 || (int)($_REQUEST['offset'] ?? 0) > 0) {
+    $query_offset = ((int)($_REQUEST['offset'] ?? 0) > 0) ? (int)$_REQUEST['offset'] : (int)zen_config('GPSF_START_PRODUCTS');
     $offset = ' OFFSET ' . $query_offset;
 }
 $outfile = DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . zen_config('GPSF_OUTPUT_FILENAME') . '_' . $type . '_' . $_SESSION['languages_code'];
