@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Google Merchant Center Feeder II for Zen Cart 1.5.6b and Later</title>
+<title>Google Merchant Center Feeder II for Zen Cart 2.0.0 and Later</title>
 <style>
 a, a:active,
 a:visited {
@@ -71,7 +71,7 @@ img {
 </head>
 
 <body>
-    <h1>Google Product Search Feeder II for Zen Cart v1.5.6b and later, including v2.0.x and v2.1.0</h1>
+    <h1>Google Product Search Feeder II for Zen Cart v2.0.0 and later, including v2.3.x and v3.0.0-dev</h1>
     <h3>Version 1.1.0</h3>
     <p>Current Support Thread at Zen Cart Forums: <a href="https://www.zen-cart.com/showthread.php?229785-Google-Product-Search-Feeder-II-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?229785-Google-Product-Search-Feeder-II-Support-Thread</a></p>
     <p>Zen Cart Download Link: <a href="https://www.zen-cart.com/downloads.php?do=file&id=2379" target="_blank">https://www.zen-cart.com/downloads.php?do=file&id=2379</a></p>
@@ -89,7 +89,7 @@ img {
     </ul>
 
     <h2>Installation and Upgrade</h2>
-    <p><em>GPSF</em><sup>2</sup> is a drop-in plugin for Zen Carts 1.5.6b and later; it's been tested with versions up to and including v2.0.0 on PHP versions 7.3 through 8.3.  The installation is simple, just follow these steps:</p>
+    <p><em>GPSF</em><sup>2</sup> is a drop-in plugin for Zen Carts 2.0.0 and later; it's been tested with Zen Cart versions up to and including v2.3.0 and v3.0.0-dev on PHP versions 8.0 through 8.5.  The installation is simple, just follow these steps:</p>
     <ol>
         <li>Unzip this plugin's zip-file; you'll see the following files and directories:<ol type="a">
             <li>/gpsf_main_controller.php</li>
@@ -105,7 +105,7 @@ img {
             <li>/YOUR_ADMIN/includes/auto_loaders/config.gpsf_admin.php</li>
             <li>/YOUR_ADMIN/includes/extra_datafiles/gpsf_admin_filenames.php</li>
             <li>/YOUR_ADMIN/includes/functions/extra_functions/gpsf_admin_functions.php</li>
-            <li>/YOUR_ADMIN/includes/functions/extra_functions/zen_cfg_read_only.php</li>
+            <li><span class="removed">/YOUR_ADMIN/includes/functions/extra_functions/zen_cfg_read_only.php</span> <span class="smaller">(Removed in v1.1.0)</span></li>
             <li>/YOUR_ADMIN/includes/functions/extra_functions/zen_config.php <span class="smaller">(Added in v1.1.0)</span></li>
             <li>/YOUR_ADMIN/includes/init_includes/init_gpsf_admin.php</li>
             <li><span class="removed">/YOUR_ADMIN/includes/languages/english/gpsf_admin.php</span> <span class="smaller">(Removed in v1.1.0)</span></li>
@@ -137,12 +137,14 @@ img {
         <li>v1.1.0-beta1, 2026-08-16 (lat9)<ul>
             <li>BUGFIX: Update to use array-based language files, supporting zc300 and later.</li>
             <li>INTROP: Use and provide a polyfill for <code>zen_config</code>, introduced in zc300.</li>
+            <li>CHANGE: Drop support for Zen Cart versions prior to 2.0.0 and PHP versions prior to 8.0.</li>
             <li>The following files were changed, <span class="added">added</span> or <span class="removed">removed</span>:<ol>
                 <li>/gpsf_main_controller.php</li>
                 <li>/includes/classes/gpsfFeedGenerator.php</li>
                 <li><span class="added">/includes/functions/extra_functions/zen_config.php</span></li>
                 <li><span class="removed">/includes/languages/english/gpsf_main_controller.php</span></li>
                 <li><span class="added">/includes/languages/english/lang.gpsf_main_controller.php</span></li>
+                <li><span class="removed">/YOUR_ADMIN/includes/functions/extra_functions/zen_cfg_read_only.php</span></li>
                 <li><span class="added">/YOUR_ADMIN/includes/functions/extra_functions/zen_config.php</span></li>
                 <li>/YOUR_ADMIN/gpsf_admin.php</li>
                 <li>/YOUR_ADMIN/includes/init_includes/init_gpsf_admin.php</li>

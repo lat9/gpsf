@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 // -----
 // Google Product Search Feeder II, admin tool.
 // Copyright 2023-2026, https://vinosdefrutastropicales.com
@@ -24,31 +26,25 @@ class gpsfFeedGenerator
 {
     const FEED_OUTPUT_FREQUENCY = 2500;
 
-    protected
-        $productsSkipped = [],
-        $categoryInfoCache = [],
-        $defaultGoogleProductCategory,
-        $attributeVariants,
+    protected array $productsSkipped = [];
+    protected array $categoryInfoCache = [];
+    protected bool|string $defaultGoogleProductCategory;
+    protected array $attributeVariants;
+    protected ?array $extensions;
+    protected array $feedParameters = [];
+    protected $fp;
+    protected string $currencyCode;
+    protected int|float $currencyValue;
+    protected \XMLWriter $xmlWriter;
+    protected \queryFactoryResult $products;
+    protected int $totalProducts = 0;
+    protected int $productsProcessed = 0;
+    protected array $taxRates = [];
+    protected array $identifiersSet;
+    protected string $identifiersList;
 
-        $extensions,
-
-        $feedParameters = [],
-
-        $fp,
-        $currencyCode,
-        $currencyValue,
-        $xmlWriter,
-        $sniffer,
-
-        $products,
-        $totalProducts = 0,
-        $productsProcessed = 0,
-        $taxRates = [],
-        $identifiersSet,
-        $identifiersList,
-
-        $alternateImageUrl,
-        $alternateImageUrlIsLocal;
+    protected false|string $alternateImageUrl;
+    protected bool $alternateImageUrlIsLocal;
 
     public function __construct()
     {
@@ -83,7 +79,7 @@ class gpsfFeedGenerator
         // in now for use within the feed's processing.
         //
         $dir_fs_gpsf_classes = DIR_FS_CATALOG . DIR_WS_CLASSES . 'gpsf/';
-        if (file_exists($dir_fs_gpsf_classes . 'gpsfBase.php')) {
+        if (is_file($dir_fs_gpsf_classes . 'gpsfBase.php')) {
             $base_loaded = false;
             foreach (glob(DIR_FS_CATALOG . DIR_WS_CLASSES . 'gpsf/*.php') as $next_file) {
                 $file_pathinfo = pathinfo($next_file);
@@ -99,33 +95,31 @@ class gpsfFeedGenerator
                 $this->extensions[] = new $file_pathinfo['filename']();
             }
 
-            if (class_exists('Zencart\PluginManager\PluginManager')) {
-                $pluginManager = new PluginManager(new PluginControl(), new \App\Models\PluginControlVersion());
-                $installedPlugins = $pluginManager->getInstalledPlugins();
-                foreach ($installedPlugins as $plugin) {
-                    $dir_plugin_fs_gpsf_classes = DIR_FS_CATALOG . 'zc_plugins/' . $plugin['unique_key'] . '/' . $plugin['version'] . '/catalog/includes/classes/gpsf/';
-                    if (!is_dir($dir_plugin_fs_gpsf_classes)) {
+            $pluginManager = new PluginManager(new PluginControl(), new \App\Models\PluginControlVersion());
+            $installedPlugins = $pluginManager->getInstalledPlugins();
+            foreach ($installedPlugins as $plugin) {
+                $dir_plugin_fs_gpsf_classes = DIR_FS_CATALOG . 'zc_plugins/' . $plugin['unique_key'] . '/' . $plugin['version'] . '/catalog/includes/classes/gpsf/';
+                if (!is_dir($dir_plugin_fs_gpsf_classes)) {
+                    continue;
+                }
+                foreach (glob($dir_plugin_fs_gpsf_classes . '*.php') as $next_file) {
+                    $extension_class = pathinfo($next_file, PATHINFO_FILENAME);
+                    if (class_exists($extension_class)) {
                         continue;
                     }
-                    foreach (glob($dir_plugin_fs_gpsf_classes . '*.php') as $next_file) {
-                        $extension_class = pathinfo($next_file, PATHINFO_FILENAME);
-                        if (class_exists($extension_class)) {
-                            continue;
-                        }
-                        if ($base_loaded === false) {
-                            $base_loaded = true;
-                            require $dir_fs_gpsf_classes . 'gpsfBase.php';
-                            $this->extensions = [];
-                        }
-                        require $next_file;
-                        $this->extensions[] = new $extension_class();
+                    if ($base_loaded === false) {
+                        $base_loaded = true;
+                        require $dir_fs_gpsf_classes . 'gpsfBase.php';
+                        $this->extensions = [];
                     }
+                    require $next_file;
+                    $this->extensions[] = new $extension_class();
                 }
             }
         }
     }
 
-    public function setFeedParameters($feed_parameters)
+    public function setFeedParameters(string $feed_parameters): bool
     {
         $feed = 'yes';
         $type = 'products';
@@ -133,11 +127,11 @@ class gpsfFeedGenerator
 
         if ($feed_parameters !== '') {
             foreach (explode('_', $feed_parameters) as $next_param) {
-                if (strpos($next_param, 'f') === 0) {
+                if (str_starts_with($next_param, 'f')) {
                     if ($next_param !== 'fy') {
                         $feed = 'no';
                     }
-                } elseif (strpos($next_param, 't') === 0) {
+                } elseif (str_starts_with($next_param, 't')) {
                     if ($next_param === 'td') {
                         $type = 'documents';
                     } elseif ($next_param === 'tn') {
@@ -156,20 +150,20 @@ class gpsfFeedGenerator
         ];
         return $feed_parameters_ok;
     }
-    public function isFeedGeneration()
+    public function isFeedGeneration(): string
     {
         return $this->feedParameters['feed'];
     }
-    public function getFeedType()
+    public function getFeedType(): string
     {
         return $this->feedParameters['type'];
     }
 
-    public function getTotalProducts()
+    public function getTotalProducts(): int
     {
         return $this->totalProducts;
     }
-    public function getTotalProductsProcessed()
+    public function getTotalProductsProcessed(): int
     {
         return $this->productsProcessed;
     }
@@ -178,7 +172,7 @@ class gpsfFeedGenerator
     // Previously inline in google_product_search.php.  Moving all feed generation
     // into the class.
     //
-    public function generateProductsFeed($fp, $limit, $offset)
+    public function generateProductsFeed($fp, string $limit, string $offset): void
     {
         global $currencies;
 
@@ -206,7 +200,7 @@ class gpsfFeedGenerator
             // bypassed for the feed.  Also give an extension the chance to modify the
             // product's name (g:title).
             //
-            if ($this->extensions !== null) {
+            if (isset($this->extensions)) {
                 $extension_bypass_product = false;
                 foreach ($this->extensions as $extension_class) {
                     $extension_message = $extension_class->bypassProductInFeed($products_id, $product);
@@ -246,7 +240,7 @@ class gpsfFeedGenerator
             // -----
             // See if any GPSF extensions have updates for the product's pricing.
             //
-            if ($this->extensions !== null) {
+            if (isset($this->extensions)) {
                 foreach ($this->extensions as $extension_class) {
                     list($price, $sale_price) = $extension_class->getProductPricing($products_id, $product, $price, $sale_price);
                 }
@@ -290,7 +284,7 @@ class gpsfFeedGenerator
             // then give any defined extension the opportunity to extend that information.
             //
             $products_description = $product['products_description'];
-            if ($this->extensions !== null) {
+            if (isset($this->extensions)) {
                 foreach ($this->extensions as $extension_class) {
                     $products_description = $extension_class->modifyProductsDescription($products_id, $products_description, $product);
                 }
@@ -307,7 +301,7 @@ class gpsfFeedGenerator
             // Determine the product's 'title', which must be at least 3 characters long.  This is
             // either its meta-tag title (if enabled and not empty) or the product's name otherwise.
             //
-            if (GPSF_META_TITLE === 'true' && !empty($product['metatags_title'])) {
+            if (zen_config('GPSF_META_TITLE') === 'true' && !empty($product['metatags_title'])) {
                 $products_title = $this->sanitizeXml($product['metatags_title']);
             } else {
                 $products_title = $this->sanitizeXml($products_name);
@@ -319,7 +313,7 @@ class gpsfFeedGenerator
                 continue;
             }
 
-            list($categories_list, $cPath) = $this->getCategoryInfo($product['master_categories_id']);
+            [$categories_list, $cPath] = $this->getCategoryInfo($product['master_categories_id']);
             $cPath_href = (zen_config('GPSF_USE_CPATH') === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
             $link = zen_href_link($product['type_handler'] . '_info', $cPath_href . 'products_id=' . $products_id, 'NONSSL', false);
 
@@ -330,7 +324,7 @@ class gpsfFeedGenerator
                 $id = $this->sanitizeXml($product['products_model']);
             }
 
-            if ($this->extensions !== null) {
+            if (isset($this->extensions)) {
                 foreach ($this->extensions as $extension_class) {
                     $id = $extension_class->getProductsFeedId($products_id, $id, $product);
                 }
@@ -357,13 +351,13 @@ class gpsfFeedGenerator
             // handler, let that handler make any modifications necessary.
             //
             $custom_fields = (zen_has_product_attributes($products_id, 'false') === false) ? [] : $this->getProductsAttributes($products_id);
-            if ($this->extensions !== null) {
+            if (isset($this->extensions)) {
                 $custom_fields = $this->getExtensionsAttributes($products_id, $product, $custom_fields);
             }
 
             // -----
             // Set a string version of the identifiers as {xx}[,{xx}]... so that the
-            // values can be found with a 'quick' strpos instead of an array lookup.
+            // values can be found with a 'quick' str_contains instead of an array lookup.
             //
             $this->identifiersList = '{' . implode('}{', array_keys($custom_fields)) . '}';
             $this->identifiersSet = $custom_fields;
@@ -406,7 +400,8 @@ class gpsfFeedGenerator
 
     // by checking for an array, sub-attributes of an xml element are now allowed.
     // pRoseLA
-    private function writeCustomFields(array $array) {
+    private function writeCustomFields(array $array): void
+    {
         foreach ($array as $key => $value) {
             if ($value === false || $key === '') {
                 continue;
@@ -421,7 +416,7 @@ class gpsfFeedGenerator
         }
     }
 
-    protected function initializeProductsFeed($limit, $offset)
+    protected function initializeProductsFeed(string $limit, string $offset): void
     {
         global $db, $currencies;
 
@@ -433,7 +428,7 @@ class gpsfFeedGenerator
         $this->alternateImageUrlIsLocal = false;
         $gpsf_alternate_image_url = zen_config('GPSF_ALTERNATE_IMAGE_URL');
         if ($gpsf_alternate_image_url !== '') {
-            if (strpos($gpsf_alternate_image_url, HTTP_SERVER . '/' . DIR_WS_IMAGES) !== 0) {
+            if (!str_starts_with($gpsf_alternate_image_url, HTTP_SERVER . '/' . DIR_WS_IMAGES)) {
                 $this->alternateImageUrl = $gpsf_alternate_image_url;
             } else {
                 $this->alternateImageUrlIsLocal = true;
@@ -476,7 +471,7 @@ class gpsfFeedGenerator
         // Determine any additional fields and/or tables to be gathered from the database, depending
         // on configuration and extensions' additions.
         //
-        list($additional_fields, $additional_tables, $additional_where_clause) = $this->getAdditionalQueryFields();
+        [$additional_fields, $additional_tables, $additional_where_clause] = $this->getAdditionalQueryFields();
 
         // -----
         // Initialize the products' query to pull the fields required for the to-be-generated feed.
@@ -556,7 +551,7 @@ class gpsfFeedGenerator
         $this->defaultGoogleProductCategory = (zen_config('GPSF_DEFAULT_PRODUCT_CATEGORY') === '') ? false : $this->sanitizeXml(zen_config('GPSF_DEFAULT_PRODUCT_CATEGORY'));
     }
 
-    protected function getAdditionalQueryFields()
+    protected function getAdditionalQueryFields(): array
     {
         $additional_fields = '';
         $additional_tables = '';
@@ -576,9 +571,9 @@ class gpsfFeedGenerator
         // additional fields and/or tables that should be included in the products'
         // gathering query or any additional conditions added to the feed's "where" claues.
         //
-        if ($this->extensions !== null) {
+        if (isset($this->extensions)) {
             foreach ($this->extensions as $extension_class) {
-                list($extension_fields, $extension_tables, $extension_where_clause) = $extension_class->getAdditionalQueryFields($additional_fields, $additional_tables);
+                [$extension_fields, $extension_tables, $extension_where_clause] = $extension_class->getAdditionalQueryFields($additional_fields, $additional_tables);
                 $extension_fields = trim($extension_fields, ',');
                 if ($extension_fields !== '') {
                     $additional_fields .= ', ' . $extension_fields;
@@ -589,14 +584,12 @@ class gpsfFeedGenerator
         }
 
         // -----
-        // If the site's products table includes products_width, products_length or
-        // products_height fields and those additional fields aren't already
+        // If the products_width, products_length or products_height fields aren't already
         // present in the $additional_fields to grab, add them in.
         //
-        global $sniffer;
         foreach (['products_length', 'products_width', 'products_height'] as $next_field) {
             $field_name = 'p.' . $next_field;
-            if (strpos($additional_fields, $field_name) !== false || $sniffer->field_exists(TABLE_PRODUCTS, $next_field) === false) {
+            if (str_contains($additional_fields, $field_name)) {
                 continue;
             }
             $additional_fields .= ', ' . $field_name;
@@ -609,9 +602,9 @@ class gpsfFeedGenerator
         ];
     }
 
-    protected function addProductsAdditionalImages($products_image)
+    protected function addProductsAdditionalImages($products_image): void
     {
-       if ($this->extensions !== null) {
+       if (isset($this->extensions)) {
             foreach ($this->extensions as $extension_class) {
                 $extension_additional_image_urls = $extension_class->getProductsAdditionalImagesUrls($products_image);
                 if (!is_array($extension_additional_image_urls)) {
@@ -662,7 +655,7 @@ class gpsfFeedGenerator
     }
 
     // creates the url for the products_image
-    protected function getProductsImageUrl($products_image, $formatting_additional_images = false)
+    protected function getProductsImageUrl(string $products_image, bool $formatting_additional_images = false): false|string
     {
         // -----
         // See if an extension wants to override the determination of a product's base image.
@@ -673,7 +666,7 @@ class gpsfFeedGenerator
         // - (string)URL when returning the image's URL.
         // - null if the product's image, and thus the product, should not be included in the feed.
         //
-        if ($formatting_additional_images === false && $this->extensions !== null) {
+        if ($formatting_additional_images === false && isset($this->extensions)) {
             foreach ($this->extensions as $extension_class) {
                 $extension_image_url = $extension_class->getProductsImageUrl($products_image);
                 if ($extension_image_url !== false) {
@@ -697,9 +690,9 @@ class gpsfFeedGenerator
         $products_image_large = $products_image_base . zen_config('IMAGE_SUFFIX_LARGE') . $products_image_extension;
 
         // check for a large image else use medium else use small
-        if (file_exists(DIR_WS_IMAGES . 'large/' . $products_image_large)) {
+        if (is_file(DIR_WS_IMAGES . 'large/' . $products_image_large)) {
             $products_image_large = DIR_WS_IMAGES . 'large/' . $products_image_large;
-        } elseif (!file_exists(DIR_WS_IMAGES . 'medium/' . $products_image_medium)) {
+        } elseif (!is_file(DIR_WS_IMAGES . 'medium/' . $products_image_medium)) {
                 $products_image_large = DIR_WS_IMAGES . $products_image;
         } else {
             $products_image_large = DIR_WS_IMAGES . 'medium/' . $products_image_medium;
@@ -708,7 +701,7 @@ class gpsfFeedGenerator
         // -----
         // If the image isn't found, return (bool)false; it's required!
         //
-        if (!file_exists($products_image_large)) {
+        if (!is_file($products_image_large)) {
             return false;
         }
 
@@ -722,7 +715,7 @@ class gpsfFeedGenerator
         return $this->sanitizeLink($products_image_link);
     }
 
-    protected function sanitizeLink($link)
+    protected function sanitizeLink(string $link): string
     {
         $ampersand = (zen_config('GPSF_CONVERT_AMPERSANDS') === 'false') ? '&' : '%26';
         return str_replace(
@@ -740,9 +733,9 @@ class gpsfFeedGenerator
         );
     }
 
-    protected function formatPriceElement($price)
+    protected function formatPriceElement(int|float $price): string
     {
-        return number_format($price, 2, '.', '') . ' ' . $this->currencyCode;
+        return number_format((float)$price, 2, '.', '') . ' ' . $this->currencyCode;
     }
 
     // -----
@@ -750,8 +743,9 @@ class gpsfFeedGenerator
     // the category information based on the master_categories_id as a performance
     // enhancement.
     //
-    protected function getCategoryInfo($master_categories_id)
+    protected function getCategoryInfo(int|string $master_categories_id): array
     {
+        $master_categories_id = (int)$master_categories_id;
         if (isset($this->categoryInfoCache[$master_categories_id])) {
             $category_names = $this->categoryInfoCache[$master_categories_id]['category_names'];
             $cPath = $this->categoryInfoCache[$master_categories_id]['cPath'];
@@ -776,7 +770,7 @@ class gpsfFeedGenerator
     // -----
     // Create a product's "base" feed information (no attributes).  Previously named create_regular_product
     //
-    protected function createBaseProduct($id, $product, $products_title, $tax_rate, $price, $sale_price)
+    protected function createBaseProduct(string $id, array $product, string $products_title, mixed $tax_rate, int|float $price, int|float $sale_price): void
     {
         $this->xmlWriter->startElement('g:title');
         $this->xmlWriter->writeCData($this->substr($products_title, 0, 150-12));
@@ -882,7 +876,7 @@ class gpsfFeedGenerator
     // Gathers the specified product's feed-related attributes.  Was previously in-line in
     // /google_product_search.php.
     //
-    protected function getProductsAttributes($products_id)
+    protected function getProductsAttributes(string $products_id): array
     {
         global $db;
 
@@ -895,7 +889,7 @@ class gpsfFeedGenerator
                     INNER JOIN " . TABLE_PRODUCTS_OPTIONS . " po
                         ON po.products_options_id = pa.options_id
                        AND po.language_id = " . $_SESSION['languages_id'] . "
-              WHERE pa.products_id = $products_id
+              WHERE pa.products_id = " . (int)$products_id . "
               ORDER BY products_attributes_id ASC"
         );
 
@@ -921,7 +915,7 @@ class gpsfFeedGenerator
 
     protected function getExtensionsAttributes(string $products_id, array $product, array $custom_fields): array
     {
-        list($categories_list, $cPath) = $this->getCategoryInfo($product['master_categories_id']);
+        [$categories_list, $cPath] = $this->getCategoryInfo($product['master_categories_id']);
         foreach ($this->extensions as $extension_class) {
             $extension_custom_fields = $extension_class->getProductsAttributes($products_id, $product, $categories_list, $cPath, $custom_fields);
             $new_custom_fields = $this->processCustomFields($extension_custom_fields);
@@ -948,18 +942,18 @@ class gpsfFeedGenerator
     }
 
     // takes already created $item and adds universal attributes from $products
-    protected function addUniversalAttributes($product, $products_description, $products_image)
+    protected function addUniversalAttributes(array $product, string $products_description, string $products_image): void
     {
         $unique_identifiers = 0;
 
-        list($categories_list, $cPath) = $this->getCategoryInfo($product['master_categories_id']);
+        [$categories_list, $cPath] = $this->getCategoryInfo($product['master_categories_id']);
 
         // -----
         // If the product's 'brand' has been overridden by a site-specific extension, simply
         // indicate that a unique-identifier has been supplied; other, use the product's
         // manufacturer's name, if supplied.
         //
-        if (strpos($this->identifiersList, '{brand}') !== false) {
+        if (str_contains($this->identifiersList, '{brand}')) {
             $unique_identifiers++;
         } elseif (!empty($product['manufacturers_name'])) {
             $unique_identifiers++;
@@ -972,7 +966,7 @@ class gpsfFeedGenerator
         // If the 'product_type' hasn't been overridden by a site-specific extension,
         // determine the default value to be used.
         //
-        if (strpos($this->identifiersList, '{product_type}') === false) {
+        if (!str_contains($this->identifiersList, '{product_type}')) {
             $gpsf_product_type = zen_config('GPSF_PRODUCT_TYPE');
             if ($gpsf_product_type === 'default' && zen_config('GPSF_DEFAULT_PRODUCT_TYPE') !== '') {
                 $product_type = htmlentities(zen_config('GPSF_DEFAULT_PRODUCT_TYPE'));
@@ -1006,13 +1000,13 @@ class gpsfFeedGenerator
         // If the product's link hasn't been overridden by a site-specific extension,
         // add the default value.
         //
-        if (strpos($this->identifiersList, '{link}') === false) {
+        if (!str_contains($this->identifiersList, '{link}')) {
             $cPath_href = (zen_config('GPSF_USE_CPATH') === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
             $link = zen_href_link($product['type_handler'] . '_info', $cPath_href . 'products_id=' . $product['products_id'], 'NONSSL', false);
             $this->xmlWriter->writeElement('g:link', $this->sanitizeLink($link));
         }
 
-        if (strpos($this->identifiersList, '{mpn}') === false) {
+        if (!str_contains($this->identifiersList, '{mpn}')) {
             if ($product['products_model'] !== '') {
                 $unique_identifiers++;
                 $this->xmlWriter->writeElement('g:mpn', $this->sanitizeXml($product['products_model']));
@@ -1021,7 +1015,7 @@ class gpsfFeedGenerator
             $unique_identifiers++;
         }
 
-        if (strpos($this->identifiersList, '{gtin}') !== false && $this->identifiersSet['gtin'] !== false) {
+        if (str_contains($this->identifiersList, '{gtin}') && $this->identifiersSet['gtin'] !== false) {
             $unique_identifiers++;
         }
 
@@ -1029,7 +1023,7 @@ class gpsfFeedGenerator
             $this->xmlWriter->writeElement('g:identifier_exists', 'false');
         }
 
-        if (strpos($this->identifiersList, '{condition}') === false) {
+        if (!str_contains($this->identifiersList, '{condition}')) {
             $this->xmlWriter->writeElement('g:condition', zen_config('GPSF_CONDITION'));
         }
 
@@ -1037,20 +1031,20 @@ class gpsfFeedGenerator
         $this->xmlWriter->writeCData($this->substr(preg_replace('/\s+/', ' ', $products_description), 0, 5000-12));
         $this->xmlWriter->endElement();
 
-        if ($this->defaultGoogleProductCategory !== false && strpos($this->identifiersList, '{google_product_category}') === false) {
+        if ($this->defaultGoogleProductCategory !== false && !str_contains($this->identifiersList, '{google_product_category}')) {
             $this->xmlWriter->startElement('g:google_product_category');
             $this->xmlWriter->writeCData($this->defaultGoogleProductCategory);
             $this->xmlWriter->endElement();
         }
     }
 
-    protected function substr($string, $start, $length): string
+    protected function substr(string $string, int $start, int $length): string
     {
         return (function_exists('mb_substr')) ?
             mb_substr($string, $start, $length, CHARSET) : substr($string, $start, $length);
     }
 
-    protected function sanitizeString($str): string
+    protected function sanitizeString(mixed $str): string
     {
         $str = (string)$str;
         $str = str_replace(
@@ -1079,7 +1073,7 @@ class gpsfFeedGenerator
         return trim(strip_tags($str));
     }
 
-    protected function sanitizeXml($str)
+    protected function sanitizeXml(string $str): string
     {
         $str = $this->sanitizeString($str);
         if (zen_config('GPSF_XML_SANITIZATION') === 'false') {
@@ -1119,7 +1113,7 @@ class gpsfFeedGenerator
         return $strout;
     }
 
-    protected function transcribe_cp1252_to_latin1($cp1252)
+    protected function transcribe_cp1252_to_latin1(string $cp1252): string
     {
         return strtr(
             $cp1252,
@@ -1136,7 +1130,7 @@ class gpsfFeedGenerator
         );
     }
 
-    protected function getProductsExpirationDate($base_date)
+    protected function getProductsExpirationDate(string $base_date): string
     {
         if (zen_config('GPSF_EXPIRATION_BASE') === 'now' || $base_date === '0') {
             $expiration_date = time();
@@ -1152,7 +1146,7 @@ class gpsfFeedGenerator
     // Finalize the products' feed by closing the XML elements started by
     // the initializeProductsFeed method.
     //
-    protected function finalizeProductsFeed()
+    protected function finalizeProductsFeed(): void
     {
         $this->xmlWriter->endElement(); // end channel
         $this->xmlWriter->endElement(); // end rss
@@ -1169,7 +1163,7 @@ class gpsfFeedGenerator
 
 // SHIPPING FUNCTIONS //
 
-    protected function getCountriesIsoCode2($countries_id)
+    protected function getCountriesIsoCode2(string|int $countries_id): string
     {
         global $db;
 
@@ -1183,7 +1177,7 @@ class gpsfFeedGenerator
         return ($countries->EOF) ? '??' : $countries->fields['countries_iso_code_2'];
     }
 
-    protected function getProductsShippingRate($products_id, $products_weight, $products_price, $product_is_always_free_shipping)
+    protected function getProductsShippingRate(string $products_id, string $products_weight, int|float $products_price, string $product_is_always_free_shipping): int|float
     {
         global $currencies;
 
@@ -1191,7 +1185,7 @@ class gpsfFeedGenerator
         // See if there's an extension-override for the shipping rate for the product.  If the response is less than 0,
         // then continue on to do the built-in calculations.
         //
-        if ($this->extensions !== null) {
+        if (isset($this->extensions)) {
             foreach ($this->extensions as $extension_class) {
                 $rate = $extension_class->getProductsShippingRate($products_id, $products_weight, $products_price, $product_is_always_free_shipping);
                 if ($rate >= 0) {
@@ -1236,7 +1230,7 @@ class gpsfFeedGenerator
         return $rate;
     }
 
-    protected function numinixGetTableRate($products_weight, $products_price)
+    protected function numinixGetTableRate(string $products_weight, int|float $products_price): int|float
     {
         switch (zen_config('MODULE_SHIPPING_TABLE_MODE')) {
             case 'price':
@@ -1256,7 +1250,7 @@ class gpsfFeedGenerator
         $table_cost = preg_split("/[:,]/" , zen_config('MODULE_SHIPPING_TABLE_COST', ''));
         for ($i = 0, $n = count($table_cost); $i < $n; $i += 2) {
             if ($rate_basis <= $table_cost[$i]) {
-                if (strpos($table_cost[$i+1], '%') !== false) {
+                if (str_contains($table_cost[$i+1], '%')) {
                     $shipping = ($table_cost[$i+1] / 100) * $products_price;
                 } else {
                     $shipping = $table_cost[$i+1];
@@ -1268,7 +1262,7 @@ class gpsfFeedGenerator
         return $shipping + zen_str_to_numeric(zen_config('MODULE_SHIPPING_TABLE_HANDLING'));
     }
 
-    protected function numinixGetZonesRate($products_weight, $products_price, $table_zone)
+    protected function numinixGetZonesRate(string $products_weight, int|float $products_price, string $table_zone): int|float
     {
         switch (zen_config('MODULE_SHIPPING_ZONES_METHOD')) {
             case 'Price':
@@ -1285,11 +1279,11 @@ class gpsfFeedGenerator
 
         $shipping = 0;
 
-        $zones_cost = constant('MODULE_SHIPPING_ZONES_COST_' . $table_zone);
+        $zones_cost = zen_config('MODULE_SHIPPING_ZONES_COST_' . $table_zone);
         $zones_table = preg_split("/[:,]/", $zones_cost);
         for ($i = 0, $n = count($zones_table); $i < $n; $i += 2) {
             if ($rate_basis <= $zones_table[$i]) {
-                if (strpos($zones_table[$i+1], '%') !== false) {
+                if (str_contains($zones_table[$i+1], '%')) {
                     $shipping = ($zones_table[$i+1] / 100) * $products_price;
                 } else {
                     $shipping = $zones_table[$i+1];
@@ -1298,7 +1292,7 @@ class gpsfFeedGenerator
             }
         }
 
-        return $shipping + constant('MODULE_SHIPPING_ZONES_HANDLING_' . $table_zone);
+        return $shipping + zen_str_to_numeric(zen_config('MODULE_SHIPPING_ZONES_HANDLING_' . $table_zone));
     }
 
     // =====
@@ -1309,7 +1303,7 @@ class gpsfFeedGenerator
     // Determine the product sale price to include in the feed.  In the original implementation, this method
     // was named google_get_products_actual_price.
     //
-    protected function getProductsSalePrice($products_id, $display_normal_price)
+    protected function getProductsSalePrice(string $products_id, mixed $display_normal_price): mixed
     {
         $display_sale_price = zen_get_products_special_price($products_id, false);
         if ($display_sale_price != 0) {
@@ -1325,9 +1319,9 @@ class gpsfFeedGenerator
         return $products_actual_price;
     }
 
-    public function microtime_float()
+    public function microtime_float(): float
     {
-       list($usec, $sec) = explode(' ', microtime());
+       [$usec, $sec] = explode(' ', microtime());
        return ((float)$usec + (float)$sec);
     }
 
@@ -1355,12 +1349,12 @@ class gpsfFeedGenerator
     // (bool)true if either the debug is not enabled or the maximum number of skipped products
     //      has not been reached.
     //
-    protected function addSkippedProduct($products_id, $message): bool
+    protected function addSkippedProduct(string|int $products_id, string $message): bool
     {
         if (zen_config('GPSF_DEBUG') === 'false') {
             return true;
         }
-        $this->productsSkipped[$products_id] = $message;
+        $this->productsSkipped[(int)$products_id] = $message;
         $gpsf_debug_max_skipped = zen_config('GPSF_DEBUG_MAX_SKIPPED');
         if ($gpsf_debug_max_skipped !== '' && count($this->productsSkipped) > (int)$gpsf_debug_max_skipped) {
             $this->productsSkipped['max-out'] = 'Maximum number of skipped products reached (' . (int)$gpsf_debug_max_skipped . '); feed terminating.';
@@ -1369,7 +1363,7 @@ class gpsfFeedGenerator
         return true;
     }
 
-    public function googleOutputDebug()
+    public function googleOutputDebug(): void
     {
         if (zen_config('GPSF_DEBUG') === 'true' && $this->productsSkipped !== []) {
             print('<pre>' . print_r($this->productsSkipped, true) . '</pre>');

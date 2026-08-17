@@ -17,9 +17,11 @@
  */
 require 'includes/application_top.php';
 
-if (isset($_GET['action']) && $_GET['action'] === 'delete') {
-    if (is_file(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . $_GET['file'])) {
-        unlink(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . $_GET['file']);
+if (($_GET['action'] ?? '') === 'delete') {
+    if (!empty($_GET['file']) && str_ends_with((string)$_GET['file'], '.xml')) {
+        if (is_file(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . $_GET['file'])) {
+            unlink(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . $_GET['file']);
+        }
     }
     zen_redirect(zen_href_link(FILENAME_GPSF_ADMIN));
 }
@@ -73,45 +75,13 @@ unset($products_count);
 // If not unset, the variable $key will be filled in for an empty GPSF_ACCESS_KEY!
 //
 unset($key);
-
-// -----
-// The initial version of GPSF-2 supports zc156 through zc200.  Future versions will be removing
-// the 'legacy' stylesheets and javascript provided in previous versions.  As such, determine
-// the Zen Cart base version in use to maintain the downwardly-compatible use of this module.
-//
-$gspf_zc_version = PROJECT_VERSION_MAJOR . '.' . PROJECT_VERSION_MINOR;
-$admin_html_head_supported = ($gspf_zc_version >= '1.5.7');
-$body_onload = ($admin_html_head_supported === true) ? '' : ' onload="init();"';
 ?>
 <!doctype html>
 <html <?= HTML_PARAMS ?>>
 <head>
-<?php
-if ($admin_html_head_supported === true) {
-    require DIR_WS_INCLUDES . 'admin_html_head.php';
-} else {
-?>
-<meta charset="<?= CHARSET ?>">
-<title><?= TITLE ?></title>
-<link rel="stylesheet" href="includes/stylesheet.css">
-<link rel="stylesheet" href="includes/cssjsmenuhover.css" media="all" id="hoverJS">
-<script src="includes/menu.js"></script>
-<script src="includes/general.js"></script>
-<script>
-function init()
-{
-    cssjsmenu('navbar');
-    if (document.getElementById) {
-        var kill = document.getElementById('hoverJS');
-        kill.disabled = true;
-    }
-}
-</script>
-<?php
-}
-?>
+    <?php require DIR_WS_INCLUDES . 'admin_html_head.php'; ?>
 </head>
-<body<?= $body_onload ?>>
+<body>
     <?php require DIR_WS_INCLUDES . 'header.php'; ?>
 <?php
 $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTROLLER;
