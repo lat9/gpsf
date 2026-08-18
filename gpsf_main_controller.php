@@ -89,20 +89,29 @@ $offset = '';
 
 // sql limiters
 $query_limit = 0;
-if ((int)zen_config('GPSF_MAX_PRODUCTS') > 0 || (int)($_REQUEST['limit'] ?? 0) > 0) {
-    $query_limit = ((int)($_REQUEST['limit'] ?? 0) > 0) ? (int)$_REQUEST['limit'] : (int)zen_config('GPSF_MAX_PRODUCTS');
+if ((int)zen_config('GPSF_MAX_PRODUCTS') > 0 || (int)($_REQUEST['limit'] ?? -1) > 0) {
+    $query_limit = ((int)($_REQUEST['limit'] ?? -1) > 0) ? (int)$_REQUEST['limit'] : (int)zen_config('GPSF_MAX_PRODUCTS');
     $limit = ' LIMIT ' . $query_limit;
 }
+
+// -----
+// Note that for an offset to be used, it must be accompanied by a limit! No limit, no offset!
+//
 $query_offset = 0;
-if ((int)zen_config('GPSF_START_PRODUCTS') > 0 || (int)($_REQUEST['offset'] ?? 0) > 0) {
-    $query_offset = ((int)($_REQUEST['offset'] ?? 0) > 0) ? (int)$_REQUEST['offset'] : (int)zen_config('GPSF_START_PRODUCTS');
-    $offset = ' OFFSET ' . $query_offset;
+$no_limit_no_offset = '';
+if ((int)zen_config('GPSF_START_PRODUCTS') > 0 || (int)($_REQUEST['offset'] ?? -1) > 0) {
+    $query_offset = ((int)($_REQUEST['offset'] ?? -1) > 0) ? (int)$_REQUEST['offset'] : (int)zen_config('GPSF_START_PRODUCTS');
+    if ($limit === '') {
+        $no_limit_no_offset = "<p><b>Offset value ($query_offset) ignored, since no limit value was supplied.</b></p>";
+    } else {
+        $offset = " OFFSET $query_offset";
+    }
 }
 $outfile = DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . zen_config('GPSF_OUTPUT_FILENAME') . '_' . $type . '_' . $_SESSION['languages_code'];
-if ($query_limit > 0) {
+if ($limit !== '') {
     $outfile .= '_' . $query_limit;
 }
-if ($query_offset > 0) {
+if ($offset !== '') {
     $outfile .= '_' . $query_offset;
 }
 $outfile .= '.xml'; //example domain_products.xml
@@ -112,6 +121,7 @@ echo '<p>' . sprintf(TEXT_GPSF_STARTED, zen_config('GPSF_VERSION')) . '</p>';
 echo '<p>' . TEXT_GPSF_FILE_LOCATION . $outfile . '</p>';
 echo '<p>Processing: Feed - ' . ($feed === 'yes' ? 'Yes' : 'No') . '</p>';
 echo '<p>PHP Memory Limit: ' . ini_get('memory_limit') . '</p>';
+echo $no_limit_no_offset;
 ob_flush();
 flush();
 
