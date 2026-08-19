@@ -18,7 +18,7 @@
 require 'includes/application_top.php';
 
 if (($_GET['action'] ?? '') === 'delete') {
-    if (!empty($_GET['file']) && str_ends_with((string)$_GET['file'], '.xml')) {
+    if (!empty($_GET['file']) && (str_ends_with((string)$_GET['file'], '.xml') || str_ends_with((string)$_GET['file'], '.xml.lock'))) {
         if (is_file(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . $_GET['file'])) {
             unlink(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . $_GET['file']);
         }
