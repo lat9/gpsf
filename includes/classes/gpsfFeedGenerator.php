@@ -348,7 +348,7 @@ class gpsfFeedGenerator
                 continue;
             }
 
-            $products_image = $this->getProductsImageUrl($product['products_image']);
+            $products_image = $this->getProductsImageUrl($product['products_image'], formatting_additional_images: false, find_large_image: true);
             if ($products_image === false) {
                 if ($this->addSkippedProduct($products_id, $products_name . ': products image (' . $product['products_image'] . ') not found.') === false) {
                     break;
@@ -634,7 +634,7 @@ class gpsfFeedGenerator
         ];
     }
 
-    protected function addProductsAdditionalImages($products_image): void
+    protected function addProductsAdditionalImages(string $products_id, string $products_image): void
     {
        if (isset($this->extensions)) {
             foreach ($this->extensions as $extension_class) {
@@ -654,6 +654,41 @@ class gpsfFeedGenerator
             }
         }
 
+        if (zen_config('ADDITIONAL_IMAGES_HANDLING') === null) {
+            $this->addProductsAdditionalImagesLegacy($products_image);
+            return;
+        }
+
+        if (ADDITIONAL_IMAGES_HANDLING === 'Database') {
+            $products_image_directory = DIR_WS_IMAGES;
+            $images_array = (new Product((int)$products_id))->get('additional_images') ?? [];
+            $images_array = array_map(static fn($f) => $f['image_filename'], $images_array);
+        } else {
+            ['imgs' => $images_array, 'dir' => $products_image_directory] = zen_lookup_additional_images_from_filesystem($products_image);
+        }
+
+        $images_found = 0;
+        foreach ($images_array as $next_image) {
+            $additional_image = $this->getProductsImageUrl($products_image_directory . $next_image, formatting_additional_images: true);
+            if ($additional_image === false) {
+                continue;
+            }
+
+            $this->xmlWriter->writeElement('g:additional_image_link', $additional_image);
+            $images_found++;
+            if ($images_found === 9) {
+                break;
+            }
+        }
+    }
+
+    // -----
+    // This method is called from addProductsAdditionalImages for Zen Cart versions *prior to*
+    // 2.2.0.  For those ZC versions, there was no feature that enabled a product's additional
+    // images to be stored in the database; only the file-system is interrogated.
+    //
+    protected function addProductsAdditionalImagesLegacy(string $products_image): void
+    {
         $image_pathinfo = pathinfo($products_image);
 
         // prepare image name
@@ -663,6 +698,15 @@ class gpsfFeedGenerator
         $image_directory = $image_pathinfo['dirname'];
         if ($image_directory === '.') {
             $image_directory = '';
+
+            // -----
+            // Zen Cart 2.1.0 introduced the configuration switch to indicate whether (strict)
+            // or not (legacy) to always use a '_' suffix on the main image's filename to locate
+            // its additional images ... regardless of the location of the main image.
+            //
+            if (zen_config('ADDITIONAL_IMAGES_MODE', 'legacy') === 'strict') {
+                $image_filename .= '_';
+            }
         } else {
             $image_directory .=  '/';
             $image_filename .= '_';
@@ -673,12 +717,16 @@ class gpsfFeedGenerator
 
         $images_found = 0;
         $products_image = DIR_WS_IMAGES . $products_image;
-        $formatting_additional_images = true;
         foreach (glob(DIR_WS_IMAGES . $image_directory . $image_filename . '*' . $image_extension) as $next_image) {
             if ($next_image === $products_image) {
                 continue;
             }
-            $this->xmlWriter->writeElement('g:additional_image_link', $this->getProductsImageUrl(str_replace(DIR_WS_IMAGES, '', $next_image), $formatting_additional_images));
+            $additional_image = $this->getProductsImageUrl(str_replace(DIR_WS_IMAGES, '', $next_image), formatting_additional_images: true, find_large_image: true);
+            if ($additional_image === false) {
+                continue;
+            }
+
+            $this->xmlWriter->writeElement('g:additional_image_link', $additional_image);
             $images_found++;
             if ($images_found === 9) {
                 break;
@@ -687,7 +735,7 @@ class gpsfFeedGenerator
     }
 
     // creates the url for the products_image
-    protected function getProductsImageUrl(string $products_image, bool $formatting_additional_images = false): false|string
+    protected function getProductsImageUrl(string $products_image, bool $formatting_additional_images = false, bool $find_large_image = false): false|string
     {
         // -----
         // See if an extension wants to override the determination of a product's base image.
@@ -696,7 +744,6 @@ class gpsfFeedGenerator
         //
         // - (bool)false if no override is provided.
         // - (string)URL when returning the image's URL.
-        // - null if the product's image, and thus the product, should not be included in the feed.
         //
         if ($formatting_additional_images === false && isset($this->extensions)) {
             foreach ($this->extensions as $extension_class) {
@@ -715,19 +762,23 @@ class gpsfFeedGenerator
             }
         }
 
-        $image_pathinfo = pathinfo($products_image);
-        $products_image_extension = '.' . $image_pathinfo['extension'];
-        $products_image_base = $image_pathinfo['basename'];
-        $products_image_medium = $products_image_base . zen_config('IMAGE_SUFFIX_MEDIUM') . $products_image_extension;
-        $products_image_large = $products_image_base . zen_config('IMAGE_SUFFIX_LARGE') . $products_image_extension;
-
-        // check for a large image else use medium else use small
-        if (is_file(DIR_WS_IMAGES . 'large/' . $products_image_large)) {
-            $products_image_large = DIR_WS_IMAGES . 'large/' . $products_image_large;
-        } elseif (!is_file(DIR_WS_IMAGES . 'medium/' . $products_image_medium)) {
-                $products_image_large = DIR_WS_IMAGES . $products_image;
+        if ($find_large_image === false) {
+            $products_image_large = $products_image;
         } else {
-            $products_image_large = DIR_WS_IMAGES . 'medium/' . $products_image_medium;
+            $image_pathinfo = pathinfo($products_image);
+            $products_image_extension = '.' . $image_pathinfo['extension'];
+            $products_image_base = $image_pathinfo['basename'];
+            $products_image_medium = $products_image_base . zen_config('IMAGE_SUFFIX_MEDIUM') . $products_image_extension;
+            $products_image_large = $products_image_base . zen_config('IMAGE_SUFFIX_LARGE') . $products_image_extension;
+
+            // check for a large image else use medium else use small
+            if (is_file(DIR_WS_IMAGES . 'large/' . $products_image_large)) {
+                $products_image_large = DIR_WS_IMAGES . 'large/' . $products_image_large;
+            } elseif (!is_file(DIR_WS_IMAGES . 'medium/' . $products_image_medium)) {
+                $products_image_large = DIR_WS_IMAGES . $products_image;
+            } else {
+                $products_image_large = DIR_WS_IMAGES . 'medium/' . $products_image_medium;
+            }
         }
 
         // -----
@@ -1020,7 +1071,7 @@ class gpsfFeedGenerator
 
         $this->xmlWriter->writeElement('g:image_link', $products_image);
         if (zen_config('GPSF_INCLUDE_ADDITIONAL_IMAGES') === 'true') {
-            $this->addProductsAdditionalImages($product['products_image']);
+            $this->addProductsAdditionalImages($product['products_id'], $product['products_image']);
         }
 
         // only include if less then 30 days as 30 is the max and leaving blank will default to the max
