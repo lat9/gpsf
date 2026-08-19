@@ -313,6 +313,17 @@ class gpsfFeedGenerator
                 continue;
             }
 
+            // -----
+            // Ensure that the product's master-categories-id is a valid category and is mapped to the
+            // current product; if not, the product is skipped.
+            //
+            if ($this->validateMasterCategoriesId($products_id, $product['master_categories_id']) === false) {
+                if ($this->addSkippedProduct($products_id, $products_name . ': invalid master_categories_id') === false) {
+                    break;
+                }
+                continue;
+            }
+
             [$categories_list, $cPath] = $this->getCategoryInfo($product['master_categories_id']);
             $cPath_href = (zen_config('GPSF_USE_CPATH') === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
             $link = zen_href_link($product['type_handler'] . '_info', $cPath_href . 'products_id=' . $products_id, 'NONSSL', false);
@@ -396,6 +407,27 @@ class gpsfFeedGenerator
         // specified file-pointer.
         //
         $this->finalizeProductsFeed();
+    }
+
+    // -----
+    // Validate that the supplied master-categories-id is (a) a valid category
+    // and (b) associated with the supplied product.
+    //
+    protected function validateMasterCategoriesId(string $products_id, string $master_categories_id): bool
+    {
+        global $db;
+
+        $result = $db->Execute(
+            "SELECT c.categories_id
+               FROM " . TABLE_CATEGORIES . " c
+                    INNER JOIN " . TABLE_PRODUCTS_TO_CATEGORIES . " p2c
+                        ON p2c.categories_id = c.categories_id
+                       AND p2c.products_id = " . (int)$products_id . "
+              WHERE c.categories_id = " . (int)$master_categories_id . "
+                AND c.categories_status = 1
+              LIMIT 1"
+        );
+        return !$result->EOF;
     }
 
     // by checking for an array, sub-attributes of an xml element are now allowed.
