@@ -134,7 +134,7 @@ img {
 
     <h2>Version History</h2>
     <ul>
-        <li>v1.1.0-beta1, 2026-08-19 (lat9)<ul>
+        <li>v1.1.0-beta1, 2026-08-20 (lat9)<ul>
             <li>BUGFIX: Update to use array-based language files, supporting zc300 and later.</li>
             <li>INTROP: Use and provide a polyfill for <code>zen_config</code>, introduced in zc300.</li>
             <li>CHANGE: Drop support for Zen Cart versions prior to 2.0.0 and PHP versions prior to 8.0.</li>
@@ -142,6 +142,7 @@ img {
             <li>BUGFIX: MySQL <code>OFFSET</code> can't be used without <code>LIMIT</code>.</li>
             <li>BUGFIX: If a product's <code>master_categories_id</code> is invalid, don't include the product in the feed.</li>
             <li>CHANGE: Add support for additional-images' configuration settings added by zc210 and zc22x.</li>
+            <li>CHANGE: Convert admin file-removal to posted form and add stricter filename checks.</li>
             <li>The following files were changed, <span class="added">added</span> or <span class="removed">removed</span>:<ol>
                 <li>/gpsf_main_controller.php</li>
                 <li>/includes/classes/gpsfFeedGenerator.php</li>
