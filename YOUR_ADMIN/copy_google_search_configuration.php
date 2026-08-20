@@ -3,25 +3,29 @@
 // Google Product Search Feeder II.  A one-time tool to copy the older google product
 // search configuration settings to this plugin's settings.
 //
-// Copyright (C), 2023-2024.  https://vinosdefrutastropicales.com
+// Copyright (C), 2023-2026.  https://vinosdefrutastropicales.com
 //
-// Last updated: v1.0.1
-//
-// INSTRUCTIONS:
-// - Copy this file to the root of your site's file-system.
-// - Enter {your-website-address}/copy_google_search_configuration.php
-// - The settings copied are displayed on your screen and created in the
-//   file /logs/copy_google_search_configuration_YYYYMMDDHHIISS.log.
-// - Delete the file from the root of your site's file-system.
+// Last updated: v1.1.0
 //
 require 'includes/application_top.php';
 
-if (!defined('GPSF_VERSION')) {
-    exit('"Google Product Search Feeder II" must be installed before this script can be successfully run.');
+if (!defined('IS_ADMIN_FLAG') || IS_ADMIN_FLAG !== true) {
+    exit('Illegal access');
 }
 
-if (!defined('GOOGLE_PRODUCTS_VERSION')) {
-    exit('"Google Merchant Center Feeder" must be installed before its configuration can be copied.');
+if (zen_config('GPSF_VERSION') === null) {
+    $messageStack->add_session('"Google Product Search Feeder II" must be installed before this script can be successfully run.', 'error');
+    zen_redirect(zen_href_link(FILENAME_DEFAULT));
+}
+
+if (zen_config('GOOGLE_PRODUCTS_VERSION') === null) {
+    $messageStack->add_session('"Google Merchant Center Feeder" must be installed before its configuration can be copied.', 'error');
+    zen_redirect(zen_href_link(FILENAME_DEFAULT));
+}
+
+if (zen_config('GPSF_CONVERTED') !== null) {
+    $messageStack->add_session('"Google Merchant Center Feeder" configuration has already been copied.', 'error');
+    zen_redirect(zen_href_link(FILENAME_DEFAULT));
 }
 
 $settings_to_copy = [
@@ -72,6 +76,28 @@ $settings_to_copy = [
     'GOOGLE_PRODUCTS_OFFER_ID' => 'GPSF_OFFER_ID',
 ];
 
+// -----
+// If any of the GPSF settings have been modified since installation, the copy operation
+// is disallowed.
+//
+$result = $db->Execute(
+    "SELECT COUNT(configuration_id) AS count
+       FROM " . TABLE_CONFIGURATION . "
+      WHERE configuration_key IN ('" . implode("', '", array_values($settings_to_copy)) . "')
+        AND last_modified IS NOT NULL"
+);
+if ($result->fields['count'] !== '0') {
+    $db->Execute(
+        "INSERT IGNORE INTO " . TABLE_CONFIGURATION . "
+            (configuration_key, configuration_value, configuration_title, configuration_description, configuration_group_id, sort_order, date_added)
+         VALUES
+            ('GPSF_CONVERTED', '1', 'Merchant Center Converted', 'Indicates Merchant Center conversion has been performed', 6, 1000, now())"
+    );
+    zen_deregister_admin_pages('extrasGpsf');
+    $messageStack->add_session('"Google Merchant Center Feeder" configuration copy disallowed; "Google Product Search Feeder II" configuration already updated.', 'error');
+    zen_redirect(zen_href_link(FILENAME_DEFAULT));
+}
+
 $copy_logfile = DIR_FS_LOGS . '/copy_google_search_configuration_' . date('YmdHis') . '.log';
 $google_products = $db->Execute(
     "SELECT configuration_key, configuration_value, configuration_title
@@ -81,16 +107,27 @@ $google_products = $db->Execute(
 foreach ($google_products as $next_setting) {
     if ($next_setting['configuration_key'] === 'GOOGLE_PRODUCTS_OFFER_ID') {
         if ($next_setting['configuration_value'] !== 'id' && $next_setting['configuration_value'] !== 'model') {
-            error_log('Not copied ' . $next_setting['configuration_title'] . ' (' . $next_setting['configuration_value'] . '); value not supported by GPSF.' . PHP_EOL, 3, $copy_logfile);
+            error_log('Not copied ' . $next_setting['configuration_title'] . ' (' . $next_setting['configuration_value'] . '); value not supported by GPSF.' . "\n", 3, $copy_logfile);
             continue;
         }
     }
     $db->Execute(
         "UPDATE " . TABLE_CONFIGURATION . "
             SET configuration_value = '" . $next_setting['configuration_value'] . "'
-          WHERE configuration_key = '" . $settings_to_copy[$next_setting['configuration_key']] . "'"
+          WHERE configuration_key = '" . $settings_to_copy[$next_setting['configuration_key']] . "'
+          LIMIT 1"
     );
-    error_log('Copied ' . $next_setting['configuration_title'] . ' (' . $next_setting['configuration_value'] . ') to its GPSF setting.' . PHP_EOL, 3, $copy_logfile);
+    error_log('Copied ' . $next_setting['configuration_title'] . ' (' . $next_setting['configuration_value'] . ') to its GPSF setting.' . "\n", 3, $copy_logfile);
 }
+
+$db->Execute(
+    "INSERT IGNORE INTO " . TABLE_CONFIGURATION . "
+        (configuration_key, configuration_value, configuration_title, configuration_description, configuration_group_id, sort_order, date_added)
+     VALUES
+        ('GPSF_CONVERTED', '1', 'Merchant Center Converted', 'Indicates Merchant Center conversion has been performed', 6, 1000, now())"
+);
+zen_deregister_admin_pages('extrasGpsf');
+$messageStack->add_session('"Google Merchant Center Feeder" configuration has been successfully copied.', 'success');
+zen_redirect(zen_href_link(FILENAME_DEFAULT));
 
 require DIR_WS_INCLUDES . 'application_bottom.php';

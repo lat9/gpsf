@@ -9,7 +9,7 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('GPSF_CURRENT_VERSION', '1.1.0-beta1');
+define('GPSF_CURRENT_VERSION', '1.1.0-beta2');
 
 // -----
 // No installation actions are required if an admin is not currently logged-in or if the plugin's
@@ -159,13 +159,13 @@ switch (true) {
             "DELETE FROM " . TABLE_CONFIGURATION . "
                WHERE configuration_key IN ('GPSF_USERNAME', 'GPSF_PASSWORD', 'GPSF_SERVER', 'GPSF_PASV', 'GPSF_UPLOADED_DATE', 'GPSF_ADDRESS', 'GPSF_DESCRIPTION')"
         );
-    case version_compare($gpsf_version, '1.0.1', '<'):           //-Fall through from above processing ...
+    case version_compare($gpsf_version, '1.0.1', '<'):  //-Fall through from above processing ...
         $db->Execute(
             "DELETE FROM " . TABLE_CONFIGURATION . "
               WHERE configuration_key = 'GPSF_LANGUAGE'
               LIMIT 1"
         );
-    case version_compare($gpsf_version, '1.0.5', '<'):           //-Fall through from above processing ...
+    case version_compare($gpsf_version, '1.0.5', '<'):  //-Fall through from above processing ...
         $db->Execute(
             "UPDATE " . TABLE_CONFIGURATION . "
                 SET set_function = 'zen_cfg_select_option([\'flat rate\', \'per item\', \'per weight unit\', \'table rate\', \'zones\', \'merchant-center\', \'none\'],',
@@ -173,7 +173,11 @@ switch (true) {
               WHERE configuration_key = 'GPSF_SHIPPING_METHOD'
               LIMIT 1"
         );
-    default:                                                    //-Fall through from above processing ...
+    case version_compare($gpsf_version, '1.1.0', '<'):  //-Fall through from above processing ...
+        if (!zen_page_key_exists('extrasGpsf')) {
+            zen_register_admin_page('extrasGpsf', 'BOX_EXTRAS_GPSF', 'FILENAME_GPSF_EXTRAS', '', 'extras', 'Y');
+        }
+    default:                                            //-Fall through from above processing ...
         break;
 }
 

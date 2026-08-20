@@ -93,7 +93,7 @@ img {
     <ol>
         <li>Unzip this plugin's zip-file; you'll see the following files and directories:<ol type="a">
             <li>/gpsf_main_controller.php</li>
-            <li>/extras/copy_google_product_configuration.php</li>
+            <li><span class="removed">/extras/copy_google_product_configuration.php</span> <span class="smaller">(Removed in v1.1.0)</span></li>
             <li>/feed/index.html</li>
             <li>/feed/google/index.html</li>
             <li>/includes/classes/gpsfFeedGenerator.php</li>
@@ -101,6 +101,7 @@ img {
             <li>/includes/functions/extra_functions/zen_config.php <span class="smaller">(Added in v1.1.0)</span></li>
             <li><span class="removed">/includes/languages/english/gpsf_main_controller.php</span> <span class="smaller">(Removed in v1.1.0)</span></li>
             <li>/includes/languages/english/lang.gpsf_main_controller.php <span class="smaller">(Added in v1.1.0)</span></li>
+            <li>/YOUR_ADMIN/copy_google_product_configuration.php <span class="smaller">(Added in v1.1.0)</span></li>
             <li>/YOUR_ADMIN/gpsf_admin.php</li>
             <li>/YOUR_ADMIN/includes/auto_loaders/config.gpsf_admin.php</li>
             <li>/YOUR_ADMIN/includes/extra_datafiles/gpsf_admin_filenames.php</li>
@@ -118,10 +119,11 @@ img {
         <li>Log into your Zen Cart admin and the plugin will perform its auto-install/upgrade procedure.</li>
         <li>You'll see a <em>Google Product Search Feeder II</em> element under the admin's <em>Configuration</em> tab; proceed to the configuration step, see below.</li>
     </ol>
-    <p>Once the plugin has performed its automatic installation, you'll see two additional links on your site's admin's menus:</p>
+    <p>Once the plugin has performed its automatic installation, you'll see three additional links on your site's admin's menus:</p>
     <ol>
         <li><code>Configuration :: Google Product Search Feeder II</code></li>
         <li><code>Tools :: Google Product Search Feeder II</code></li>
+        <li><code>Extras :: Convert Merchant Center Feeder</code></li>
     </ol>
     <h3>Cron Jobs: Upgrading to v1.0.1</h3>
     <p>v1.0.1 of <em>GPSF</em> changes the way that a site identifies the language to be used for a generated feed. In v1.0.0, the <code>language_id</code> parameter indicated the language <code>id</code> to be used, e.g. <code>language_id=1</code> might refer to the English language.  For v1.0.1, this was changed to use the more Zen-Cart standard <code>language</code> parameter, e.g. <code>language=en</code> for English.</p>
@@ -130,11 +132,11 @@ img {
 
     <h2 id="config">Configuration</h2>
     <p>The plugin adds its <em>Google Product Search Feeder II</em> group under the admin's <em>Configuration</em>.  Refer to the plugin's <a href="https://github.com/lat9/gpsf/wiki/Configuration-and-Feed-File-Naming-Conventions" target="_blank">Wiki</a> for additional information.</p>
-    <p><b>Note:</b> If you are converting from a previous version of a Google-Feed, i.e. the <a href="https://www.zen-cart.com/downloads.php?do=file&id=1375" target="_blank">Google Merchant Center Feeder</a>, you can use the script present in this zip-file's <code>/extras/copy_google_product_configuration.php</code> to copy your previous product-feed settings to their new home.  Just copy that file to the root of your site's file-system and run it via your browser's command-line, e.g. <code>https://www.example.com/copy_google_product_configuration.php</code>.  Once you've run the conversion script, be sure to remove it from your site!</p>
+    <p><b>Note:</b> If you are converting from a previous version of a Google-Feed, i.e. the <a href="https://www.zen-cart.com/downloads.php?do=file&id=1375" target="_blank">Google Merchant Center Feeder</a>, you can use the tool now present at <code>Extras :: Convert Merchant Center Feeder</code> to copy the settings to their GPSF version. refer to <a href="https://github.com/lat9/gpsf/wiki/Differences-From-The-Original-Version" target="_blank">this</a> <em>GPSF</em> Wiki article for additional information.</p>
 
     <h2>Version History</h2>
     <ul>
-        <li>v1.1.0-beta1, 2026-08-19 (lat9)<ul>
+        <li>v1.1.0-beta1, 2026-08-20 (lat9)<ul>
             <li>BUGFIX: Update to use array-based language files, supporting zc300 and later.</li>
             <li>INTROP: Use and provide a polyfill for <code>zen_config</code>, introduced in zc300.</li>
             <li>CHANGE: Drop support for Zen Cart versions prior to 2.0.0 and PHP versions prior to 8.0.</li>
@@ -142,7 +144,10 @@ img {
             <li>BUGFIX: MySQL <code>OFFSET</code> can't be used without <code>LIMIT</code>.</li>
             <li>BUGFIX: If a product's <code>master_categories_id</code> is invalid, don't include the product in the feed.</li>
             <li>CHANGE: Add support for additional-images' configuration settings added by zc210 and zc22x.</li>
+            <li>CHANGE: Move the <em>Merchant Center Feeder</em> configuration-copy tool to the admin.</li>
             <li>The following files were changed, <span class="added">added</span> or <span class="removed">removed</span>:<ol>
+                <li>/docs/gpsf/uninstall.sql</li>
+                <li><span class="removed">/extras/copy_google_search_configuration.php</span></li>
                 <li>/gpsf_main_controller.php</li>
                 <li>/includes/classes/gpsfFeedGenerator.php</li>
                 <li><span class="added">/includes/functions/extra_functions/zen_config.php</span></li>
@@ -150,7 +155,9 @@ img {
                 <li><span class="added">/includes/languages/english/lang.gpsf_main_controller.php</span></li>
                 <li><span class="removed">/YOUR_ADMIN/includes/functions/extra_functions/zen_cfg_read_only.php</span></li>
                 <li><span class="added">/YOUR_ADMIN/includes/functions/extra_functions/zen_config.php</span></li>
+                <li><span class="added">/YOUR_ADMIN/copy_google_search_configuration.php</span></li>
                 <li>/YOUR_ADMIN/gpsf_admin.php</li>
+                <li>/YOUR_ADMIN/includes/extra_datafiles/gpsf_admin_filenames.php</li>
                 <li>/YOUR_ADMIN/includes/init_includes/init_gpsf_admin.php</li>
                 <li><span class="removed">/YOUR_ADMIN/includes/languages/english/extra_definitions/gpsf_admin_extra_definitions.php</span></li>
                 <li><span class="added">/YOUR_ADMIN/includes/languages/english/extra_definitions/lang.gpsf_admin_extra_definitions.php</span></li>

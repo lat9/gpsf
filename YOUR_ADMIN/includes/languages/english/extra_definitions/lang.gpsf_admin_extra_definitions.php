@@ -8,6 +8,7 @@
 return [
     'BOX_GPSF' => 'Google Product Search Feeder II',
     'BOX_CONFIGURATION_GPSF' => 'Google Product Search Feeder II',
+    'BOX_EXTRAS_GPSF' => 'Convert Merchant Center Feeder',
 
     'ERROR_GPSF_MISSING_XMLWRITER' => 'The <code>xmlwriter</code> PHP extension is required for the successful operation of <em>%s</em>; the plugin has been auto-disabled.',
 ];
