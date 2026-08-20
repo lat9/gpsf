@@ -18,9 +18,12 @@
 require 'includes/application_top.php';
 
 if (($_GET['action'] ?? '') === 'delete') {
-    if (!empty($_GET['file']) && (str_ends_with((string)$_GET['file'], '.xml') || str_ends_with((string)$_GET['file'], '.xml.lock'))) {
-        if (is_file(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . $_GET['file'])) {
-            unlink(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY') . $_GET['file']);
+    $file = basename((string)($_POST['file'] ?? ''));
+    if ($file !== '' && (str_ends_with($file, '.xml') || str_ends_with($file, '.xml.lock'))) {
+        $feed_dir = realpath(DIR_FS_CATALOG . zen_config('GPSF_DIRECTORY'));
+        $target = realpath($feed_dir . '/' . $file);
+        if ($feed_dir !== false && $target !== false && str_starts_with($target, $feed_dir . DIRECTORY_SEPARATOR) && is_file($target)) {
+            zen_remove($target);
         }
     }
     zen_redirect(zen_href_link(FILENAME_GPSF_ADMIN));
@@ -201,16 +204,21 @@ if ($feed_files === []) {
                         </tr>
 <?php
 } else {
+    $form_num = 0;
     foreach ($feed_files as $next_file) {
+        $form_num++;
 ?>
                         <tr>
                             <td class="text-center"><?= date('d/m/Y H:i:s', filemtime($gpsf_directory . $next_file)) ?></td>
                             <td class="upload-file"><a href="<?= HTTP_SERVER . DIR_WS_CATALOG . zen_config('GPSF_DIRECTORY') . $next_file ?>" target="_blank"><?= $next_file ?></a></td>
                             <td class="text-center"><?= number_format((float)(filesize($gpsf_directory . $next_file) / 1024), 2, '.', ',') ?>KB</td>
                             <td class="text-center">
-                                <a role="button" class="btn btn-danger btn-sm" href="<?= zen_href_link(FILENAME_GPSF_ADMIN, "file=$next_file&action=delete") ?>">
-                                    <?= GPSF_BUTTON_DELETE ?>
-                                </a>
+                                <?= zen_draw_form("delete-$form_num", FILENAME_GPSF_ADMIN, 'action=delete') ?>
+                                    <?= zen_draw_hidden_field('file', $next_file) ?>
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <?= GPSF_BUTTON_DELETE ?>
+                                    </button>
+                                <?= '</form>' ?>
                             </td>
                         </tr>
 <?php
