@@ -136,7 +136,7 @@ img {
 
     <h2>Version History</h2>
     <ul>
-        <li>v1.1.0-beta1, 2026-08-20 (lat9)<ul>
+        <li>v1.1.0-beta3, 2026-08-21 (lat9)<ul>
             <li>BUGFIX: Update to use array-based language files, supporting zc300 and later.</li>
             <li>INTROP: Use and provide a polyfill for <code>zen_config</code>, introduced in zc300.</li>
             <li>CHANGE: Drop support for Zen Cart versions prior to 2.0.0 and PHP versions prior to 8.0.</li>
@@ -147,6 +147,7 @@ img {
             <li>CHANGE: Move the <em>Merchant Center Feeder</em> configuration-copy tool to the admin.</li>
             <li>CHANGE: Convert admin file-removal to posted form and add stricter filename checks.</li>
             <li><span class="impt"><b>CHANGE: An empty <code>Security Key</code> is no longer allowed and results in the feed-generation being disabled.</b></span></li>
+            <li>BUGFIX: Correct argument reversal in <code>gpsfFeedGenerator::isStringInArray</code> method.</li>
             <li>The following files were changed, <span class="added">added</span> or <span class="removed">removed</span>:<ol>
                 <li>/docs/gpsf/uninstall.sql</li>
                 <li><span class="removed">/extras/copy_google_search_configuration.php</span></li>
