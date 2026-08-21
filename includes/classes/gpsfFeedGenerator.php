@@ -1408,13 +1408,11 @@ class gpsfFeedGenerator
        return ((float)$usec + (float)$sec);
     }
 
-    // returns the array key of first needle in needles found or false
-    // offset skips the first X number of elements in the array or the first X characters in a string
     protected function isStringInArray(string $find_string, array $values): bool
     {
-        $string_to_find = '@\b' . $find_string . '\b@i';
+        $find_string = str_replace('@', '^', $find_string); //- Since @ is the regex delimiter used
         foreach ($values as $key => $value) {
-            if (preg_match($string_to_find, $value) === 1) {
+            if (preg_match('@\b' . $value . '\b@i', $find_string) === 1) {
                 return true;
             }
         }
