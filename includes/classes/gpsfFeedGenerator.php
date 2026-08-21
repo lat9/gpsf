@@ -659,7 +659,7 @@ class gpsfFeedGenerator
             return;
         }
 
-        if (ADDITIONAL_IMAGES_HANDLING === 'Database') {
+        if (zen_config('ADDITIONAL_IMAGES_HANDLING') === 'Database') {
             $products_image_directory = DIR_WS_IMAGES;
             $images_array = (new Product((int)$products_id))->get('additional_images') ?? [];
             $images_array = array_map(static fn($f) => $f['image_filename'], $images_array);
@@ -669,7 +669,7 @@ class gpsfFeedGenerator
 
         $images_found = 0;
         foreach ($images_array as $next_image) {
-            $additional_image = $this->getProductsImageUrl($products_image_directory . $next_image, formatting_additional_images: true);
+            $additional_image = $this->getProductsImageUrl($products_image_directory . $next_image, formatting_additional_images: true, find_large_image: false);
             if ($additional_image === false) {
                 continue;
             }
@@ -721,7 +721,7 @@ class gpsfFeedGenerator
             if ($next_image === $products_image) {
                 continue;
             }
-            $additional_image = $this->getProductsImageUrl(str_replace(DIR_WS_IMAGES, '', $next_image), formatting_additional_images: true, find_large_image: true);
+            $additional_image = $this->getProductsImageUrl($next_image, formatting_additional_images: true, find_large_image: true);
             if ($additional_image === false) {
                 continue;
             }
@@ -737,6 +737,11 @@ class gpsfFeedGenerator
     // creates the url for the products_image
     protected function getProductsImageUrl(string $products_image, bool $formatting_additional_images = false, bool $find_large_image = false): false|string
     {
+        // -----
+        // Strip any leading images/ directory from the submitted image's name.
+        //
+        $products_image = str_replace(DIR_WS_IMAGES, '', $products_image);
+
         // -----
         // See if an extension wants to override the determination of a product's base image.
         //
