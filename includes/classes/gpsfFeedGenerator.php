@@ -46,6 +46,8 @@ class gpsfFeedGenerator
     protected false|string $alternateImageUrl;
     protected bool $alternateImageUrlIsLocal;
 
+    protected array $config;
+
     public function __construct()
     {
         // -----
@@ -117,6 +119,45 @@ class gpsfFeedGenerator
                 }
             }
         }
+
+        $this->config = [
+            'additional_images_handling' => zen_config('ADDITIONAL_IMAGES_HANDLING'),
+            'additional_images_mode' => zen_config('ADDITIONAL_IMAGES_MODE', 'legacy'),
+
+            'gpsf_alternate_image_url' => zen_config('GPSF_ALTERNATE_IMAGE_URL'),
+            'gpsf_condition' => zen_config('GPSF_CONDITION'),
+            'gpsf_convert_ampersands' => zen_config('GPSF_CONVERT_AMPERSANDS'),
+            'gpsf_currency' => zen_config('GPSF_CURRENCY'),
+            'gpsf_debug' => zen_config('GPSF_DEBUG'),
+            'gpsf_debug_max_skipped' => zen_config('GPSF_DEBUG_MAX_SKIPPED'),
+            'gpsf_default_product_type' => zen_config('GPSF_DEFAULT_PRODUCT_TYPE'),
+            'gpsf_expiration_base' => zen_config('GPSF_EXPIRATION_BASE'),
+            'gpsf_expiration_days' => (int)zen_config('GPSF_EXPIRATION_DAYS'),
+            'gpsf_image_handler' => zen_config('GPSF_IMAGE_HANDLER'),
+            'gpsf_include_additional_images' => zen_config('GPSF_INCLUDE_ADDITIONAL_IMAGES'),
+            'gpsf_meta_title' => zen_config('GPSF_META_TITLE'),
+            'gpsf_offer_id' => zen_config('GPSF_OFFER_ID'),
+            'gpsf_product_type' => zen_config('GPSF_PRODUCT_TYPE'),
+            'gpsf_shipping_country' => zen_config('GPSF_SHIPPING_COUNTRY'),
+            'gpsf_shipping_label' => zen_config('GPSF_SHIPPING_LABEL'),
+            'gpsf_shipping_method' => zen_config('GPSF_SHIPPING_METHOD'),
+            'gpsf_shipping_region' => zen_config('GPSF_SHIPPING_REGION'),
+            'gpsf_shipping_service' => zen_config('GPSF_SHIPPING_SERVICE'),
+            'gpsf_tax_country' => zen_config('GPSF_TAX_COUNTRY'),
+            'gpsf_tax_display' => zen_config('GPSF_TAX_DISPLAY'),
+            'gpsf_tax_region' => zen_config('GPSF_TAX_REGION'),
+            'gpsf_units' => zen_config('GPSF_UNITS'),
+            'gpsf_use_cpath' => zen_config('GPSF_USE_CPATH'),
+            'gpsf_weight' => zen_config('GPSF_WEIGHT'),
+            'gpsf_xml_sanitization' => zen_config('GPSF_XML_SANITIZATION'),
+
+            'image_suffix_large' => zen_config('IMAGE_SUFFIX_LARGE'),
+            'image_suffix_medium' => zen_config('IMAGE_SUFFIX_MEDIUM'),
+            'large_image_max_width' => zen_config('LARGE_IMAGE_MAX_WIDTH'),
+            'large_image_max_height' => zen_config('LARGE_IMAGE_MAX_HEIGHT'),
+            'stock_check' => zen_config('STOCK_CHECK'),
+            'stock_allow_checkout' => zen_config('STOCK_ALLOW_CHECKOUT'),
+        ];
     }
 
     public function setFeedParameters(string $feed_parameters): bool
@@ -301,7 +342,7 @@ class gpsfFeedGenerator
             // Determine the product's 'title', which must be at least 3 characters long.  This is
             // either its meta-tag title (if enabled and not empty) or the product's name otherwise.
             //
-            if (zen_config('GPSF_META_TITLE') === 'true' && !empty($product['metatags_title'])) {
+            if ($this->config['gpsf_meta_title'] === 'true' && !empty($product['metatags_title'])) {
                 $products_title = $this->sanitizeXml($product['metatags_title']);
             } else {
                 $products_title = $this->sanitizeXml($products_name);
@@ -325,11 +366,11 @@ class gpsfFeedGenerator
             }
 
             [$categories_list, $cPath] = $this->getCategoryInfo($product['master_categories_id']);
-            $cPath_href = (zen_config('GPSF_USE_CPATH') === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
+            $cPath_href = ($this->config['gpsf_use_cpath'] === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
             $link = zen_href_link($product['type_handler'] . '_info', $cPath_href . 'products_id=' . $products_id, 'NONSSL', false);
 
             $id = false;
-            if (zen_config('GPSF_OFFER_ID') === 'id') {
+            if ($this->config['gpsf_offer_id'] === 'id') {
                 $id = $products_id;
             } elseif ($product['products_model'] !== '') {
                 $id = $this->sanitizeXml($product['products_model']);
@@ -458,7 +499,7 @@ class gpsfFeedGenerator
         //
         $this->alternateImageUrl = false;
         $this->alternateImageUrlIsLocal = false;
-        $gpsf_alternate_image_url = zen_config('GPSF_ALTERNATE_IMAGE_URL');
+        $gpsf_alternate_image_url = $this->config['gpsf_alternate_image_url'];
         if ($gpsf_alternate_image_url !== '') {
             if (!str_starts_with($gpsf_alternate_image_url, HTTP_SERVER . '/' . DIR_WS_IMAGES)) {
                 $this->alternateImageUrl = $gpsf_alternate_image_url;
@@ -471,7 +512,7 @@ class gpsfFeedGenerator
         // -----
         // Save the current currency that we're to use when generating the feed.
         //
-        $this->currencyCode = (isset($_GET['currency_code'])) ? $_GET['currency_code'] : zen_config('GPSF_CURRENCY');
+        $this->currencyCode = (isset($_GET['currency_code'])) ? $_GET['currency_code'] : $this->config['gpsf_currency'];
         $this->currencyValue = $currencies->get_value($this->currencyCode);
 
         // -----
@@ -589,7 +630,7 @@ class gpsfFeedGenerator
         $additional_tables = '';
         $additional_where_clause = '';
 
-        if (zen_config('GPSF_META_TITLE') === 'true') {
+        if ($this->config['gpsf_meta_title'] === 'true') {
             $additional_fields .= ', mtpd.metatags_title';
             $additional_tables .= ' LEFT JOIN ' . TABLE_META_TAGS_PRODUCTS_DESCRIPTION . ' mtpd ON (p.products_id = mtpd.products_id) ';
         }
@@ -654,12 +695,12 @@ class gpsfFeedGenerator
             }
         }
 
-        if (zen_config('ADDITIONAL_IMAGES_HANDLING') === null) {
+        if ($this->config['additional_images_handling'] === null) {
             $this->addProductsAdditionalImagesLegacy($products_image);
             return;
         }
 
-        if (zen_config('ADDITIONAL_IMAGES_HANDLING') === 'Database') {
+        if ($this->config['additional_images_handling'] === 'Database') {
             $products_image_directory = DIR_WS_IMAGES;
             $images_array = (new Product((int)$products_id))->get('additional_images') ?? [];
             $images_array = array_map(static fn($f) => $f['image_filename'], $images_array);
@@ -704,7 +745,7 @@ class gpsfFeedGenerator
             // or not (legacy) to always use a '_' suffix on the main image's filename to locate
             // its additional images ... regardless of the location of the main image.
             //
-            if (zen_config('ADDITIONAL_IMAGES_MODE', 'legacy') === 'strict') {
+            if ($this->config['additional_images_mode'] === 'strict') {
                 $image_filename .= '_';
             }
         } else {
@@ -773,8 +814,8 @@ class gpsfFeedGenerator
             $image_pathinfo = pathinfo($products_image);
             $products_image_extension = '.' . $image_pathinfo['extension'];
             $products_image_base = $image_pathinfo['basename'];
-            $products_image_medium = $products_image_base . zen_config('IMAGE_SUFFIX_MEDIUM') . $products_image_extension;
-            $products_image_large = $products_image_base . zen_config('IMAGE_SUFFIX_LARGE') . $products_image_extension;
+            $products_image_medium = $products_image_base . $this->config['image_suffix_medium'] . $products_image_extension;
+            $products_image_large = $products_image_base . $this->config['image_suffix_large'] . $products_image_extension;
 
             // check for a large image else use medium else use small
             if (is_file(DIR_WS_IMAGES . 'large/' . $products_image_large)) {
@@ -793,8 +834,8 @@ class gpsfFeedGenerator
             return false;
         }
 
-        if (zen_config('GPSF_IMAGE_HANDLER') === 'true' && function_exists('handle_image')) {
-            $image_ih = handle_image($products_image_large, '', zen_config('LARGE_IMAGE_MAX_WIDTH'), zen_config('LARGE_IMAGE_MAX_HEIGHT'), '');
+        if ($this->config['gpsf_image_handler'] === 'true' && function_exists('handle_image')) {
+            $image_ih = handle_image($products_image_large, '', $this->config['large_image_max_width'], $this->config['large_image_max_height'], '');
             $products_image_link = HTTP_SERVER . DIR_WS_CATALOG . $image_ih[0];
         } else {
             $products_image_link = HTTP_SERVER . DIR_WS_CATALOG . $products_image_large;
@@ -805,7 +846,7 @@ class gpsfFeedGenerator
 
     protected function sanitizeLink(string $link): string
     {
-        $ampersand = (zen_config('GPSF_CONVERT_AMPERSANDS') === 'false') ? '&' : '%26';
+        $ampersand = ($this->config['gpsf_convert_ampersands'] === 'false') ? '&' : '%26';
         return str_replace(
             [
                 ' ',
@@ -871,11 +912,11 @@ class gpsfFeedGenerator
             $this->xmlWriter->writeElement('g:sale_price', $this->formatPriceElement($sale_price));
         }
 
-        $gpsf_tax_country = zen_config('GPSF_TAX_COUNTRY');
-        if (zen_config('GPSF_TAX_DISPLAY') === 'true' && $gpsf_tax_country === 'US' && $tax_rate !== '') {
-            $gpsf_tax_shipping = zen_config('GPSF_TAX_SHIPPING');
-            if (zen_config('GPSF_TAX_REGION') !== '') {
-                $regions = explode(',', zen_config('GPSF_TAX_REGION'));
+        $gpsf_tax_country = $this->config['gpsf_tax_country'];
+        if ($this->config['gpsf_tax_display'] === 'true' && $gpsf_tax_country === 'US' && $tax_rate !== '') {
+            $gpsf_tax_shipping = $this->config['gpsf_tax_shipping'];
+            if ($this->config['gpsf_tax_region'] !== '') {
+                $regions = explode(',', $this->config['gpsf_tax_region']);
                 foreach ($regions as $region) {
                     if (trim($region) === '') {
                         continue;
@@ -901,7 +942,7 @@ class gpsfFeedGenerator
             }
         }
 
-        if (zen_config('STOCK_CHECK') !== 'true') {
+        if ($this->config['stock_check'] !== 'true') {
             $this->xmlWriter->writeElement('g:availability', 'in_stock');
         } elseif ($product['products_quantity'] > 0) {
             if (isset($product['products_quantity_order_min']) && $product['products_quantity_order_min'] > $product['products_quantity']) {
@@ -909,7 +950,7 @@ class gpsfFeedGenerator
             } else {
                 $this->xmlWriter->writeElement('g:availability', 'in_stock');
             }
-        } elseif (zen_config('STOCK_ALLOW_CHECKOUT') !== 'true') {
+        } elseif ($this->config['stock_allow_checkout'] !== 'true') {
             $this->xmlWriter->writeElement('g:availability', 'out_of_stock');
         } elseif ($product['products_date_available'] === null || strtotime($product['products_date_available']) < time()) {
             $this->xmlWriter->writeElement('g:availability', 'in_stock');
@@ -921,31 +962,31 @@ class gpsfFeedGenerator
             $this->xmlWriter->writeElement('g:availability', 'preorder');
         }
 
-        if (zen_config('GPSF_WEIGHT') === 'true' && $product['products_weight'] > 0) {
-            $this->xmlWriter->writeElement('g:product_weight', $product['products_weight'] . ' ' . zen_config('GPSF_UNITS'));
+        if ($this->config['gpsf_weight'] === 'true' && $product['products_weight'] > 0) {
+            $this->xmlWriter->writeElement('g:product_weight', $product['products_weight'] . ' ' . $this->config['gpsf_units']);
         }
 
-        if (zen_config('GPSF_SHIPPING_METHOD') === 'merchant-center') {
+        if ($this->config['gpsf_shipping_method'] === 'merchant-center') {
             if ($product['products_weight'] > 0) {
-                $this->xmlWriter->writeElement('g:shipping_weight', $product['products_weight'] . ' ' . zen_config('GPSF_UNITS'));
+                $this->xmlWriter->writeElement('g:shipping_weight', $product['products_weight'] . ' ' . $this->config['gpsf_units']);
             }
-        } elseif (zen_config('GPSF_SHIPPING_METHOD') !== 'none') {
+        } elseif ($this->config['gpsf_shipping_method'] !== 'none') {
             $shipping_rate = $this->getProductsShippingRate($product['products_id'], $product['products_weight'], $price, $product['product_is_always_free_shipping']);
 
             if ((float)$shipping_rate >= 0) {
                 $this->xmlWriter->startElement('g:shipping');
-                if (zen_config('GPSF_SHIPPING_COUNTRY') !== '') {
-                    $this->xmlWriter->writeElement('g:country', $this->getCountriesIsoCode2(zen_config('GPSF_SHIPPING_COUNTRY')));
+                if ($this->config['gpsf_shipping_country'] !== '') {
+                    $this->xmlWriter->writeElement('g:country', $this->getCountriesIsoCode2($this->config['gpsf_shipping_country']));
                 }
-                if (zen_config('GPSF_SHIPPING_REGION') !== '') {
-                    $this->xmlWriter->writeElement('g:region', zen_config('GPSF_SHIPPING_REGION'));
+                if ($this->config['gpsf_shipping_region'] !== '') {
+                    $this->xmlWriter->writeElement('g:region', $this->config['gpsf_shipping_region']);
                 }
-                if (zen_config('GPSF_SHIPPING_SERVICE') !== '') {
-                    $this->xmlWriter->writeElement('g:service', zen_config('GPSF_SHIPPING_SERVICE'));
+                if ($this->config['gpsf_shipping_service'] !== '') {
+                    $this->xmlWriter->writeElement('g:service', $this->config['gpsf_shipping_service']);
                 }
                 $this->xmlWriter->writeElement('g:price', $this->formatPriceElement($shipping_rate));
 
-                if (zen_config('GPSF_SHIPPING_LABEL') === 'categories') {
+                if ($this->config['gpsf_shipping_label'] === 'categories') {
                     $this->xmlWriter->writeElement('g:shipping_label', $product['master_categories_id']);
                 } else {
                     $this->xmlWriter->writeElement('g:shipping_label', $product['products_id']);
@@ -954,8 +995,8 @@ class gpsfFeedGenerator
                 $this->xmlWriter->endElement();  //- END g:shipping
             }
 
-            if (zen_config('GPSF_WEIGHT') === 'true' && $product['products_weight'] > 0) {
-                $this->xmlWriter->writeElement('g:shipping_weight', $product['products_weight'] . ' ' . zen_config('GPSF_UNITS'));
+            if ($this->config['gpsf_weight'] === 'true' && $product['products_weight'] > 0) {
+                $this->xmlWriter->writeElement('g:shipping_weight', $product['products_weight'] . ' ' . $this->config['gpsf_units']);
             }
         }
     }
@@ -1055,9 +1096,9 @@ class gpsfFeedGenerator
         // determine the default value to be used.
         //
         if (!str_contains($this->identifiersList, '{product_type}')) {
-            $gpsf_product_type = zen_config('GPSF_PRODUCT_TYPE');
-            if ($gpsf_product_type === 'default' && zen_config('GPSF_DEFAULT_PRODUCT_TYPE') !== '') {
-                $product_type = htmlentities(zen_config('GPSF_DEFAULT_PRODUCT_TYPE'));
+            $gpsf_product_type = $this->config['gpsf_product_type'];
+            if ($gpsf_product_type === 'default' && $this->config['gpsf_default_product_type'] !== '') {
+                $product_type = htmlentities($this->config['gpsf_default_product_type']);
             } elseif ($gpsf_product_type === 'top') {
                 $product_type = $categories_list[0];
             } elseif ($gpsf_product_type === 'bottom') {
@@ -1075,12 +1116,12 @@ class gpsfFeedGenerator
         }
 
         $this->xmlWriter->writeElement('g:image_link', $products_image);
-        if (zen_config('GPSF_INCLUDE_ADDITIONAL_IMAGES') === 'true') {
+        if ($this->config['gpsf_include_additional_images'] === 'true') {
             $this->addProductsAdditionalImages($product['products_id'], $product['products_image']);
         }
 
         // only include if less then 30 days as 30 is the max and leaving blank will default to the max
-        if ((int)zen_config('GPSF_EXPIRATION_DAYS') !== 0 && (int)zen_config('GPSF_EXPIRATION_DAYS') <= 29) {
+        if ($this->config['gpsf_expiration_days'] !== 0 && $this->config['gpsf_expiration_days'] <= 29) {
             $this->xmlWriter->writeElement('g:expiration_date', $this->getProductsExpirationDate($product['base_date']));
         }
 
@@ -1089,7 +1130,7 @@ class gpsfFeedGenerator
         // add the default value.
         //
         if (!str_contains($this->identifiersList, '{link}')) {
-            $cPath_href = (zen_config('GPSF_USE_CPATH') === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
+            $cPath_href = ($this->config['gpsf_use_cpath'] === 'true') ? ('cPath=' . implode('_', $cPath) . '&') : '';
             $link = zen_href_link($product['type_handler'] . '_info', $cPath_href . 'products_id=' . $product['products_id'], 'NONSSL', false);
             $this->xmlWriter->writeElement('g:link', $this->sanitizeLink($link));
         }
@@ -1112,7 +1153,7 @@ class gpsfFeedGenerator
         }
 
         if (!str_contains($this->identifiersList, '{condition}')) {
-            $this->xmlWriter->writeElement('g:condition', zen_config('GPSF_CONDITION'));
+            $this->xmlWriter->writeElement('g:condition', $this->config['gpsf_condition']);
         }
 
         $this->xmlWriter->startElement('g:description');
@@ -1164,7 +1205,7 @@ class gpsfFeedGenerator
     protected function sanitizeXml(string $str): string
     {
         $str = $this->sanitizeString($str);
-        if (zen_config('GPSF_XML_SANITIZATION') === 'false') {
+        if ($this->config['gpsf_xml_sanitization'] === 'false') {
             return $str;
         }
 
@@ -1220,12 +1261,12 @@ class gpsfFeedGenerator
 
     protected function getProductsExpirationDate(string $base_date): string
     {
-        if (zen_config('GPSF_EXPIRATION_BASE') === 'now' || $base_date === '0') {
+        if ($this->config['gpsf_expiration_base'] === 'now' || $base_date === '0') {
             $expiration_date = time();
         } else {
             $expiration_date = strtotime($base_date);
         }
-        $expiration_date += (int)zen_config('GPSF_EXPIRATION_DAYS') * 24 * 60 * 60;
+        $expiration_date += $this->config['gpsf_expiration_days'] * 24 * 60 * 60;
 
         return date('Y-m-d', $expiration_date);
     }
@@ -1287,7 +1328,7 @@ class gpsfFeedGenerator
         if ($product_is_always_free_shipping === '1' || $this->currencyCode === '' || empty($this->currencyValue)) {
             $rate = 0;
         } else {
-            switch (zen_config('GPSF_SHIPPING_METHOD')) {
+            switch ($this->config['gpsf_shipping_method']) {
                 case 'flat rate':
                     $rate = zen_str_to_numeric(zen_config('MODULE_SHIPPING_FLAT_COST'));
                     break;
@@ -1437,11 +1478,11 @@ class gpsfFeedGenerator
     //
     protected function addSkippedProduct(string|int $products_id, string $message): bool
     {
-        if (zen_config('GPSF_DEBUG') === 'false') {
+        if ($this->config['gpsf_debug'] === 'false') {
             return true;
         }
         $this->productsSkipped[(int)$products_id] = $message;
-        $gpsf_debug_max_skipped = zen_config('GPSF_DEBUG_MAX_SKIPPED');
+        $gpsf_debug_max_skipped = $this->config['gpsf_debug_max_skipped'];
         if ($gpsf_debug_max_skipped !== '' && count($this->productsSkipped) > (int)$gpsf_debug_max_skipped) {
             $this->productsSkipped['max-out'] = 'Maximum number of skipped products reached (' . (int)$gpsf_debug_max_skipped . '); feed terminating.';
             return false;
@@ -1451,7 +1492,7 @@ class gpsfFeedGenerator
 
     public function googleOutputDebug(): void
     {
-        if (zen_config('GPSF_DEBUG') === 'true' && $this->productsSkipped !== []) {
+        if ($this->config['gpsf_debug'] === 'true' && $this->productsSkipped !== []) {
             print('<pre>' . print_r($this->productsSkipped, true) . '</pre>');
         }
     }
