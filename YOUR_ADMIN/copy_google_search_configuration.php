@@ -113,7 +113,7 @@ foreach ($google_products as $next_setting) {
     }
     $db->Execute(
         "UPDATE " . TABLE_CONFIGURATION . "
-            SET configuration_value = '" . $next_setting['configuration_value'] . "'
+            SET configuration_value = '" . zen_db_input($next_setting['configuration_value']) . "'
           WHERE configuration_key = '" . $settings_to_copy[$next_setting['configuration_key']] . "'
           LIMIT 1"
     );
