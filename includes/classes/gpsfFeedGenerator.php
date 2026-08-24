@@ -146,6 +146,7 @@ class gpsfFeedGenerator
             'gpsf_tax_country' => zen_config('GPSF_TAX_COUNTRY'),
             'gpsf_tax_display' => zen_config('GPSF_TAX_DISPLAY'),
             'gpsf_tax_region' => zen_config('GPSF_TAX_REGION'),
+            'gpsf_tax_shipping' => zen_config('GPSF_TAX_SHIPPING'),
             'gpsf_units' => zen_config('GPSF_UNITS'),
             'gpsf_use_cpath' => zen_config('GPSF_USE_CPATH'),
             'gpsf_weight' => zen_config('GPSF_WEIGHT'),
