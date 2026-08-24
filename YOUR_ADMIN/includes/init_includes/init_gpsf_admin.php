@@ -9,7 +9,7 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('GPSF_CURRENT_VERSION', '1.1.0-beta3');
+define('GPSF_CURRENT_VERSION', '1.1.0-beta4');
 
 // -----
 // No installation actions are required if an admin is not currently logged-in or if the plugin's
@@ -178,12 +178,13 @@ switch (true) {
     // -----
     // v1.1.0 updates:
     //
-    // - Adds admin-page registration for 'Convert Merchant Center Feeder' tool.
+    // - Adds admin-page registration for 'Convert Merchant Center Feeder' tool, iff the Google Merchant Center
+    //   Feeder's configuration is present.
     // - Updates description for 'Security Key' to indicate that an empty value results in the feed being disabled.
     // - Remove leading <br> from each setting's description.
     //
     case version_compare($gpsf_version, '1.1.0', '<'):  //-Fall through from above processing ...
-        if (!zen_page_key_exists('extrasGpsf')) {
+        if (zen_config('GOOGLE_PRODUCTS_VERSION') !== null && !zen_page_key_exists('extrasGpsf')) {
             zen_register_admin_page('extrasGpsf', 'BOX_EXTRAS_GPSF', 'FILENAME_GPSF_EXTRAS', '', 'extras', 'Y');
         }
         $db->Execute(
