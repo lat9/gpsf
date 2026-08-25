@@ -23,7 +23,7 @@ if (zen_config('GPSF_ENABLED') !== 'true') {
 }
 
 // process parameters
-$configured_key = urlencode((string)zen_config('GPSF_ACCESS_KEY'));
+$configured_key = (string)zen_config('GPSF_ACCESS_KEY');
 $supplied_key = $_REQUEST['key'] ?? '';
 if ($configured_key === '' || !is_string($supplied_key) || !hash_equals($configured_key, $supplied_key)) {
     exit('Incorrect/invalid key supplied!');

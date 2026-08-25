@@ -110,7 +110,7 @@ $gpsf_main_controller = HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GPSF_MAIN_CONTRO
                     <div class="col-md-4"><?= number_format((float)$maximum_products_in_feed, 0, '', ',') ?></div>
                 </div>
                 <form method="get" id="feed" action="<?= $gpsf_main_controller ?>.php" class="form-horizontal" target="_blank">
-                    <?= zen_draw_hidden_field('key', urlencode(zen_config('GPSF_ACCESS_KEY'))) ?>
+                    <?= zen_draw_hidden_field('key', zen_config('GPSF_ACCESS_KEY')) ?>
                     <?= zen_draw_hidden_field('feed', 'fy_un_tp') ?>
                     <div class="form-group">
                         <?= zen_draw_label(GPSF_MAX_PRODUCTS_TEXT, 'limit', 'class="col-sm-3 control-label"') ?>
