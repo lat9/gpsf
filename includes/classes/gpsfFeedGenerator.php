@@ -390,7 +390,7 @@ class gpsfFeedGenerator
                 continue;
             }
 
-            $products_image = $this->getProductsImageUrl($product['products_image'], formatting_additional_images: false, find_large_image: true);
+            $products_image = $this->getProductsImageUrl($product['products_image'], formatting_additional_images: false);
             if ($products_image === false) {
                 if ($this->addSkippedProduct($products_id, $products_name . ': products image (' . $product['products_image'] . ') not found.') === false) {
                     break;
@@ -705,13 +705,25 @@ class gpsfFeedGenerator
             $products_image_directory = DIR_WS_IMAGES;
             $images_array = (new Product((int)$products_id))->get('additional_images') ?? [];
             $images_array = array_map(static fn($f) => $f['image_filename'], $images_array);
+
+            // -----
+            // Some versions of the image-scanning tool include a product's main image
+            // as an additional one. If the main image is found in the returned array, remove
+            // it, re-index the images' array and continue with the remaining image processing.
+            //
+            foreach ($images_array as $key => $value) {
+                if ($value === $products_image) {
+                    array_splice($images_array, $key, 1);
+                    break;
+                }
+            }
         } else {
             ['imgs' => $images_array, 'dir' => $products_image_directory] = zen_lookup_additional_images_from_filesystem($products_image);
         }
 
         $images_found = 0;
         foreach ($images_array as $next_image) {
-            $additional_image = $this->getProductsImageUrl($products_image_directory . $next_image, formatting_additional_images: true, find_large_image: false);
+            $additional_image = $this->getProductsImageUrl($products_image_directory . $next_image, formatting_additional_images: true);
             if ($additional_image === false) {
                 continue;
             }
@@ -763,7 +775,7 @@ class gpsfFeedGenerator
             if ($next_image === $products_image) {
                 continue;
             }
-            $additional_image = $this->getProductsImageUrl($next_image, formatting_additional_images: true, find_large_image: true);
+            $additional_image = $this->getProductsImageUrl($next_image, formatting_additional_images: true);
             if ($additional_image === false) {
                 continue;
             }
@@ -777,13 +789,8 @@ class gpsfFeedGenerator
     }
 
     // creates the url for the products_image
-    protected function getProductsImageUrl(string $products_image, bool $formatting_additional_images = false, bool $find_large_image = false): false|string
+    protected function getProductsImageUrl(string $products_image, bool $formatting_additional_images = false): false|string
     {
-        // -----
-        // Strip any leading images/ directory from the submitted image's name.
-        //
-        $products_image = str_replace(DIR_WS_IMAGES, '', $products_image);
-
         // -----
         // See if an extension wants to override the determination of a product's base image.
         //
@@ -809,23 +816,27 @@ class gpsfFeedGenerator
             }
         }
 
-        if ($find_large_image === false) {
-            $products_image_large = $products_image;
+        if (str_starts_with($products_image, DIR_WS_IMAGES)) {
+            $products_image = substr($products_image, strlen(DIR_WS_IMAGES));
+        }
+        $image_pathinfo = pathinfo($products_image);
+        if ($image_pathinfo['dirname'] === '.') {
+            $image_pathinfo['dirname'] = '';
         } else {
-            $image_pathinfo = pathinfo($products_image);
-            $products_image_extension = '.' . $image_pathinfo['extension'];
-            $products_image_base = $image_pathinfo['basename'];
-            $products_image_medium = $products_image_base . $this->config['image_suffix_medium'] . $products_image_extension;
-            $products_image_large = $products_image_base . $this->config['image_suffix_large'] . $products_image_extension;
+            $image_pathinfo['dirname'] .= '/';
+        }
+        $products_image_extension = '.' . $image_pathinfo['extension'];
+        $products_image_base = $image_pathinfo['dirname'] . $image_pathinfo['filename'];
+        $products_image_medium = $products_image_base . $this->config['image_suffix_medium'] . $products_image_extension;
+        $products_image_large = $products_image_base . $this->config['image_suffix_large'] . $products_image_extension;
 
-            // check for a large image else use medium else use small
-            if (is_file(DIR_WS_IMAGES . 'large/' . $products_image_large)) {
-                $products_image_large = DIR_WS_IMAGES . 'large/' . $products_image_large;
-            } elseif (!is_file(DIR_WS_IMAGES . 'medium/' . $products_image_medium)) {
-                $products_image_large = DIR_WS_IMAGES . $products_image;
-            } else {
-                $products_image_large = DIR_WS_IMAGES . 'medium/' . $products_image_medium;
-            }
+        // check for a large image else use medium else use small
+        if (is_file(DIR_WS_IMAGES . 'large/' . $products_image_large)) {
+            $products_image_large = DIR_WS_IMAGES . 'large/' . $products_image_large;
+        } elseif (!is_file(DIR_WS_IMAGES . 'medium/' . $products_image_medium)) {
+            $products_image_large = DIR_WS_IMAGES . $products_image;
+        } else {
+            $products_image_large = DIR_WS_IMAGES . 'medium/' . $products_image_medium;
         }
 
         // -----
