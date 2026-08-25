@@ -1025,14 +1025,14 @@ class gpsfFeedGenerator
 
         $attributes = [];
         foreach ($attributes_info as $next_att) {
-            $variant_key = strtolower($next_att['products_options_name']);
-            if ($this->isStringInArray($variant_key, $this->attributeVariants) === false) {
+            $variant = $this->findVariantMatch(strtolower($next_att['products_options_name']));
+            if ($variant === null) {
                 continue;
             }
 
             // check that we haven't already processed an option for this variant and that the option isn't a
             // default value like please choose or please select (obviously this has limitations)
-            $options_name = str_replace(' ', '_', $variant_key);
+            $options_name = str_replace(' ', '_', $variant);
             if (array_key_exists($options_name, $attributes) || $this->isStringInArray(strtolower($next_att['products_options_values_name']), ['choose', 'please select']) !== false) {
                 continue;
             }
@@ -1041,6 +1041,15 @@ class gpsfFeedGenerator
             $attributes[$options_name] = strtolower($this->sanitizeXml($next_att['products_options_values_name']));
         }
         return $attributes;
+    }
+    protected function findVariantMatch(string $subject): ?string
+    {
+        foreach ($this->attributeVariants as $variant) {
+            if (preg_match('@\b' . preg_quote($variant, '@') . '\b@i', $subject) === 1) {
+                return $variant;
+            }
+        }
+        return null;
     }
 
     protected function getExtensionsAttributes(string $products_id, array $product, array $custom_fields): array
