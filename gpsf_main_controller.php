@@ -66,7 +66,6 @@ define('NL', "<br>\n");
 // the feed's filename to distinguish it from the default.
 //
 $currency_code = (isset($_GET['currency_code']) && is_string($_GET['currency_code'])) ? $_GET['currency_code'] : zen_config('GPSF_CURRENCY');
-error_log('(' . $currencies->is_set($currency_code) . "), $currency_code\n" . var_export($currencies, true));
 if (!$currencies->is_set($currency_code)) {
     exit('Unknown currency-code (' . zen_output_string_protected($currency_code) . '), nothing more to do.');
 }
