@@ -48,7 +48,7 @@ class gpsfFeedGenerator
 
     protected array $config;
 
-    public function __construct()
+    public function __construct(string $currency_code)
     {
         // -----
         // Various feed-related product attributes that can be specified by (er) Zen Cart
@@ -75,6 +75,18 @@ class gpsfFeedGenerator
             'size system',
             'upc',
         ];
+
+        // -----
+        // Save the current currency that we're to use when generating the feed. An
+        // invalid/unrecognized currency-code will result in a Zen Cart 'fatal' error.
+        //
+        global $currencies;
+        $this->currencyCode = $currency_code;
+        if (!$currencies->is_set($currency_code)) {
+            trigger_error("FATAL error: Unrecognized currency code ($currency_code) submitted to feed.", E_USER_WARNING);
+            zen_exit();
+        }
+        $this->currencyValue = $currencies->get_value($this->currencyCode);
 
         // -----
         // If there are site/plugin extensions for the feed, load those classes
@@ -127,7 +139,6 @@ class gpsfFeedGenerator
             'gpsf_alternate_image_url' => zen_config('GPSF_ALTERNATE_IMAGE_URL'),
             'gpsf_condition' => zen_config('GPSF_CONDITION'),
             'gpsf_convert_ampersands' => zen_config('GPSF_CONVERT_AMPERSANDS'),
-            'gpsf_currency' => zen_config('GPSF_CURRENCY'),
             'gpsf_debug' => zen_config('GPSF_DEBUG'),
             'gpsf_debug_max_skipped' => zen_config('GPSF_DEBUG_MAX_SKIPPED'),
             'gpsf_default_product_type' => zen_config('GPSF_DEFAULT_PRODUCT_TYPE'),
@@ -511,12 +522,6 @@ class gpsfFeedGenerator
         }
 
         // -----
-        // Save the current currency that we're to use when generating the feed.
-        //
-        $this->currencyCode = (isset($_GET['currency_code'])) ? $_GET['currency_code'] : $this->config['gpsf_currency'];
-        $this->currencyValue = $currencies->get_value($this->currencyCode);
-
-        // -----
         // Create the overall XMLWriter instance that's used to output the feed and set the base feed
         // descriptive elements.
         //
@@ -561,7 +566,7 @@ class gpsfFeedGenerator
                         ON p.manufacturers_id = m.manufacturers_id
                     INNER JOIN " . TABLE_PRODUCTS_DESCRIPTION . " pd
                         ON p.products_id = pd.products_id
-                       AND pd.language_id = " . $_SESSION['languages_id'] . "
+                       AND pd.language_id = " . (int)$_SESSION['languages_id'] . "
                     INNER JOIN " . TABLE_PRODUCT_TYPES . " pt
                         ON p.products_type = pt.type_id
                     INNER JOIN " . TABLE_PRODUCTS_TO_CATEGORIES . " p2c
@@ -1026,10 +1031,10 @@ class gpsfFeedGenerator
                FROM " . TABLE_PRODUCTS_ATTRIBUTES . " pa
                     INNER JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov
                         ON pov.products_options_values_id = pa.options_values_id
-                       AND pov.language_id = " . $_SESSION['languages_id'] . "
+                       AND pov.language_id = " . (int)$_SESSION['languages_id'] . "
                     INNER JOIN " . TABLE_PRODUCTS_OPTIONS . " po
                         ON po.products_options_id = pa.options_id
-                       AND po.language_id = " . $_SESSION['languages_id'] . "
+                       AND po.language_id = " . (int)$_SESSION['languages_id'] . "
               WHERE pa.products_id = " . (int)$products_id . "
               ORDER BY products_attributes_id ASC"
         );

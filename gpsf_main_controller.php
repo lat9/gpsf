@@ -60,8 +60,20 @@ unset($queryCache, $configuration);
 
 define('NL', "<br>\n");
 
+// -----
+// Determine the currency in which the feed's to be generated. If that currency is
+// different than the configured feed-default, the currency-code is appended to
+// the feed's filename to distinguish it from the default.
+//
+$currency_code = (isset($_GET['currency_code']) && is_string($_GET['currency_code'])) ? $_GET['currency_code'] : zen_config('GPSF_CURRENCY');
+error_log('(' . $currencies->is_set($currency_code) . "), $currency_code\n" . var_export($currencies, true));
+if (!$currencies->is_set($currency_code)) {
+    exit('Unknown currency-code (' . zen_output_string_protected($currency_code) . '), nothing more to do.');
+}
+$currency_feed_suffix = ($currency_code === zen_config('GPSF_CURRENCY')) ? '' : strtolower("_$currency_code");
+
 require DIR_WS_CLASSES . 'gpsfFeedGenerator.php';
-$gpsf = new gpsfFeedGenerator();
+$gpsf = new gpsfFeedGenerator($currency_code);
 
 // -----
 // Retrieve the parameters based on the requested feed type, normally in the format
@@ -115,7 +127,7 @@ if ($limit !== '') {
 if ($offset !== '') {
     $outfile .= '_' . $query_offset;
 }
-$outfile .= '.xml'; //example domain_products.xml
+$outfile .= $currency_feed_suffix . '.xml'; //example domain_products.xml
 
 ob_start();
 echo '<p>' . sprintf(TEXT_GPSF_STARTED, zen_config('GPSF_VERSION')) . '</p>';
