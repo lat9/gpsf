@@ -148,6 +148,7 @@ img {
             <li>CHANGE: Convert admin file-removal to posted form and add stricter filename checks.</li>
             <li><span class="impt"><b>CHANGE: An empty <code>Security Key</code> is no longer allowed and results in the feed-generation being disabled.</b></span></li>
             <li>BUGFIX: Correct argument reversal in <code>gpsfFeedGenerator::isStringInArray</code> method.</li>
+            <li>BUGFIX: Modify feed-output filename if a supplied <code>currency_code</code> is different than the store's default.</li>
             <li>The following files were changed, <span class="added">added</span> or <span class="removed">removed</span>:<ol>
                 <li>/docs/gpsf/uninstall.sql</li>
                 <li><span class="removed">/extras/copy_google_search_configuration.php</span></li>
