@@ -75,6 +75,7 @@ class gpsfFeedGenerator
             'size system',
             'upc',
         ];
+        usort($this->attributeVariants, static fn($a, $b) => strlen($b) <=> strlen($a));
 
         // -----
         // Save the current currency that we're to use when generating the feed. An
@@ -513,11 +514,12 @@ class gpsfFeedGenerator
         $this->alternateImageUrlIsLocal = false;
         $gpsf_alternate_image_url = $this->config['gpsf_alternate_image_url'];
         if ($gpsf_alternate_image_url !== '') {
-            if (!str_starts_with($gpsf_alternate_image_url, HTTP_SERVER . '/' . DIR_WS_IMAGES)) {
+            $images_dir = HTTP_SERVER . DIR_WS_CATALOG . DIR_WS_IMAGES;
+            if (!str_starts_with($gpsf_alternate_image_url, $images_dir)) {
                 $this->alternateImageUrl = $gpsf_alternate_image_url;
             } else {
                 $this->alternateImageUrlIsLocal = true;
-                $this->alternateImageUrl = str_replace(HTTP_SERVER . '/' . DIR_WS_IMAGES, '', $gpsf_alternate_image_url);
+                $this->alternateImageUrl = substr($gpsf_alternate_image_url, strlen($images_dir));
             }
         }
 
@@ -796,6 +798,10 @@ class gpsfFeedGenerator
     // creates the url for the products_image
     protected function getProductsImageUrl(string $products_image, bool $formatting_additional_images = false): false|string
     {
+        if (str_starts_with($products_image, DIR_WS_IMAGES)) {
+            $products_image = substr($products_image, strlen(DIR_WS_IMAGES));
+        }
+
         // -----
         // See if an extension wants to override the determination of a product's base image.
         //
@@ -817,13 +823,10 @@ class gpsfFeedGenerator
             if ($this->alternateImageUrlIsLocal === true) {
                 $products_image = $this->alternateImageUrl . $products_image;
             } else {
-                return $this->alternateImageUrl . $products_image;
+                return ($formatting_additional_images === false) ? $this->alternateImageUrl . $products_image : false;
             }
         }
 
-        if (str_starts_with($products_image, DIR_WS_IMAGES)) {
-            $products_image = substr($products_image, strlen(DIR_WS_IMAGES));
-        }
         $image_pathinfo = pathinfo($products_image);
         if ($image_pathinfo['dirname'] === '.') {
             $image_pathinfo['dirname'] = '';
@@ -1482,7 +1485,6 @@ class gpsfFeedGenerator
 
     protected function isStringInArray(string $find_string, array $values): bool
     {
-        $find_string = str_replace('@', '^', $find_string); //- Since @ is the regex delimiter used
         foreach ($values as $key => $value) {
             if (preg_match('@\b' . $value . '\b@i', $find_string) === 1) {
                 return true;
