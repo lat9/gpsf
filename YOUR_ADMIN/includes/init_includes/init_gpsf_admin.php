@@ -9,7 +9,7 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('GPSF_CURRENT_VERSION', '1.1.0-beta4');
+define('GPSF_CURRENT_VERSION', '1.1.0');
 
 // -----
 // No installation actions are required if an admin is not currently logged-in or if the plugin's
